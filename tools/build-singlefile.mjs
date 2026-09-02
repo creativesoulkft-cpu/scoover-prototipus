@@ -14,8 +14,13 @@ const outDir = 'dist-single/.tmp';
 
 // public/patterns/ képek data-URL-ként → __INLINE_ASSETS__ (src/utils/assets.js)
 const inlineAssets = {};
-for (const file of readdirSync('public/patterns')) {
-  inlineAssets[`patterns/${file}`] = `data:image/webp;base64,${readFileSync(join('public/patterns', file)).toString('base64')}`;
+const MIME = { webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' };
+for (const dir of ['patterns', 'models']) {
+  for (const file of readdirSync(join('public', dir))) {
+    const ext = file.split('.').pop().toLowerCase();
+    if (!MIME[ext]) continue;
+    inlineAssets[`${dir}/${file}`] = `data:${MIME[ext]};base64,${readFileSync(join('public', dir, file)).toString('base64')}`;
+  }
 }
 
 await build({

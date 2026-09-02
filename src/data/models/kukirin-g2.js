@@ -10,8 +10,11 @@
  * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
  * defaultLabel (ide kerül alapból a felirat), d (SVG path).
  */
+import photoView from './kukirin-g2.photo.js';
+
 export default {
   id: "kukirin-g2",
+  photoView,
   name: "Kukirin G2",
   brand: "Kukirin",
   description: "Kompakt, dupla felfüggesztésű városi roller – 11 fóliázható darab.",
