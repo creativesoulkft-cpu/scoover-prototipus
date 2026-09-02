@@ -1,10 +1,11 @@
 # GitHub Pages deploy: minden push a main ágra buildeli és publikálja a demót.
-# Egyszeri beállítás a repóban: Settings → Pages → Source: "GitHub Actions".
+# A configure-pages lépés megpróbálja bekapcsolni a Pages-t; ha nem sikerül:
+# Settings → Pages → Source: "GitHub Actions" (egyszeri kattintás).
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/**']
   workflow_dispatch:
 
 permissions:
@@ -27,6 +28,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # Pages bekapcsolása, ha még nincs (Source: GitHub Actions)
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
