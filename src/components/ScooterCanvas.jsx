@@ -5,9 +5,15 @@
  * közös mintával tölt ki. A darabok külön <g> elemben ülnek, így "szétnyitott"
  * nézetben egyenként eltolhatók – és mivel a minta userSpaceOnUse, a kivágott
  * mintarészlet a darabbal együtt mozog, pont úgy, ahogy a valódi fólia.
+ *
+ * Csempézett mintáknál a darab méretosztálya (large/medium/small) szerint
+ * három léptékű def készül (patternScale), hogy a mintázat a kis darabokon
+ * (villaborítás) se tűnjön aránytalanul nagynak. Az azonos osztályú darabok
+ * között a folytonosság megmarad.
  */
 import { useId } from 'react';
 import PatternDefs, { fillFor } from './PatternDefs.jsx';
+import LabelLayer from './LabelLayer.jsx';
 
 const DECOR_COLORS = {
   tire: '#2a2d31',
@@ -17,6 +23,8 @@ const DECOR_COLORS = {
   lamp: '#ffe9a8',
   ground: '#2a2d31',
 };
+
+const SIZE_CLASSES = ['large', 'medium', 'small'];
 
 function Decor({ items }) {
   return items.map((d, i) => {
@@ -40,18 +48,27 @@ export default function ScooterCanvas({
   model,
   pattern,
   transform,
+  patternScale,        // { large, medium, small } – kategória/minta szerinti csempe-lépték
+  sizeAwareTiling = true,
   exploded = false,
   showCutLines = true,
   disabledPieces,
   hoveredId,
   onHover,
   onTogglePiece,
+  label,               // { enabled, text, pieceId, font, color } | null
 }) {
   const uid = useId();
-  const defId = `fill${uid}`;
   const hatchId = `hatch${uid}`;
   const { width, height } = model.viewBox;
-  const fill = fillFor(pattern, defId);
+
+  // Csak akkor kell méretosztályonként külön def, ha a minta csempézett és a
+  // kapcsoló be van kapcsolva; egyébként egyetlen közös def (teljes folytonosság).
+  const tiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
+  const classes = tiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
+  const defIdFor = (size) => `fill${uid}-${classes.includes(size) ? size : 'large'}`;
+
+  const labelPiece = label?.enabled ? model.pieces.find((p) => p.id === label.pieceId) : null;
 
   return (
     <svg
@@ -62,7 +79,16 @@ export default function ScooterCanvas({
       onMouseLeave={() => onHover?.(null)}
     >
       <defs>
-        <PatternDefs pattern={pattern} defId={defId} transform={transform} viewBox={model.viewBox} />
+        {classes.map((size) => (
+          <PatternDefs
+            key={size}
+            pattern={pattern}
+            defId={defIdFor(size)}
+            transform={transform}
+            viewBox={model.viewBox}
+            scale={sizeAwareTiling ? (patternScale?.[size] ?? 1) : 1}
+          />
+        ))}
         {/* sraffozás a fólia nélkül hagyott darabokhoz */}
         <pattern id={hatchId} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
           <rect width="8" height="8" fill="#2b2e33" />
@@ -88,7 +114,7 @@ export default function ScooterCanvas({
             >
               <path
                 d={piece.d}
-                fill={disabled ? `url(#${hatchId})` : fill}
+                fill={disabled ? `url(#${hatchId})` : fillFor(pattern, defIdFor(piece.size))}
                 stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
                 strokeWidth={hovered ? 2.5 : 1}
                 strokeLinejoin="round"
@@ -103,6 +129,17 @@ export default function ScooterCanvas({
           );
         })}
       </g>
+
+      {/* Feliratréteg: a textúra fölött, vektorosan, saját rétegben */}
+      {labelPiece && !disabledPieces?.has(labelPiece.id) && (
+        <LabelLayer
+          piece={labelPiece}
+          text={label.text}
+          font={label.font}
+          color={label.color}
+          exploded={exploded}
+        />
+      )}
     </svg>
   );
 }

@@ -10,7 +10,9 @@ const grad = (id, x2, y2) =>
 export default {
   id: 'carbon-3d',
   name: 'Carbon 3D',
-  category: 'tech',
+  line: 'print',
+  category: 'demo',
+  luminance: 0.1,
   type: 'tile',
   tile: {
     width: 20,

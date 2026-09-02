@@ -33,6 +33,9 @@ const ringSector = (c, rOut, rIn, a0, a1) => {
     'Z',
   ].join(' ');
 };
+/** Sokszög területe (shoelace). */
+const polyArea = (pts) =>
+  Math.abs(pts.reduce((a, p, i) => a + p[0] * pts[(i + 1) % pts.length][1] - pts[(i + 1) % pts.length][0] * p[1], 0)) / 2;
 const centroid = (pts) => [
   pts.reduce((s, p) => s + p[0], 0) / pts.length,
   pts.reduce((s, p) => s + p[1], 0) / pts.length,
@@ -56,7 +59,7 @@ function buildModel(p) {
 
   const pieces = [];
   const add = (id, name, group, pts, extra = {}) =>
-    pieces.push({ id, name, group, d: polygon(pts), c: centroid(pts), ...extra });
+    pieces.push({ id, name, group, d: polygon(pts), c: centroid(pts), area: polyArea(pts), ...extra });
 
   // --- kormány / oszlop ---
   const disp = [
@@ -102,6 +105,7 @@ function buildModel(p) {
     id: 'rear-swingarm', name: 'Hátsó lengőkar-borítás', group: 'rear',
     d: `M ${pt(armPts[0])} L ${pt(armPts[1])} L ${pt(armPts[2])} A 30 30 0 1 1 ${pt(armPts[3])} Z`,
     c: centroid([...armPts, [rx - 30, ry]]),
+    area: polyArea(armPts) + Math.PI * 30 * 30 * 0.75,
   });
 
   // --- sárvédők (gyűrűcikkek) ---
@@ -110,11 +114,13 @@ function buildModel(p) {
     id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear',
     d: ringSector(rearHub, rOut, rIn, -182, -55),
     c: polar(rearHub, (rOut + rIn) / 2, -118),
+    area: (127 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
   });
   pieces.push({
     id: 'front-fender', name: 'Első sárvédő', group: 'front',
     d: ringSector(frontHub, rOut, rIn, -92, 8),
     c: polar(frontHub, (rOut + rIn) / 2, -42),
+    area: (100 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
   });
 
   // --- szétnyitási (explode) irány: a modell középpontjától kifelé ---
@@ -125,6 +131,23 @@ function buildModel(p) {
     piece.explode = [r1((v[0] / l) * 55), r1((v[1] / l) * 55)];
     delete piece.c;
   }
+
+  // --- méretosztály (large/medium/small) a darab tényleges területe alapján ---
+  // A csempézett minták léptéke ehhez igazodik (patternScale a kategóriában).
+  const maxArea = Math.max(...pieces.map((piece) => piece.area));
+  for (const piece of pieces) {
+    const ratio = piece.area / maxArea;
+    piece.size = ratio > 0.35 ? 'large' : ratio > 0.15 ? 'medium' : 'small';
+    delete piece.area;
+  }
+
+  // --- felirat iránya: a tengelyen ülő darabokon a tengellyel párhuzamos ---
+  const axisAngle = r1((Math.atan2(dir[1], dir[0]) * 180) / Math.PI);
+  for (const piece of pieces) {
+    if (['stem', 'stem-upper', 'stem-lower', 'fork', 'joint'].includes(piece.id)) piece.labelAngle = axisAngle;
+  }
+  // a dekk a felirat alapértelmezett helye
+  pieces.find((piece) => piece.id === 'deck-side').defaultLabel = true;
 
   // --- nem fóliázott, csak kontextust adó alkatrészek ---
   const decor = [
@@ -174,6 +197,10 @@ for (const m of MODELS) {
  * minden darab egy SVG path (\`d\`), ugyanabban a koordináta-rendszerben
  * (viewBox ${m.viewBox.width}×${m.viewBox.height}). A valódi vágófájl importálásakor
  * csak a \`d\` stringek cserélődnek, a szerkezet marad.
+ *
+ * Darab-mezők: id, name, group, explode [dx,dy], size (large|medium|small –
+ * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
+ * defaultLabel (ide kerül alapból a felirat), d (SVG path).
  */
 export default {
   id: ${JSON.stringify(m.id)},
@@ -195,6 +222,7 @@ ${pieces.map((pc) => `    {
       name: ${JSON.stringify(pc.name)},
       group: ${JSON.stringify(pc.group)},
       explode: ${JSON.stringify(pc.explode)},
+      size: ${JSON.stringify(pc.size)},${pc.labelAngle !== undefined ? `\n      labelAngle: ${pc.labelAngle},` : ''}${pc.defaultLabel ? '\n      defaultLabel: true,' : ''}
       d: ${JSON.stringify(pc.d)},
     },`).join('\n')}
   ],

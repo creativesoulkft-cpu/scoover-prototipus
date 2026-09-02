@@ -1,17 +1,22 @@
 /**
  * Mintaregiszter.
  *
- * Minden minta egy önálló adatfájl ebben a mappában. A minták kliens oldalon
- * renderelődnek (SVG <pattern> / gradiens / egyszínű fill), ezért egy új minta
- * felvétele NEM igényel darabonkénti képfájlokat – egyetlen adatbejegyzés.
+ * Minden minta egy adatbejegyzés; a renderelés kliens oldalon történik
+ * (SVG <pattern> / gradiens / egyszínű fill), ezért egy új minta felvétele
+ * NEM igényel darabonkénti képfájlokat.
  *
- * Támogatott típusok (a PatternDefs komponens rendereli őket):
- *   - solid    { color }
- *   - gradient { angle, stops: [{offset, color}] }
- *   - tile     { tile: { width, height, markup } }  – procedurális SVG csempe
- *   - image    { href, width, height }               – feltöltött kép (futásidőben)
+ * Közös mezők:  id, name, type, line ('solid' | 'print'), category, luminance
+ * Opcionális:   colorway, density ('sparse' | 'dense'), patternScale, keywords
  *
- * ÚJ MINTA HOZZÁADÁSA: új fájl + import + bejegyzés a PATTERNS tömbbe.
+ * Típusok (PatternDefs rendereli):
+ *   - solid       { color }
+ *   - gradient    { angle, stops }
+ *   - tile        { tile: { width, height, markup } }   procedurális SVG csempe
+ *   - image-tile  { src, thumb, tile, tiling }           raszteres, ismétlődő textúra
+ *   - image       { href, width, height }                feltöltött kép (futásidőben)
+ *
+ * ÚJ NYOMTATOTT MINTA: kép a public/patterns/ mappába + egy sor a
+ * print-textures.js listájába. Új kategória: categories.js.
  */
 import matteBlack from './solid-matte-black.js';
 import signalOrange from './solid-signal-orange.js';
@@ -19,29 +24,21 @@ import arcticWhite from './solid-arctic-white.js';
 import sunset from './gradient-sunset.js';
 import carbon3d from './carbon-3d.js';
 import hexTech from './hex-tech.js';
-import urbanCamo from './urban-camo.js';
-import topoLines from './topo-lines.js';
+import printTextures from './print-textures.js';
+
+export { PRODUCT_LINES, PATTERN_CATEGORIES, COLORWAYS, DENSITIES, getCategory } from './categories.js';
 
 export const PATTERNS = [
   matteBlack,
   signalOrange,
   arcticWhite,
-  sunset,
+  ...printTextures,
   carbon3d,
   hexTech,
-  urbanCamo,
-  topoLines,
+  sunset,
 ];
 
-/** Kategóriák a galéria csoportosításához (sorrend = megjelenítési sorrend). */
-export const PATTERN_CATEGORIES = [
-  { id: 'solid', name: 'Egyszínű' },
-  { id: 'gradient', name: 'Színátmenet' },
-  { id: 'tech', name: 'Tech / geometrikus' },
-  { id: 'organic', name: 'Szerves' },
-];
-
-export const DEFAULT_PATTERN_ID = carbon3d.id;
+export const DEFAULT_PATTERN_ID = 'cyber-cian-ritka';
 
 /** A feltöltött kép mintája ezt az id-t kapja; nem szerepel a statikus listában. */
 export const UPLOAD_PATTERN_ID = 'user-upload';

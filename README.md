@@ -16,7 +16,17 @@ npm run build    # dist/ – statikusan hosztolható
 ## Mit tud
 
 - 2 rollermodell (Kukirin G2, G2 Master), 11 ill. 12 fóliázható darabbal, legördülőből váltható
-- 8 beépített minta 4 kategóriában (egyszínű, színátmenet, tech, szerves)
+- két termékvonal: SOLID (egyszínű vinyl) és PRINT (nyomtatott minta), külön füleken
+- 9 nyomtatott textúra két stíluskategóriában (Cyber, Motocross), színvariáns és
+  sűrűség (ritka/sűrű) szerint szűrhetően; jövőbeli kategóriák (Organic, Y2K, Urban camo)
+  "hamarosan" jelzéssel, adatból
+- a textúrák ismétlődő SVG `<pattern>` csempeként kerülnek a darabokra (nem nyújtva),
+  darabméret-osztály szerinti léptékkel (dekk ≠ villaborítás); nem varratmentes
+  képhez tükrözött 2×2 csempézés (`tiling: 'mirror'`)
+- **feliratréteg** (`LabelLayer`): a "SCOOVER" / modellnév vektoros `<text>`-ként a
+  textúra fölött, saját rétegben, a darab alakjára vágva, kategóriánként más
+  betűtípussal (Orbitron / Anton / Rajdhani), automatikus fehér/fekete színnel a
+  háttér világossága alapján; ki/be kapcsolható, szöveg és céldarab szerkeszthető
 - saját kép feltöltése (JPG/PNG/WebP, kliens oldali kicsinyítés)
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
@@ -32,12 +42,16 @@ src/
       kukirin-g2.js   #   darabok SVG path-ként (d), csoport, explode-irány
       kukirin-g2-master.js
     patterns/         # minták – EGY FÁJL = EGY MINTA
-      index.js        #   regiszter + kategóriák
-      _helpers.js     #   procedurális csempe-segédek (seamless wrap, blob, hex)
-      solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js / urban-camo.js / topo-lines.js
+      index.js        #   regiszter
+      categories.js   #   termékvonalak, stíluskategóriák (+ betűtípus, csempe-lépték), színek, sűrűség
+      print-textures.js #  a 9 nyomtatott textúra bejegyzései (kép: public/patterns/)
+      _helpers.js     #   procedurális csempe-segédek
+      solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js
   components/
     ScooterCanvas.jsx   # roller-vázlat: darabok + közös minta-fill + szétnyitás
-    PatternDefs.jsx     # minta → SVG <defs> (pattern / gradient / image), fill-érték
+    PatternDefs.jsx     # minta → SVG <defs> (pattern / gradient / image-tile / image), fill-érték
+    LabelLayer.jsx      # vektoros felirat a textúra fölött (getBBox-alapú méretezés, clipPath)
+    LabelControls.jsx   # felirat ki/be, szöveg, céldarab
     PatternGallery.jsx  # mintaválasztó galéria
     PatternThumb.jsx    # bélyegkép (ugyanazzal a renderelővel, mint a vászon)
     UploadPanel.jsx     # saját kép feltöltése (drag&drop + fájlválasztó)
@@ -45,7 +59,10 @@ src/
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
-  utils/image.js            # feltöltés-validálás, kicsinyítés
+  utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
+  utils/color.js            # világosság → felirat-szín
+  utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
+public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)
 ```
 
@@ -64,9 +81,27 @@ elem koordináta-rendszerét követi, a "rányomtatott" részlet együtt mozog a
 (`id, name, brand, viewBox, decor[], pieces[]`; minden darab `id, name, group, explode, d`),
 majd egy sor a `MODEL_REGISTRY` tömbbe. A build automatikusan külön chunkot készít belőle.
 
-**Minta:** új fájl a `src/data/patterns/` mappába (`solid` / `gradient` / `tile` típus),
-import + egy sor a `PATTERNS` tömbbe. Csempés mintánál a `tile.markup` tetszőleges SVG,
-a `__ID__` helyőrzővel egyedi belső id-k (gradiens) is használhatók.
+**Nyomtatott textúra:** WebP a `public/patterns/` mappába (+ `.thumb.webp`), és egy sor a
+`print-textures.js` listájába (`category`, `colorway`, `density`, `luminance`, opcionálisan
+`tiling: 'mirror'`). **Új kategória:** `categories.js`-ben `available: true` + betűtípus.
+**Procedurális minta:** új fájl (`solid` / `gradient` / `tile` típus) + import a regiszterbe.
+
+## Feliratréteg – hogyan lesz belőle "egyedi felirat" funkció (vázlat)
+
+A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből így nő ki:
+
+1. **Több felirat, darabonként.** A `label` állapot tömb lesz: `[{ pieceId, text, font, size, offset, angle }]`;
+   a darabra kattintva "Felirat ide" gomb, a felirat húzással pozicionálható (pointer-eventek az SVG-ben,
+   a darab clipPath-ja továbbra is levágja a kilógó részt).
+2. **Betűtípus- és színválasztó** a kategória alapértelmezésével, de felülírhatóan; a szín továbbra is
+   kontraszt-ellenőrzéssel (minimum WCAG-arány a háttér világosságához képest), figyelmeztetéssel.
+3. **Validálás:** hossz-limit, tiltott karakterek/szavak, minimális betűméret mm-ben (a valós mm-alapú
+   viewBox-ból számolva), hogy vágható/olvasható maradjon.
+4. **Vektoros export:** a `<text>` a rendelésnél `opentype.js`-szel path-má konvertálódik (betűtípus-
+   függetlenség a nyomdában), a felirat külön rétegen kerül a nyomtatási SVG/PDF-be; a textúra-réteg
+   raszteres marad. Így a felirat minden felbontáson éles.
+5. **Rendelési JSON** kiegészül: `labels: [{ pieceId, text, fontId, color, transform }]` – a webshop
+   ebből mutat előnézetet és ebből készül a gyártási fájl.
 
 ## Út a végleges rendszerhez (vázlat)
 

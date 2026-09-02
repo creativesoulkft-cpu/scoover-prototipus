@@ -7,4 +7,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: './',
+  // beágyazott eszköz-térkép – csak az egyfájlos build tölti fel (lásd src/utils/assets.js)
+  define: { __INLINE_ASSETS__: '{}' },
 });

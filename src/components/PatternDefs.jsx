@@ -6,8 +6,12 @@
  * vázlat koordináta-rendszerében van definiálva. Így bármelyik darab ugyanabból
  * a "végtelen" textúrából a saját helyének megfelelő részt mutatja → a minta
  * nem törik meg a darabhatárokon, mintha egy nagy fóliaívből vágták volna ki.
+ *
+ * A `scale` prop a darabméret-osztály szerinti csempe-léptéket adja (a
+ * felhasználói transzformációra rászorozva); egy méretosztály = egy def.
  */
 import { useMemo } from 'react';
+import { assetUrl } from '../utils/assets.js';
 
 /** A minta azonosítójából a fill-érték. Egyszínűnél nincs szükség defs-re. */
 export function fillFor(pattern, defId) {
@@ -17,15 +21,15 @@ export function fillFor(pattern, defId) {
 }
 
 /** patternTransform / gradientTransform string a felhasználói beállításokból. */
-function transformString(t, cx, cy) {
+function transformString(t, cx, cy, extraScale = 1) {
   const { scale = 1, rotate = 0, dx = 0, dy = 0 } = t ?? {};
   // forgatás a vázlat közepe körül, hogy a csúszka "helyben" forgasson
-  return `translate(${dx} ${dy}) rotate(${rotate} ${cx} ${cy}) scale(${scale})`;
+  return `translate(${dx} ${dy}) rotate(${rotate} ${cx} ${cy}) scale(${scale * extraScale})`;
 }
 
-export default function PatternDefs({ pattern, defId, transform, viewBox }) {
+export default function PatternDefs({ pattern, defId, transform, viewBox, scale = 1 }) {
   const { width: vw, height: vh } = viewBox;
-  const tf = transformString(transform, vw / 2, vh / 2);
+  const tf = transformString(transform, vw / 2, vh / 2, scale);
 
   // A markup-ban a __ID__ helyőrzőt az egyedi defId-re cseréljük.
   const tileHtml = useMemo(() => {
@@ -68,23 +72,34 @@ export default function PatternDefs({ pattern, defId, transform, viewBox }) {
     );
   }
 
+  if (pattern.type === 'image-tile') {
+    // Raszteres, varratmentes csempe: NEM nyújtjuk a darabra, hanem ismételjük.
+    // 'mirror' csempézésnél 2×2-es tükrözött blokk → akkor is folytonos, ha a
+    // kép szélei nem illeszkednek tökéletesen.
+    const t = pattern.tile;
+    const href = assetUrl(pattern.src);
+    const mirror = pattern.tiling === 'mirror';
+    const size = mirror ? t * 2 : t;
+    return (
+      <pattern id={defId} patternUnits="userSpaceOnUse" width={size} height={size} patternTransform={tf}>
+        <image href={href} width={t} height={t} preserveAspectRatio="none" />
+        {mirror && (
+          <>
+            <image href={href} width={t} height={t} preserveAspectRatio="none" transform={`translate(${2 * t} 0) scale(-1 1)`} />
+            <image href={href} width={t} height={t} preserveAspectRatio="none" transform={`translate(0 ${2 * t}) scale(1 -1)`} />
+            <image href={href} width={t} height={t} preserveAspectRatio="none" transform={`translate(${2 * t} ${2 * t}) scale(-1 -1)`} />
+          </>
+        )}
+      </pattern>
+    );
+  }
+
   if (pattern.type === 'image') {
     // A feltöltött kép egy vázlat-méretű csempét tölt ki ("cover" illesztés);
     // a felhasználó a skála/eltolás csúszkákkal pozicionálja.
     return (
-      <pattern
-        id={defId}
-        patternUnits="userSpaceOnUse"
-        width={vw}
-        height={vh}
-        patternTransform={tf}
-      >
-        <image
-          href={pattern.href}
-          width={vw}
-          height={vh}
-          preserveAspectRatio="xMidYMid slice"
-        />
+      <pattern id={defId} patternUnits="userSpaceOnUse" width={vw} height={vh} patternTransform={tf}>
+        <image href={pattern.href} width={vw} height={vh} preserveAspectRatio="xMidYMid slice" />
       </pattern>
     );
   }

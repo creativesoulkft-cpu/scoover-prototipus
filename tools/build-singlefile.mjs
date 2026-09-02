@@ -11,10 +11,18 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const outDir = 'dist-single/.tmp';
+
+// public/patterns/ képek data-URL-ként → __INLINE_ASSETS__ (src/utils/assets.js)
+const inlineAssets = {};
+for (const file of readdirSync('public/patterns')) {
+  inlineAssets[`patterns/${file}`] = `data:image/webp;base64,${readFileSync(join('public/patterns', file)).toString('base64')}`;
+}
+
 await build({
   configFile: false,
   plugins: [react()],
   base: './',
+  define: { __INLINE_ASSETS__: JSON.stringify(inlineAssets) },
   logLevel: 'warn',
   build: {
     outDir,
@@ -33,6 +41,7 @@ const css = readFileSync(join(assets, files.find((f) => f.endsWith('.css'))), 'u
 // Fej nélküli töredék: hosztolt artifact-környezet saját <html>/<head>-be csomagolja,
 // böngészőben közvetlenül megnyitva is működik.
 const html = `<title>Scoover fólia-konfigurátor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Anton&family=Rajdhani:wght@700&display=swap">
 <style>${css}</style>
 <div id="root"></div>
 <script type="module">${js.replace(/<\/script>/g, '<\\/script>')}</script>

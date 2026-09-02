@@ -5,7 +5,9 @@
 export default {
   id: 'sunset',
   name: 'Sunset fade',
-  category: 'gradient',
+  line: 'print',
+  category: 'demo',
+  luminance: 0.4,
   type: 'gradient',
   angle: 20, // fok, 0 = balról jobbra
   stops: [

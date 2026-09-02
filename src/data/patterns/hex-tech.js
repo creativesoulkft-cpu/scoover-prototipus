@@ -33,7 +33,9 @@ markup += `<path d="${hexPath(w / 2, s, s - 6)}" fill="none" stroke="${ACCENT}" 
 export default {
   id: 'hex-tech',
   name: 'Hex-tech',
-  category: 'tech',
+  line: 'print',
+  category: 'demo',
+  luminance: 0.15,
   type: 'tile',
   tile: { width: W, height: H, markup },
 };

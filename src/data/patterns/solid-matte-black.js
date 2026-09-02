@@ -2,7 +2,10 @@
 export default {
   id: 'matte-black',
   name: 'Matt fekete',
+  line: 'solid',
   category: 'solid',
+  colorway: 'black',
+  luminance: 0.11,
   type: 'solid',
   color: '#1c1d20',
 };

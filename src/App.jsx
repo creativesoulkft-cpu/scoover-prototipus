@@ -2,29 +2,35 @@
  * Scoover roller-fólia konfigurátor – alkalmazás-váz.
  *
  * Állapot: kiválasztott modell, kiválasztott minta (beépített vagy feltöltött),
- * minta-transzformáció, nézeti kapcsolók, kikapcsolt darabok.
- * Az adat (modellek, minták) a src/data mappában él; a komponensek csak
- * megjelenítenek.
+ * minta-transzformáció, nézeti kapcsolók, kikapcsolt darabok, felirat.
+ * Az adat (modellek, minták, kategóriák) a src/data mappában él; a komponensek
+ * csak megjelenítenek.
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_MODEL_ID } from './data/models/index.js';
-import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern } from './data/patterns/index.js';
+import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from './data/patterns/index.js';
 import { useScooterModel } from './hooks/useScooterModel.js';
+import { labelColorFor } from './utils/color.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
 import PatternGallery from './components/PatternGallery.jsx';
 import UploadPanel from './components/UploadPanel.jsx';
 import ModelSelector from './components/ModelSelector.jsx';
 import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls.jsx';
+import LabelControls from './components/LabelControls.jsx';
 import PieceList from './components/PieceList.jsx';
+
+const DEFAULT_LABEL = { enabled: true, text: 'SCOOVER', pieceId: null };
 
 export default function App() {
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   const [patternId, setPatternId] = useState(DEFAULT_PATTERN_ID);
   const [uploadedPattern, setUploadedPattern] = useState(null);
   const [transform, setTransform] = useState(DEFAULT_TRANSFORM);
+  const [sizeAwareTiling, setSizeAwareTiling] = useState(true);
   const [exploded, setExploded] = useState(false);
   const [showCutLines, setShowCutLines] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
+  const [label, setLabel] = useState(DEFAULT_LABEL);
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
   const [disabledByModel, setDisabledByModel] = useState({});
 
@@ -35,6 +41,19 @@ export default function App() {
     () => (patternId === UPLOAD_PATTERN_ID ? uploadedPattern : getPattern(patternId)),
     [patternId, uploadedPattern],
   );
+  const category = getCategory(pattern?.category ?? 'solid');
+  const patternScale = pattern?.patternScale ?? category.patternScale ?? { large: 1, medium: 1, small: 1 };
+
+  // Modellváltáskor a felirat a modell alapértelmezett darabjára kerül
+  // (defaultLabel), ha az aktuális céldarab nem létezik az új modellen.
+  useEffect(() => {
+    if (!model) return;
+    setLabel((l) => {
+      if (l.pieceId && model.pieces.some((p) => p.id === l.pieceId)) return l;
+      const def = model.pieces.find((p) => p.defaultLabel) ?? model.pieces[0];
+      return { ...l, pieceId: def.id };
+    });
+  }, [model]);
 
   const disabledPieces = disabledByModel[modelId] ?? new Set();
 
@@ -57,6 +76,8 @@ export default function App() {
   }
 
   const hoveredPiece = model?.pieces.find((p) => p.id === hoveredId);
+  const labelColor = labelColorFor(pattern);
+  const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
   return (
     <div className="app">
@@ -81,17 +102,20 @@ export default function App() {
                 model={model}
                 pattern={pattern}
                 transform={transform}
+                patternScale={patternScale}
+                sizeAwareTiling={sizeAwareTiling}
                 exploded={exploded}
                 showCutLines={showCutLines}
                 disabledPieces={disabledPieces}
                 hoveredId={hoveredId}
                 onHover={setHoveredId}
                 onTogglePiece={togglePiece}
+                label={{ ...label, font: category.labelFont, color: labelColor }}
               />
               <div className="stage-footer">
                 <div>
                   <strong>{model.name}</strong>
-                  <span className="muted"> · {model.pieces.length} darab · {model.description}</span>
+                  <span className="muted"> · {model.pieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
                 </div>
                 <div className="hover-label">
                   {hoveredPiece ? hoveredPiece.name : 'Vidd az egeret egy darab fölé'}
@@ -108,11 +132,24 @@ export default function App() {
           </details>
 
           <details open>
+            <summary>Felirat</summary>
+            {model && (
+              <LabelControls
+                label={label}
+                onChange={setLabel}
+                pieces={model.pieces}
+                font={category.labelFont}
+                color={labelColor}
+              />
+            )}
+          </details>
+
+          <details>
             <summary>Saját kép</summary>
             <UploadPanel onUpload={handleUpload} onClear={handleClearUpload} uploadedPattern={uploadedPattern} />
           </details>
 
-          <details open>
+          <details>
             <summary>Minta-illesztés és nézet</summary>
             <PatternControls
               transform={transform}
@@ -122,6 +159,9 @@ export default function App() {
               showCutLines={showCutLines}
               onShowCutLinesChange={setShowCutLines}
               isImage={pattern?.type === 'image'}
+              isTiled={isTiled}
+              sizeAwareTiling={sizeAwareTiling}
+              onSizeAwareTilingChange={setSizeAwareTiling}
             />
           </details>
 

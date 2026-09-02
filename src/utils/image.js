@@ -29,14 +29,28 @@ export async function prepareUploadedImage(file) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const luminance = measureLuminance(ctx, width, height);
 
   // PNG-t átlátszóság miatt megtartjuk, minden mást JPEG-re tömörítünk.
   const href = file.type === 'image/png'
     ? canvas.toDataURL('image/png')
     : canvas.toDataURL('image/jpeg', 0.9);
 
-  return { href, width, height, originalWidth: bitmap.width, originalHeight: bitmap.height };
+  return { href, width, height, luminance, originalWidth: bitmap.width, originalHeight: bitmap.height };
+}
+
+/** Átlagos világosság 0..1 – ritkított mintavétellel, a felirat auto-színéhez. */
+function measureLuminance(ctx, width, height) {
+  const { data } = ctx.getImageData(0, 0, width, height);
+  const step = 4 * Math.max(1, Math.floor((width * height) / 20000));
+  let sum = 0, n = 0;
+  for (let i = 0; i < data.length; i += step) {
+    sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    n++;
+  }
+  return n ? sum / n / 255 : 0.5;
 }
 
 function loadImage(file) {
