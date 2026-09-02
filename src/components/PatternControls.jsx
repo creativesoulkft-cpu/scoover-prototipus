@@ -1,0 +1,44 @@
+/**
+ * Minta-illesztés: méret, forgatás, eltolás – ugyanaz a transzformáció megy
+ * minden darabra, ezért a folytonosság megmarad. Plusz nézeti kapcsolók.
+ */
+const DEFAULT_TRANSFORM = { scale: 1, rotate: 0, dx: 0, dy: 0 };
+export { DEFAULT_TRANSFORM };
+
+function Slider({ label, value, min, max, step, onChange, format }) {
+  return (
+    <label className="slider">
+      <span>{label}<em>{format ? format(value) : value}</em></span>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(Number(e.target.value))} />
+    </label>
+  );
+}
+
+export default function PatternControls({
+  transform, onTransformChange, exploded, onExplodedChange, showCutLines, onShowCutLinesChange, isImage,
+}) {
+  const set = (key) => (v) => onTransformChange({ ...transform, [key]: v });
+  return (
+    <div className="controls">
+      <Slider label="Méret" value={transform.scale} min={0.25} max={3} step={0.05}
+        onChange={set('scale')} format={(v) => `${v.toFixed(2)}×`} />
+      <Slider label="Forgatás" value={transform.rotate} min={0} max={360} step={1}
+        onChange={set('rotate')} format={(v) => `${v}°`} />
+      <Slider label="Eltolás X" value={transform.dx} min={-500} max={500} step={1} onChange={set('dx')} />
+      <Slider label="Eltolás Y" value={transform.dy} min={-300} max={300} step={1} onChange={set('dy')} />
+      {isImage && <p className="muted small">Tipp: a saját kép a teljes rollert fedi le; a mérettel és eltolással pozicionálhatod.</p>}
+      <div className="control-row">
+        <button type="button" className="link" onClick={() => onTransformChange(DEFAULT_TRANSFORM)}>Alaphelyzet</button>
+      </div>
+      <label className="check">
+        <input type="checkbox" checked={exploded} onChange={(e) => onExplodedChange(e.target.checked)} />
+        Darabok szétnyitása (vágott darabok nézete)
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={showCutLines} onChange={(e) => onShowCutLinesChange(e.target.checked)} />
+        Vágóvonalak mutatása
+      </label>
+    </div>
+  );
+}
