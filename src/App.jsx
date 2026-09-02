@@ -12,6 +12,7 @@ import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from '
 import { useScooterModel } from './hooks/useScooterModel.js';
 import { labelColorFor } from './utils/color.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
+import PhotoCanvas from './components/PhotoCanvas.jsx';
 import PatternGallery from './components/PatternGallery.jsx';
 import UploadPanel from './components/UploadPanel.jsx';
 import ModelSelector from './components/ModelSelector.jsx';
@@ -31,6 +32,8 @@ export default function App() {
   const [showCutLines, setShowCutLines] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
   const [label, setLabel] = useState(DEFAULT_LABEL);
+  /** 'schematic' | 'photo' – a fotós nézet csak akkor elérhető, ha a modellnek van photoView-ja */
+  const [view, setView] = useState('schematic');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
   const [disabledByModel, setDisabledByModel] = useState({});
 
@@ -75,7 +78,11 @@ export default function App() {
     if (patternId === UPLOAD_PATTERN_ID) setPatternId(DEFAULT_PATTERN_ID);
   }
 
-  const hoveredPiece = model?.pieces.find((p) => p.id === hoveredId);
+  const hasPhoto = Boolean(model?.photoView);
+  const activeView = view === 'photo' && hasPhoto ? 'photo' : 'schematic';
+  // az aktív nézet darablistája (a fotós nézet darabjai ugyanazokat az id-kat használják)
+  const activePieces = activeView === 'photo' ? model.photoView.pieces : model?.pieces ?? [];
+  const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
   const labelColor = labelColorFor(pattern);
   const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
@@ -98,6 +105,30 @@ export default function App() {
           {!model && loading && <p className="muted">Modell betöltése…</p>}
           {model && (
             <>
+              {hasPhoto && (
+                <div className="view-switch" role="tablist">
+                  <button type="button" role="tab" aria-selected={activeView === 'schematic'}
+                    className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
+                  <button type="button" role="tab" aria-selected={activeView === 'photo'}
+                    className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
+                </div>
+              )}
+              {activeView === 'photo' ? (
+                <PhotoCanvas
+                  view={model.photoView}
+                  modelName={model.name}
+                  pattern={pattern}
+                  transform={transform}
+                  patternScale={patternScale}
+                  sizeAwareTiling={sizeAwareTiling}
+                  showCutLines={showCutLines}
+                  disabledPieces={disabledPieces}
+                  hoveredId={hoveredId}
+                  onHover={setHoveredId}
+                  onTogglePiece={togglePiece}
+                  label={{ ...label, font: category.labelFont, color: labelColor }}
+                />
+              ) : (
               <ScooterCanvas
                 model={model}
                 pattern={pattern}
@@ -112,6 +143,7 @@ export default function App() {
                 onTogglePiece={togglePiece}
                 label={{ ...label, font: category.labelFont, color: labelColor }}
               />
+              )}
               <div className="stage-footer">
                 <div>
                   <strong>{model.name}</strong>
@@ -137,7 +169,7 @@ export default function App() {
               <LabelControls
                 label={label}
                 onChange={setLabel}
-                pieces={model.pieces}
+                pieces={activePieces}
                 font={category.labelFont}
                 color={labelColor}
               />
@@ -167,9 +199,9 @@ export default function App() {
 
           {model && (
             <details>
-              <summary>Darabok ({model.pieces.length})</summary>
+              <summary>Darabok ({activePieces.length})</summary>
               <PieceList
-                pieces={model.pieces}
+                pieces={activePieces}
                 hoveredId={hoveredId}
                 disabledPieces={disabledPieces}
                 onHover={setHoveredId}

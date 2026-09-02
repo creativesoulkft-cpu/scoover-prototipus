@@ -69,7 +69,8 @@ export default function LabelLayer({ piece, text, font, color, exploded }) {
           clipPath={`url(#${clipId})`}
           x={cx}
           y={cy}
-          transform={`rotate(${angle} ${cx} ${cy}) skewX(${font.skew ?? 0})`}
+          // a döntés (skew) a szöveg középpontja körül, különben elcsúszna
+          transform={`rotate(${angle} ${cx} ${cy}) translate(${cx} ${cy}) skewX(${font.skew ?? 0}) translate(${-cx} ${-cy})`}
           textAnchor="middle"
           dominantBaseline="central"
           fontFamily={`'${font.family}', Impact, 'Arial Black', sans-serif`}

@@ -12,7 +12,7 @@
  * Futtatás:  node tools/generate-schematic.js
  * Kimenet:   src/data/models/<id>.js
  */
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, existsSync } from 'node:fs';
 
 // ---------- geometriai segédfüggvények ----------
 const r1 = (n) => Math.round(n * 10) / 10;
@@ -190,6 +190,8 @@ const MODELS = [
 
 for (const m of MODELS) {
   const { pieces, decor } = buildModel(m);
+  // Kézzel készített fotós nézet (maszkok a termékfotón): <id>.photo.js, ha létezik.
+  const hasPhoto = existsSync(new URL(`../src/data/models/${m.id}.photo.js`, import.meta.url));
   const out = `/**
  * ${m.name} – sematikus oldalnézeti vázlat.
  *
@@ -202,8 +204,8 @@ for (const m of MODELS) {
  * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
  * defaultLabel (ide kerül alapból a felirat), d (SVG path).
  */
-export default {
-  id: ${JSON.stringify(m.id)},
+${hasPhoto ? `import photoView from './${m.id}.photo.js';\n\n` : ''}export default {
+  id: ${JSON.stringify(m.id)},${hasPhoto ? '\n  photoView,' : ''}
   name: ${JSON.stringify(m.name)},
   brand: ${JSON.stringify(m.brand)},
   description: ${JSON.stringify(m.description)},

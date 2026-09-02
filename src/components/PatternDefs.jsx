@@ -22,9 +22,10 @@ export function fillFor(pattern, defId) {
 
 /** patternTransform / gradientTransform string a felhasználói beállításokból. */
 function transformString(t, cx, cy, extraScale = 1) {
-  const { scale = 1, rotate = 0, dx = 0, dy = 0 } = t ?? {};
+  const { scale = 1, rotate = 0, dx = 0, dy = 0, pre = '' } = t ?? {};
+  // `pre`: darabonkénti extra transzformáció (pl. perspektív ferdítés a fotós nézetben)
   // forgatás a vázlat közepe körül, hogy a csúszka "helyben" forgasson
-  return `translate(${dx} ${dy}) rotate(${rotate} ${cx} ${cy}) scale(${scale * extraScale})`;
+  return `${pre} translate(${dx} ${dy}) rotate(${rotate} ${cx} ${cy}) scale(${scale * extraScale})`.trim();
 }
 
 export default function PatternDefs({ pattern, defId, transform, viewBox, scale = 1 }) {

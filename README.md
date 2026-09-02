@@ -66,6 +66,27 @@ public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bély
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)
 ```
 
+## Fotós nézet (PhotoCanvas)
+
+Egy modellhez opcionálisan tartozhat `src/data/models/<id>.photo.js`: a termékfotó
+(`public/models/…`), a fotó pixelméretű `viewBox`-a, és a fotón körberajzolt darab-maszkok
+(ugyanazok az `id`-k, mint a vágófájlban). A generátor automatikusan beköti `photoView`
+néven, a fejlécen megjelenik a Vázlat / Fotó váltó. Rétegek: fotó → minta a maszkokban →
+a fotó szürke, gammával emelt másolata overlay-keveréssel (fény-árnyék átvitele) → felirat.
+Darabonként `patternTransform` (pl. `skewX(-18)`) ferdíti a mintát a felület dőlése szerint.
+
+```js
+export default {
+  image: 'models/kukirin-g2-photo.jpg',
+  viewBox: { width: 3000, height: 2000 },
+  shading: { blend: 'overlay', gamma: 0.5, opacity: 0.95 },
+  pieces: [
+    { id: 'deck-side', name: 'Dekk oldala', group: 'deck', size: 'large', defaultLabel: true, d: 'M … Z' },
+    { id: 'stem', name: 'Kormányoszlop', group: 'front', size: 'medium', labelAngle: -72, patternTransform: 'skewX(-18)', d: 'M … Z' },
+  ],
+};
+```
+
 ## Hogyan működik a folytonos minta
 
 Minden minta `userSpaceOnUse` egységben, a teljes vázlat koordináta-rendszerében
