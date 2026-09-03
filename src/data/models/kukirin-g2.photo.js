@@ -18,7 +18,7 @@ export default {
     { id: 'joint', name: 'Csuklóborítás (hajtás)', group: 'front', size: 'small',
       d: 'M 775 499 L 778 510 L 779 535 L 772 550 L 772 566 L 775 565 L 778 555 L 783 556 L 785 566 L 842 566 L 842 550 L 835 532 L 827 499 Z' },
     { id: 'neck', name: 'Dekk-nyak / első lengőkar-borítás', group: 'deck', size: 'medium', patternTransform: 'skewX(-28)',
-      d: 'M 848 568 L 785 568 L 785 571 L 778 576 L 773 575 L 774 568 L 765 568 L 764 589 L 761 593 L 761 597 L 723 641 L 692 700 L 720 742 L 772 730 L 773 726 L 769 724 L 768 716 L 772 713 L 772 705 L 777 699 L 774 689 L 781 680 L 786 678 L 850 578 Z' },
+      d: 'M 846 561 L 842 560 L 842 565 L 837 566 L 833 565 L 831 560 L 783 560 L 785 571 L 778 576 L 774 576 L 773 569 L 776 560 L 768 560 L 764 573 L 764 589 L 761 593 L 761 597 L 698 671 L 698 705 L 709 705 L 752 653 L 757 654 L 756 660 L 720 705 L 772 705 L 778 698 L 778 696 L 774 693 L 774 689 L 781 680 L 786 681 L 784 704 L 788 705 L 788 688 L 795 674 L 815 656 L 821 656 L 822 658 L 832 657 L 832 650 L 834 648 L 851 642 L 849 622 L 852 609 L 852 592 Z' },
     { id: 'deck-top', name: 'Dekk teteje (állófelület)', group: 'deck', size: 'medium',
       d: 'M 390 701 L 702 701 L 693 678 L 682 686 L 628 686 L 625 684 L 584 685 L 396 682 L 394 676 L 391 676 Z' },
     { id: 'deck-side', name: 'Dekk oldala', group: 'deck', size: 'large', defaultLabel: true,

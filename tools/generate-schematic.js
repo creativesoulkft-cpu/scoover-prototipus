@@ -48,6 +48,11 @@ const centroid = (pts) => [
  */
 function buildModel(p) {
   const { rearHub, frontHub, wheelR, deck, top, splitStem } = p;
+  // Tengelyszakaszok (villa/csukló/kormányoszlop) aránya a tengelyen –
+  // modellenként felülírható, ha a valódi arányok eltérnek az alapértelmezettől.
+  // A kormányoszlop alapból a "top" pontig ér (nem áll meg alatta), hogy a
+  // kijelzőborítás alatt sose maradjon rés.
+  const segT = { fork: [0.2, 0.49], joint: [0.5, 0.62], stem: [0.63, 1], ...p.segT };
   const axis = [top[0] - frontHub[0], top[1] - frontHub[1]];
   const len = Math.hypot(...axis);
   const dir = [axis[0] / len, axis[1] / len];
@@ -62,23 +67,38 @@ function buildModel(p) {
     pieces.push({ id, name, group, d: polygon(pts), c: centroid(pts), area: polyArea(pts), ...extra });
 
   // --- kormány / oszlop ---
+  // A kijelzőborítás alja néhány pixellel a "top" pont (a kormányoszlop
+  // tetejének) alá nyúlik, hogy sose maradjon rés a kormányoszlop és a
+  // kijelzőborítás között, még kisebb tengely-elforgatásnál sem.
   const disp = [
     [top[0] - 58, top[1] - 14], [top[0] + 58, top[1] - 14],
-    [top[0] + 54, top[1] + 22], [top[0] - 54, top[1] + 22],
+    [top[0] + 54, top[1] + 8], [top[0] - 54, top[1] + 8],
   ];
   add('display', 'Kormány-középrész (kijelzőborítás)', 'front', disp);
+  const [stemT0, stemT1] = segT.stem;
   if (splitStem) {
-    add('stem-upper', 'Kormányoszlop – felső', 'front', axisQuad(0.79, 0.92, 15));
-    add('stem-lower', 'Kormányoszlop – alsó', 'front', axisQuad(0.63, 0.78, 15));
+    const stemMid = (stemT0 + stemT1) / 2;
+    add('stem-upper', 'Kormányoszlop – felső', 'front', axisQuad(stemMid, stemT1, 15));
+    add('stem-lower', 'Kormányoszlop – alsó', 'front', axisQuad(stemT0, stemMid, 15));
   } else {
-    add('stem', 'Kormányoszlop', 'front', axisQuad(0.63, 0.92, 15));
+    add('stem', 'Kormányoszlop', 'front', axisQuad(stemT0, stemT1, 15));
   }
-  add('joint', 'Csuklóborítás (hajtás)', 'front', axisQuad(0.5, 0.62, 26));
-  add('fork', 'Első villaborítás', 'front', axisQuad(0.2, 0.49, 20));
+  // A csuklóborítás valódi, fotóból mért sziluettje, ha a modell megadja;
+  // egyébként az egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
+  add('joint', 'Csuklóborítás (hajtás)', 'front', p.jointPoints ?? axisQuad(...segT.joint, 26));
+  // "C" futómű: a lengőkar NEM a kormányoszlop tengelyén ül, hanem attól
+  // külön, a csuklóborítás/rugó alján lévő csuklópontból indul, és onnan
+  // ível le a kerékagyig (egyoldali felfogás) – ha a modell megadja a valódi
+  // sziluettet, azt használjuk, egyébként az egyszerű tengely-négyszög marad.
+  add('fork', p.frontArmName ?? 'Első villaborítás', 'front', p.frontArmPoints ?? axisQuad(...segT.fork, 20));
+  const lampT = p.lampT ?? (segT.joint[0] + segT.joint[1]) / 2;
 
   // --- dekk-nyak: a dekk elejétől a villa hátsó éléig ---
   const [dx0, dx1] = deck.x;
-  add('neck', 'Dekk-nyak / első lengőkar-borítás', 'deck', [
+  // Valódi fotó alapján mért, a csuklóborítás melletti lengőkar-burkolatot is
+  // magába foglaló forma – ha a modell megadja, azt használjuk; egyébként az
+  // egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
+  add('neck', 'Dekk-nyak / első lengőkar-borítás', 'deck', p.neckPoints ?? [
     [dx1 - 2, deck.top + 2], [dx1 + 2, deck.bottom],
     side(0.36, -20), side(0.5, -20),
   ]);
@@ -108,20 +128,30 @@ function buildModel(p) {
     area: polyArea(armPts) + Math.PI * 30 * 30 * 0.75,
   });
 
-  // --- sárvédők (gyűrűcikkek) ---
+  // --- sárvédők ---
   const rOut = wheelR + 18, rIn = wheelR + 6;
-  pieces.push({
-    id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear',
-    d: ringSector(rearHub, rOut, rIn, -182, -55),
-    c: polar(rearHub, (rOut + rIn) / 2, -118),
-    area: (127 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
-  });
-  pieces.push({
-    id: 'front-fender', name: 'Első sárvédő', group: 'front',
-    d: ringSector(frontHub, rOut, rIn, -92, 8),
-    c: polar(frontHub, (rOut + rIn) / 2, -42),
-    area: (100 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
-  });
+  // A hátsó sárvédő valódi (szögletes, hegyes végű) sziluettje a fotóból mérve,
+  // ha a modell megadja; egyébként az egyszerű gyűrűcikk az alapértelmezett.
+  if (p.rearFenderPoints) {
+    add('rear-fender', 'Hátsó sárvédő', 'rear', p.rearFenderPoints);
+  } else {
+    pieces.push({
+      id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear',
+      d: ringSector(rearHub, rOut, rIn, -182, -55),
+      c: polar(rearHub, (rOut + rIn) / 2, -118),
+      area: (127 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
+    });
+  }
+  // Első sárvédő: csak azoknál a modelleknél, amelyeknél ténylegesen van ilyen
+  // burkolat a villán (alapértelmezésben igen; a Kukirin G2-nél nincs).
+  if (p.frontFender !== false) {
+    pieces.push({
+      id: 'front-fender', name: 'Első sárvédő', group: 'front',
+      d: ringSector(frontHub, rOut, rIn, -92, 8),
+      c: polar(frontHub, (rOut + rIn) / 2, -42),
+      area: (100 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
+    });
+  }
 
   // --- szétnyitási (explode) irány: a modell középpontjától kifelé ---
   const center = [p.viewBox.width / 2, p.viewBox.height / 2 + 40];
@@ -143,8 +173,11 @@ function buildModel(p) {
 
   // --- felirat iránya: a tengelyen ülő darabokon a tengellyel párhuzamos ---
   const axisAngle = r1((Math.atan2(dir[1], dir[0]) * 180) / Math.PI);
+  // a "C" lengőkar (frontArmPoints) nem a kormányoszlop tengelyén fekszik,
+  // ezért nem kapja meg a tengely-feliratszöget
+  const axisAlignedIds = ['stem', 'stem-upper', 'stem-lower', 'joint', ...(p.frontArmPoints ? [] : ['fork'])];
   for (const piece of pieces) {
-    if (['stem', 'stem-upper', 'stem-lower', 'fork', 'joint'].includes(piece.id)) piece.labelAngle = axisAngle;
+    if (axisAlignedIds.includes(piece.id)) piece.labelAngle = axisAngle;
   }
   // a dekk a felirat alapértelmezett helye
   pieces.find((piece) => piece.id === 'deck-side').defaultLabel = true;
@@ -162,7 +195,18 @@ function buildModel(p) {
     { type: 'circle', cx: top[0], cy: top[1] - 24, r: 9, fill: 'grip' },
     { type: 'line', x1: top[0] + 40, y1: top[1] - 22, x2: top[0] + 78, y2: top[1] - 12, stroke: 'grip' },
     // fényszóró a csukló elején
-    { type: 'circle', cx: r1(side(0.56, 32)[0]), cy: r1(side(0.56, 32)[1]), r: 6, fill: 'lamp' },
+    { type: 'circle', cx: r1(side(lampT, 32)[0]), cy: r1(side(lampT, 32)[1]), r: 6, fill: 'lamp' },
+    // első felfüggesztés rugója (a lengőkar-burkolat és a dekk találkozásánál),
+    // ha a modell megadja a helyét
+    // (a fóliázott darabok fölé kerül, mert a valóságban is a burkolat előtt/mellett ül)
+    ...(p.springAt ? [{
+      type: 'path',
+      d: `M ${pt(p.springAt)} l 6 5 l -12 5 l 12 5 l -12 5 l 6 4`,
+      stroke: 'spring', strokeWidth: 5, over: true,
+    }] : []),
+    // a "C" lengőkar hátsó csuklópontja (a kormányoszlopétól független
+    // forgáspont, amiből a kar a kerékagyig ível)
+    ...(p.frontArmPivot ? [{ type: 'circle', cx: p.frontArmPivot[0], cy: p.frontArmPivot[1], r: 6, fill: 'hub', over: true }] : []),
   ];
 
   return { pieces, decor };
@@ -171,12 +215,55 @@ function buildModel(p) {
 // ---------- modellek paraméterei ----------
 const MODELS = [
   {
+    // Geometria a termékfotóból (public/models/kukirin-g2-photo.jpg) mért
+    // valódi arányok alapján (kerékméret, tengelyhossz/dőlésszög, dekkhossz),
+    // hogy a vázlat felismerhetően ugyanazt a modellt ábrázolja, mint a fotó.
     id: 'kukirin-g2', name: 'Kukirin G2', brand: 'Kukirin',
-    description: 'Kompakt, dupla felfüggesztésű városi roller – 11 fóliázható darab.',
-    viewBox: { width: 1000, height: 560 },
-    rearHub: [175, 440], frontHub: [830, 440], wheelR: 70,
-    deck: { x: [250, 650], top: 378, bottom: 428 }, top: [720, 80],
+    description: 'Kompakt, dupla felfüggesztésű városi roller – 10 fóliázható darab.',
+    viewBox: { width: 1000, height: 820 },
+    rearHub: [164, 702], frontHub: [830, 702], wheelR: 70,
+    deck: { x: [362, 672], top: 622, bottom: 687 }, top: [727, 47],
     splitStem: false,
+    // a villán nincs első sárvédő-burkolat a valóságban
+    frontFender: false,
+    // a csukló és a kormányoszlop a fotón mérthez képest jóval hosszabb/meredekebb
+    // a kormányoszlop a "top" pontig ér (nem áll meg alatta), hogy a
+    // kijelzőborítás alatt ne maradjon rés
+    segT: { fork: [0.06, 0.28], joint: [0.19, 0.31], stem: [0.42, 1] },
+    lampT: 0.25,
+    // "C" futómű: a Kukirin G2-nek nem hagyományos, a kormányoszlop tengelyén
+    // ülő villája van, hanem egyoldali C-lengőkarja – külön csuklópontból
+    // (a rugó alján) ível le a kerékagyig, azt egyetlen ponton fogva közre
+    // (nem kétoldali villával). A pontok a fotóból mérve, ugyanazzal a
+    // (−28, −53) eltolással, mint a joint/neck/rearFender.
+    frontArmName: 'Első lengőkar-borítás (C-futómű)',
+    frontArmPivot: [682, 677],
+    frontArmPoints: [
+      [679, 662], [722, 674], [772, 690], [814, 701], [830, 705],
+      [844, 709], [847, 719], [830, 725], [772, 727], [722, 725],
+      [687, 715], [677, 692],
+    ],
+    // az első felfüggesztés rugójának teteje (a lengőkar-burkolat és a dekk
+    // találkozásánál, a fotón jól látható tekercsrugó helyén)
+    springAt: [740, 643],
+    // a hátsó sárvédő szögletes, hegyes végű valódi sziluettje a fotóból mérve
+    // (később fóliázható darabként tervezett elem, ezért fontos a pontos forma)
+    rearFenderPoints: [
+      [67, 604], [122, 596], [185, 593], [227, 609],
+      [240, 632], [234, 649], [132, 650], [72, 645],
+    ],
+    // a csuklóborítás (fotómaszk: tools/photo-masks/kukirin-g2.json → joint)
+    // és a dekk-nyak (→ neck) valódi, már a fotós nézetben is bevált sziluettje,
+    // ugyanabból a koordináta-rendszerből (fotópixel − 28, − 53 eltolással)
+    jointPoints: [
+      [746, 446], [812, 446], [814, 513], [744, 513],
+    ],
+    neckPoints: [
+      [820, 515], [757, 515], [757, 518], [750, 523], [745, 522], [746, 515],
+      [737, 515], [736, 536], [733, 540], [733, 544], [695, 588], [664, 647],
+      [692, 689], [744, 677], [745, 673], [741, 671], [740, 663], [744, 660],
+      [744, 652], [749, 646], [746, 636], [753, 627], [758, 625], [822, 525],
+    ],
   },
   {
     id: 'kukirin-g2-master', name: 'Kukirin G2 Master', brand: 'Kukirin',
