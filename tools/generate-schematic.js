@@ -50,7 +50,9 @@ function buildModel(p) {
   const { rearHub, frontHub, wheelR, deck, top, splitStem } = p;
   // Tengelyszakaszok (villa/csukló/kormányoszlop) aránya a tengelyen –
   // modellenként felülírható, ha a valódi arányok eltérnek az alapértelmezettől.
-  const segT = { fork: [0.2, 0.49], joint: [0.5, 0.62], stem: [0.63, 0.92], ...p.segT };
+  // A kormányoszlop alapból a "top" pontig ér (nem áll meg alatta), hogy a
+  // kijelzőborítás alatt sose maradjon rés.
+  const segT = { fork: [0.2, 0.49], joint: [0.5, 0.62], stem: [0.63, 1], ...p.segT };
   const axis = [top[0] - frontHub[0], top[1] - frontHub[1]];
   const len = Math.hypot(...axis);
   const dir = [axis[0] / len, axis[1] / len];
@@ -65,9 +67,12 @@ function buildModel(p) {
     pieces.push({ id, name, group, d: polygon(pts), c: centroid(pts), area: polyArea(pts), ...extra });
 
   // --- kormány / oszlop ---
+  // A kijelzőborítás alja néhány pixellel a "top" pont (a kormányoszlop
+  // tetejének) alá nyúlik, hogy sose maradjon rés a kormányoszlop és a
+  // kijelzőborítás között, még kisebb tengely-elforgatásnál sem.
   const disp = [
     [top[0] - 58, top[1] - 14], [top[0] + 58, top[1] - 14],
-    [top[0] + 54, top[1] + 22], [top[0] - 54, top[1] + 22],
+    [top[0] + 54, top[1] + 8], [top[0] - 54, top[1] + 8],
   ];
   add('display', 'Kormány-középrész (kijelzőborítás)', 'front', disp);
   const [stemT0, stemT1] = segT.stem;
@@ -222,7 +227,9 @@ const MODELS = [
     // a villán nincs első sárvédő-burkolat a valóságban
     frontFender: false,
     // a csukló és a kormányoszlop a fotón mérthez képest jóval hosszabb/meredekebb
-    segT: { fork: [0.06, 0.28], joint: [0.19, 0.31], stem: [0.42, 0.95] },
+    // a kormányoszlop a "top" pontig ér (nem áll meg alatta), hogy a
+    // kijelzőborítás alatt ne maradjon rés
+    segT: { fork: [0.06, 0.28], joint: [0.19, 0.31], stem: [0.42, 1] },
     lampT: 0.25,
     // "C" futómű: a Kukirin G2-nek nem hagyományos, a kormányoszlop tengelyén
     // ülő villája van, hanem egyoldali C-lengőkarja – külön csuklópontból
