@@ -34,6 +34,7 @@ export default {
     {"type":"line","x1":767,"y1":25,"x2":805,"y2":35,"stroke":"grip"},
     {"type":"circle","cx":835.9,"cy":533.3,"r":6,"fill":"lamp"},
     {"type":"path","d":"M 740 643 l 6 5 l -12 5 l 12 5 l -12 5 l 6 4","stroke":"spring","strokeWidth":5,"over":true},
+    {"type":"circle","cx":682,"cy":677,"r":6,"fill":"hub","over":true},
   ],
 
   /** Fóliázható darabok – a valódi rendszerben ezek a vágókontúrok. */
@@ -66,12 +67,11 @@ export default {
     },
     {
       id: "fork",
-      name: "Első villaborítás",
+      name: "Első lengőkar-borítás (C-futómű)",
       group: "front",
-      explode: [50.2,22.6],
+      explode: [39.8,37.9],
       size: "large",
-      labelAngle: -98.9,
-      d: "M 843.6 659.6 L 820.9 515.5 L 781.4 521.7 L 804.1 665.8 Z",
+      d: "M 679 662 L 722 674 L 772 690 L 814 701 L 830 705 L 844 709 L 847 719 L 830 725 L 772 727 L 722 725 L 687 715 L 677 692 Z",
     },
     {
       id: "neck",

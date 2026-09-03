@@ -81,7 +81,11 @@ function buildModel(p) {
   // A csuklóborítás valódi, fotóból mért sziluettje, ha a modell megadja;
   // egyébként az egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
   add('joint', 'Csuklóborítás (hajtás)', 'front', p.jointPoints ?? axisQuad(...segT.joint, 26));
-  add('fork', 'Első villaborítás', 'front', axisQuad(...segT.fork, 20));
+  // "C" futómű: a lengőkar NEM a kormányoszlop tengelyén ül, hanem attól
+  // külön, a csuklóborítás/rugó alján lévő csuklópontból indul, és onnan
+  // ível le a kerékagyig (egyoldali felfogás) – ha a modell megadja a valódi
+  // sziluettet, azt használjuk, egyébként az egyszerű tengely-négyszög marad.
+  add('fork', p.frontArmName ?? 'Első villaborítás', 'front', p.frontArmPoints ?? axisQuad(...segT.fork, 20));
   const lampT = p.lampT ?? (segT.joint[0] + segT.joint[1]) / 2;
 
   // --- dekk-nyak: a dekk elejétől a villa hátsó éléig ---
@@ -164,8 +168,11 @@ function buildModel(p) {
 
   // --- felirat iránya: a tengelyen ülő darabokon a tengellyel párhuzamos ---
   const axisAngle = r1((Math.atan2(dir[1], dir[0]) * 180) / Math.PI);
+  // a "C" lengőkar (frontArmPoints) nem a kormányoszlop tengelyén fekszik,
+  // ezért nem kapja meg a tengely-feliratszöget
+  const axisAlignedIds = ['stem', 'stem-upper', 'stem-lower', 'joint', ...(p.frontArmPoints ? [] : ['fork'])];
   for (const piece of pieces) {
-    if (['stem', 'stem-upper', 'stem-lower', 'fork', 'joint'].includes(piece.id)) piece.labelAngle = axisAngle;
+    if (axisAlignedIds.includes(piece.id)) piece.labelAngle = axisAngle;
   }
   // a dekk a felirat alapértelmezett helye
   pieces.find((piece) => piece.id === 'deck-side').defaultLabel = true;
@@ -192,6 +199,9 @@ function buildModel(p) {
       d: `M ${pt(p.springAt)} l 6 5 l -12 5 l 12 5 l -12 5 l 6 4`,
       stroke: 'spring', strokeWidth: 5, over: true,
     }] : []),
+    // a "C" lengőkar hátsó csuklópontja (a kormányoszlopétól független
+    // forgáspont, amiből a kar a kerékagyig ível)
+    ...(p.frontArmPivot ? [{ type: 'circle', cx: p.frontArmPivot[0], cy: p.frontArmPivot[1], r: 6, fill: 'hub', over: true }] : []),
   ];
 
   return { pieces, decor };
@@ -211,10 +221,21 @@ const MODELS = [
     splitStem: false,
     // a villán nincs első sárvédő-burkolat a valóságban
     frontFender: false,
-    // a villa nagy része takarásban van a lengőkar-burkolat mögött, a csukló
-    // és a kormányoszlop viszont a fotón mérthez képest jóval hosszabb/meredekebb
+    // a csukló és a kormányoszlop a fotón mérthez képest jóval hosszabb/meredekebb
     segT: { fork: [0.06, 0.28], joint: [0.19, 0.31], stem: [0.42, 0.95] },
     lampT: 0.25,
+    // "C" futómű: a Kukirin G2-nek nem hagyományos, a kormányoszlop tengelyén
+    // ülő villája van, hanem egyoldali C-lengőkarja – külön csuklópontból
+    // (a rugó alján) ível le a kerékagyig, azt egyetlen ponton fogva közre
+    // (nem kétoldali villával). A pontok a fotóból mérve, ugyanazzal a
+    // (−28, −53) eltolással, mint a joint/neck/rearFender.
+    frontArmName: 'Első lengőkar-borítás (C-futómű)',
+    frontArmPivot: [682, 677],
+    frontArmPoints: [
+      [679, 662], [722, 674], [772, 690], [814, 701], [830, 705],
+      [844, 709], [847, 719], [830, 725], [772, 727], [722, 725],
+      [687, 715], [677, 692],
+    ],
     // az első felfüggesztés rugójának teteje (a lengőkar-burkolat és a dekk
     // találkozásánál, a fotón jól látható tekercsrugó helyén)
     springAt: [740, 643],
