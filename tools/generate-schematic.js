@@ -117,20 +117,30 @@ function buildModel(p) {
     area: polyArea(armPts) + Math.PI * 30 * 30 * 0.75,
   });
 
-  // --- sárvédők (gyűrűcikkek) ---
+  // --- sárvédők ---
   const rOut = wheelR + 18, rIn = wheelR + 6;
-  pieces.push({
-    id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear',
-    d: ringSector(rearHub, rOut, rIn, -182, -55),
-    c: polar(rearHub, (rOut + rIn) / 2, -118),
-    area: (127 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
-  });
-  pieces.push({
-    id: 'front-fender', name: 'Első sárvédő', group: 'front',
-    d: ringSector(frontHub, rOut, rIn, -92, 8),
-    c: polar(frontHub, (rOut + rIn) / 2, -42),
-    area: (100 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
-  });
+  // A hátsó sárvédő valódi (szögletes, hegyes végű) sziluettje a fotóból mérve,
+  // ha a modell megadja; egyébként az egyszerű gyűrűcikk az alapértelmezett.
+  if (p.rearFenderPoints) {
+    add('rear-fender', 'Hátsó sárvédő', 'rear', p.rearFenderPoints);
+  } else {
+    pieces.push({
+      id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear',
+      d: ringSector(rearHub, rOut, rIn, -182, -55),
+      c: polar(rearHub, (rOut + rIn) / 2, -118),
+      area: (127 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
+    });
+  }
+  // Első sárvédő: csak azoknál a modelleknél, amelyeknél ténylegesen van ilyen
+  // burkolat a villán (alapértelmezésben igen; a Kukirin G2-nél nincs).
+  if (p.frontFender !== false) {
+    pieces.push({
+      id: 'front-fender', name: 'Első sárvédő', group: 'front',
+      d: ringSector(frontHub, rOut, rIn, -92, 8),
+      c: polar(frontHub, (rOut + rIn) / 2, -42),
+      area: (100 / 360) * Math.PI * (rOut * rOut - rIn * rIn),
+    });
+  }
 
   // --- szétnyitási (explode) irány: a modell középpontjától kifelé ---
   const center = [p.viewBox.width / 2, p.viewBox.height / 2 + 40];
@@ -184,14 +194,22 @@ const MODELS = [
     // valódi arányok alapján (kerékméret, tengelyhossz/dőlésszög, dekkhossz),
     // hogy a vázlat felismerhetően ugyanazt a modellt ábrázolja, mint a fotó.
     id: 'kukirin-g2', name: 'Kukirin G2', brand: 'Kukirin',
-    description: 'Kompakt, dupla felfüggesztésű városi roller – 11 fóliázható darab.',
+    description: 'Kompakt, dupla felfüggesztésű városi roller – 10 fóliázható darab.',
     viewBox: { width: 1000, height: 820 },
     rearHub: [164, 702], frontHub: [830, 702], wheelR: 70,
     deck: { x: [362, 672], top: 622, bottom: 687 }, top: [727, 47],
     splitStem: false,
+    // a villán nincs első sárvédő-burkolat a valóságban
+    frontFender: false,
     // a villa nagy része takarásban van a lengőkar-burkolat mögött, a csukló
     // és a kormányoszlop viszont a fotón mérthez képest jóval hosszabb/meredekebb
     segT: { fork: [0.06, 0.28], joint: [0.3, 0.4], stem: [0.42, 0.95] },
+    // a hátsó sárvédő szögletes, hegyes végű valódi sziluettje a fotóból mérve
+    // (később fóliázható darabként tervezett elem, ezért fontos a pontos forma)
+    rearFenderPoints: [
+      [67, 604], [122, 596], [185, 593], [227, 609],
+      [240, 632], [234, 649], [132, 650], [72, 645],
+    ],
     // a csuklóborítás melletti lengőkar-burkolat (rugóház) valódi sziluettje,
     // a fotó darab-maszkjából (tools/photo-masks/kukirin-g2.json → neck) mérve
     neckPoints: [
