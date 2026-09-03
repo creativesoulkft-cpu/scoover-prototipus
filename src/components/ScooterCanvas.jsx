@@ -22,6 +22,7 @@ const DECOR_COLORS = {
   grip: '#3a3d42',
   lamp: '#ffe9a8',
   ground: '#2a2d31',
+  spring: '#53585f',
 };
 
 const SIZE_CLASSES = ['large', 'medium', 'small'];
@@ -38,7 +39,11 @@ function Decor({ items }) {
       );
     }
     if (d.type === 'path') {
-      return <path key={i} d={d.d} fill={DECOR_COLORS[d.fill] ?? d.fill ?? 'none'} />;
+      return (
+        <path key={i} d={d.d} fill={d.fill ? DECOR_COLORS[d.fill] ?? d.fill : 'none'}
+          stroke={d.stroke ? DECOR_COLORS[d.stroke] ?? d.stroke : undefined}
+          strokeWidth={d.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+      );
     }
     return null;
   });
@@ -96,7 +101,7 @@ export default function ScooterCanvas({
         </pattern>
       </defs>
 
-      <g className="decor"><Decor items={model.decor} /></g>
+      <g className="decor"><Decor items={model.decor.filter((d) => !d.over)} /></g>
 
       <g className="pieces">
         {model.pieces.map((piece) => {
@@ -129,6 +134,9 @@ export default function ScooterCanvas({
           );
         })}
       </g>
+
+      {/* a fóliázott felület fölé kerülő apró mechanikai részletek (pl. rugó) */}
+      <g className="decor-over"><Decor items={model.decor.filter((d) => d.over)} /></g>
 
       {/* Feliratréteg: a textúra fölött, vektorosan, saját rétegben – feliratonként egy */}
       {labels.filter((l) => l.enabled && !disabledPieces?.has(l.pieceId)).map((l) => {

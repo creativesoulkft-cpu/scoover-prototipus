@@ -32,7 +32,8 @@ export default {
     {"type":"circle","cx":830,"cy":702,"r":7,"fill":"hub"},
     {"type":"circle","cx":727,"cy":23,"r":9,"fill":"grip"},
     {"type":"line","x1":767,"y1":25,"x2":805,"y2":35,"stroke":"grip"},
-    {"type":"circle","cx":825.6,"cy":467.8,"r":6,"fill":"lamp"},
+    {"type":"circle","cx":835.9,"cy":533.3,"r":6,"fill":"lamp"},
+    {"type":"path","d":"M 740 643 l 6 5 l -12 5 l 12 5 l -12 5 l 6 4","stroke":"spring","strokeWidth":5,"over":true},
   ],
 
   /** Fóliázható darabok – a valódi rendszerben ezek a vágókontúrok. */
@@ -58,10 +59,10 @@ export default {
       id: "joint",
       name: "Csuklóborítás (hajtás)",
       group: "front",
-      explode: [54.8,4.2],
+      explode: [54.7,5.8],
       size: "medium",
       labelAngle: -98.9,
-      d: "M 824.8 501.5 L 814.5 436 L 763.1 444 L 773.4 509.5 Z",
+      d: "M 746 446 L 812 446 L 814 513 L 744 513 Z",
     },
     {
       id: "fork",
@@ -76,9 +77,9 @@ export default {
       id: "neck",
       name: "Dekk-nyak / első lengőkar-borítás",
       group: "deck",
-      explode: [47.9,27.1],
+      explode: [47.5,27.8],
       size: "large",
-      d: "M 814 507 L 755 507 L 670 624 L 728 607 L 674 687 L 760 635 L 767 621 L 804 604 L 824 556 Z",
+      d: "M 820 515 L 757 515 L 757 518 L 750 523 L 745 522 L 746 515 L 737 515 L 736 536 L 733 540 L 733 544 L 695 588 L 664 647 L 692 689 L 744 677 L 745 673 L 741 671 L 740 663 L 744 660 L 744 652 L 749 646 L 746 636 L 753 627 L 758 625 L 822 525 Z",
     },
     {
       id: "deck-top",

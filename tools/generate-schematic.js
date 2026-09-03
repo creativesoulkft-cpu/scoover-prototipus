@@ -78,15 +78,17 @@ function buildModel(p) {
   } else {
     add('stem', 'Kormányoszlop', 'front', axisQuad(stemT0, stemT1, 15));
   }
-  add('joint', 'Csuklóborítás (hajtás)', 'front', axisQuad(...segT.joint, 26));
+  // A csuklóborítás valódi, fotóból mért sziluettje, ha a modell megadja;
+  // egyébként az egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
+  add('joint', 'Csuklóborítás (hajtás)', 'front', p.jointPoints ?? axisQuad(...segT.joint, 26));
   add('fork', 'Első villaborítás', 'front', axisQuad(...segT.fork, 20));
   const lampT = p.lampT ?? (segT.joint[0] + segT.joint[1]) / 2;
 
   // --- dekk-nyak: a dekk elejétől a villa hátsó éléig ---
   const [dx0, dx1] = deck.x;
   // Valódi fotó alapján mért, a csuklóborítás melletti lengőkar-burkolatot is
-  // magába foglaló forma (bulge) – ha a modell megadja, azt használjuk;
-  // egyébként az egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
+  // magába foglaló forma – ha a modell megadja, azt használjuk; egyébként az
+  // egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
   add('neck', 'Dekk-nyak / első lengőkar-borítás', 'deck', p.neckPoints ?? [
     [dx1 - 2, deck.top + 2], [dx1 + 2, deck.bottom],
     side(0.36, -20), side(0.5, -20),
@@ -182,6 +184,14 @@ function buildModel(p) {
     { type: 'line', x1: top[0] + 40, y1: top[1] - 22, x2: top[0] + 78, y2: top[1] - 12, stroke: 'grip' },
     // fényszóró a csukló elején
     { type: 'circle', cx: r1(side(lampT, 32)[0]), cy: r1(side(lampT, 32)[1]), r: 6, fill: 'lamp' },
+    // első felfüggesztés rugója (a lengőkar-burkolat és a dekk találkozásánál),
+    // ha a modell megadja a helyét
+    // (a fóliázott darabok fölé kerül, mert a valóságban is a burkolat előtt/mellett ül)
+    ...(p.springAt ? [{
+      type: 'path',
+      d: `M ${pt(p.springAt)} l 6 5 l -12 5 l 12 5 l -12 5 l 6 4`,
+      stroke: 'spring', strokeWidth: 5, over: true,
+    }] : []),
   ];
 
   return { pieces, decor };
@@ -203,18 +213,28 @@ const MODELS = [
     frontFender: false,
     // a villa nagy része takarásban van a lengőkar-burkolat mögött, a csukló
     // és a kormányoszlop viszont a fotón mérthez képest jóval hosszabb/meredekebb
-    segT: { fork: [0.06, 0.28], joint: [0.3, 0.4], stem: [0.42, 0.95] },
+    segT: { fork: [0.06, 0.28], joint: [0.19, 0.31], stem: [0.42, 0.95] },
+    lampT: 0.25,
+    // az első felfüggesztés rugójának teteje (a lengőkar-burkolat és a dekk
+    // találkozásánál, a fotón jól látható tekercsrugó helyén)
+    springAt: [740, 643],
     // a hátsó sárvédő szögletes, hegyes végű valódi sziluettje a fotóból mérve
     // (később fóliázható darabként tervezett elem, ezért fontos a pontos forma)
     rearFenderPoints: [
       [67, 604], [122, 596], [185, 593], [227, 609],
       [240, 632], [234, 649], [132, 650], [72, 645],
     ],
-    // a csuklóborítás melletti lengőkar-burkolat (rugóház) valódi sziluettje,
-    // a fotó darab-maszkjából (tools/photo-masks/kukirin-g2.json → neck) mérve
+    // a csuklóborítás (fotómaszk: tools/photo-masks/kukirin-g2.json → joint)
+    // és a dekk-nyak (→ neck) valódi, már a fotós nézetben is bevált sziluettje,
+    // ugyanabból a koordináta-rendszerből (fotópixel − 28, − 53 eltolással)
+    jointPoints: [
+      [746, 446], [812, 446], [814, 513], [744, 513],
+    ],
     neckPoints: [
-      [814, 507], [755, 507], [670, 624], [728, 607],
-      [674, 687], [760, 635], [767, 621], [804, 604], [824, 556],
+      [820, 515], [757, 515], [757, 518], [750, 523], [745, 522], [746, 515],
+      [737, 515], [736, 536], [733, 540], [733, 544], [695, 588], [664, 647],
+      [692, 689], [744, 677], [745, 673], [741, 671], [740, 663], [744, 660],
+      [744, 652], [749, 646], [746, 636], [753, 627], [758, 625], [822, 525],
     ],
   },
   {
