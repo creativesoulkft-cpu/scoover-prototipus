@@ -10,8 +10,30 @@
  * A `scale` prop a darabméret-osztály szerinti csempe-léptéket adja (a
  * felhasználói transzformációra rászorozva); egy méretosztály = egy def.
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { assetUrl } from '../utils/assets.js';
+
+/** Már betöltött textúra-URL-ek (modulszintű cache, hogy a váltás azonnali legyen). */
+const loadedImages = new Set();
+
+/**
+ * Kép előtöltése a <pattern> számára. Chromium-ban a <pattern> belsejében
+ * aszinkron betöltődő <image> nem mindig váltja ki a mintát használó elemek
+ * újrarajzolását (a darab "üresen" marad). Ezért a képet előbb betöltjük,
+ * és csak utána tesszük a pattern-be – ez DOM-változás, ami újrarajzol.
+ */
+function useImageReady(href) {
+  const [ready, setReady] = useState(() => !href || href.startsWith('data:') || loadedImages.has(href));
+  useEffect(() => {
+    if (!href || ready) return undefined;
+    let alive = true;
+    const img = new Image();
+    img.onload = img.onerror = () => { loadedImages.add(href); if (alive) setReady(true); };
+    img.src = href;
+    return () => { alive = false; };
+  }, [href, ready]);
+  return ready;
+}
 
 /** A minta azonosítójából a fill-érték. Egyszínűnél nincs szükség defs-re. */
 export function fillFor(pattern, defId) {
@@ -31,6 +53,8 @@ function transformString(t, cx, cy, extraScale = 1) {
 export default function PatternDefs({ pattern, defId, transform, viewBox, scale = 1 }) {
   const { width: vw, height: vh } = viewBox;
   const tf = transformString(transform, vw / 2, vh / 2, scale);
+  const tileHref = pattern?.type === 'image-tile' ? assetUrl(pattern.src) : null;
+  const tileReady = useImageReady(tileHref);
 
   // A markup-ban a __ID__ helyőrzőt az egyedi defId-re cseréljük.
   const tileHtml = useMemo(() => {
@@ -78,9 +102,17 @@ export default function PatternDefs({ pattern, defId, transform, viewBox, scale 
     // 'mirror' csempézésnél 2×2-es tükrözött blokk → akkor is folytonos, ha a
     // kép szélei nem illeszkednek tökéletesen.
     const t = pattern.tile;
-    const href = assetUrl(pattern.src);
+    const href = tileHref;
     const mirror = pattern.tiling === 'mirror';
     const size = mirror ? t * 2 : t;
+    if (!tileReady) {
+      // betöltés alatt: semleges sötét kitöltés, hogy ne "villanjon" a fotó/vázlat
+      return (
+        <pattern id={defId} patternUnits="userSpaceOnUse" width={size} height={size}>
+          <rect width={size} height={size} fill="#1c1d20" />
+        </pattern>
+      );
+    }
     return (
       <pattern id={defId} patternUnits="userSpaceOnUse" width={size} height={size} patternTransform={tf}>
         <image href={href} width={t} height={t} preserveAspectRatio="none" />

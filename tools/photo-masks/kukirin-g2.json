@@ -1,0 +1,30 @@
+{
+  "image": "public/models/kukirin-g2-photo.jpg",
+  "output": "src/data/models/kukirin-g2.photo.js",
+  "modelName": "Kukirin G2",
+  "backgroundThreshold": 225,
+  "shading": { "blend": "overlay", "gamma": 0.5, "opacity": 0.95 },
+  "pieces": [
+    { "id": "display", "name": "Kormány-középrész (kijelzőborítás)", "group": "front", "size": "small",
+      "poly": [[748,42],[782,36],[788,100],[750,104]] },
+    { "id": "stem", "name": "Kormányoszlop", "group": "front", "size": "medium", "labelAngle": -100,
+      "patternTransform": "skewX(-10)",
+      "poly": [[698,100],[752,100],[816,497],[764,497]] },
+    { "id": "joint", "name": "Csuklóborítás (hajtás)", "group": "front", "size": "small",
+      "poly": [[774,499],[840,499],[842,566],[772,566]] },
+    { "id": "neck", "name": "Dekk-nyak / első lengőkar-borítás", "group": "deck", "size": "medium",
+      "patternTransform": "skewX(-28)",
+      "poly": [[762,568],[856,568],[778,690],[772,730],[720,742],[692,700]] },
+    { "id": "deck-top", "name": "Dekk teteje (állófelület)", "group": "deck", "size": "medium",
+      "poly": [[390,676],[692,676],[702,701],[390,701]] },
+    { "id": "deck-side", "name": "Dekk oldala", "group": "deck", "size": "large", "defaultLabel": true,
+      "poly": [[398,702],[702,702],[702,766],[398,766]] },
+    { "id": "rear-swingarm", "name": "Hátsó lengőkar-borítás", "group": "rear", "size": "medium",
+      "poly": [[397,720],[397,766],[268,790],[212,790],[198,766],[218,738],[265,732]] },
+    { "id": "front-swingarm", "name": "Első lengőkar-borítás", "group": "front", "size": "small",
+      "patternTransform": "skewY(20)",
+      "poly": [[716,716],[752,712],[864,762],[886,776],[880,800],[848,800],[738,768],[710,752]] },
+    { "id": "rear-fender", "name": "Hátsó sárvédő", "group": "rear", "size": "small",
+      "poly": [[122,704],[142,670],[174,654],[208,650],[238,657],[256,670],[256,694],[232,684],[207,679],[180,683],[155,694],[142,714]] }
+  ]
+}
