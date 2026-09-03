@@ -8,7 +8,9 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_MODEL_ID } from './data/models/index.js';
-import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from './data/patterns/index.js';
+import {
+  DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, DEFAULT_STANDING_SURFACE_PATTERN_ID, getPattern, getCategory,
+} from './data/patterns/index.js';
 import { useScooterModel } from './hooks/useScooterModel.js';
 import { labelColorFor } from './utils/color.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
@@ -30,6 +32,10 @@ export default function App() {
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   const [patternId, setPatternId] = useState(DEFAULT_PATTERN_ID);
   const [uploadedPattern, setUploadedPattern] = useState(null);
+  // Taposófelület (deck-top, standingSurface: true): önálló felár-tétel, saját
+  // mintaszállal – kikapcsolva a darab a fő mintát viszi, mint a többi.
+  const [standingSurfaceEnabled, setStandingSurfaceEnabled] = useState(false);
+  const [standingSurfacePatternId, setStandingSurfacePatternId] = useState(DEFAULT_STANDING_SURFACE_PATTERN_ID);
   const [transform, setTransform] = useState(DEFAULT_TRANSFORM);
   const [sizeAwareTiling, setSizeAwareTiling] = useState(true);
   const [exploded, setExploded] = useState(false);
@@ -50,6 +56,12 @@ export default function App() {
   );
   const category = getCategory(pattern?.category ?? 'solid');
   const patternScale = pattern?.patternScale ?? category.patternScale ?? { large: 1, medium: 1, small: 1 };
+
+  // A taposófelület saját mintája – teljesen független a fő mintától (más anyag).
+  const standingSurfacePattern = getPattern(standingSurfacePatternId);
+  const standingSurfaceCategory = getCategory(standingSurfacePattern?.category ?? 'antislip');
+  const standingSurfacePatternScale =
+    standingSurfacePattern?.patternScale ?? standingSurfaceCategory.patternScale ?? { large: 1, medium: 1, small: 1 };
 
   // Modellváltáskor a felirat a modell alapértelmezett darabjára kerül
   // (defaultLabel), ha az aktuális céldarab nem létezik az új modellen.
@@ -137,6 +149,9 @@ export default function App() {
                   pattern={pattern}
                   transform={transform}
                   patternScale={patternScale}
+                  standingSurfacePattern={standingSurfacePattern}
+                  standingSurfaceEnabled={standingSurfaceEnabled}
+                  standingSurfacePatternScale={standingSurfacePatternScale}
                   sizeAwareTiling={sizeAwareTiling}
                   showCutLines={showCutLines}
                   disabledPieces={disabledPieces}
@@ -152,6 +167,9 @@ export default function App() {
                 pattern={pattern}
                 transform={transform}
                 patternScale={patternScale}
+                standingSurfacePattern={standingSurfacePattern}
+                standingSurfaceEnabled={standingSurfaceEnabled}
+                standingSurfacePatternScale={standingSurfacePatternScale}
                 sizeAwareTiling={sizeAwareTiling}
                 exploded={exploded}
                 showCutLines={showCutLines}
@@ -180,6 +198,29 @@ export default function App() {
           <details open>
             <summary>Minta</summary>
             <PatternGallery selectedId={patternId} onSelect={setPatternId} uploadedPattern={uploadedPattern} />
+          </details>
+
+          <details open className="standing-surface-panel">
+            <summary>Taposófelület <span className="premium-pill">Prémium csúszásgátló</span></summary>
+            <p className="muted small">
+              A dekk teteje itt külön dönthető: ez nem a fólia folytatása, hanem egy
+              strukturált, csúszásgátló anyag – önálló felár-tétel, bármelyik szinten.
+            </p>
+            <label className="standing-toggle">
+              <input
+                type="checkbox"
+                checked={standingSurfaceEnabled}
+                onChange={(e) => setStandingSurfaceEnabled(e.target.checked)}
+              />
+              Prémium csúszásgátló felület hozzáadása
+            </label>
+            {standingSurfaceEnabled && (
+              <PatternGallery
+                selectedId={standingSurfacePatternId}
+                onSelect={setStandingSurfacePatternId}
+                fixedLine="grip"
+              />
+            )}
           </details>
 
           <details open>

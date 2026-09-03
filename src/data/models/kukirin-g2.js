@@ -87,6 +87,7 @@ export default {
       group: "deck",
       explode: [5.3,54.7],
       size: "medium",
+      standingSurface: true,
       d: "M 364 620 L 670 620 L 678 634 L 356 634 Z",
     },
     {

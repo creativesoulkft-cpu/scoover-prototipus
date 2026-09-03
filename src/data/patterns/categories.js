@@ -7,10 +7,15 @@
  * kódmódosítás nem kell.
  */
 
-/** Termékvonalak: SOLID = egyszínű vágott vinyl, PRINT = nyomtatott mintás fólia. */
+/**
+ * Termékvonalak: SOLID = egyszínű vágott vinyl, PRINT = nyomtatott mintás fólia,
+ * GRIP = strukturált csúszásgátló fólia (csak a taposófelületre).
+ * `tagline`: rövid, laikusnak szóló magyarázat a galéria fülei alatt.
+ */
 export const PRODUCT_LINES = [
-  { id: 'solid', name: 'SOLID', description: 'Egyszínű, nyomtatás nélküli vágott fólia' },
-  { id: 'print', name: 'PRINT', description: 'Nyomtatott, mintás fólia' },
+  { id: 'solid', name: 'SOLID', tagline: 'Egyszínű, sima fólia', description: 'Egyszínű, nyomtatás nélküli vágott fólia' },
+  { id: 'print', name: 'PRINT', tagline: 'Mintás, nyomtatott fólia', description: 'Nyomtatott, mintás fólia' },
+  { id: 'grip', name: 'GRIP', tagline: 'Csúszásgátló, strukturált fólia', description: 'Domborított mintázatú, csúszásgátló felületű fólia – kizárólag az állófelülethez' },
 ];
 
 /**
@@ -66,6 +71,14 @@ export const PATTERN_CATEGORIES = [
     id: 'demo', line: 'print', name: 'Demó (procedurális)', available: true,
     description: 'Kliens oldalon generált SVG-minták a folytonosság tesztelésére.',
     keywords: [], labelFont: FONTS.neutral,
+    patternScale: { large: 1, medium: 1, small: 1 },
+  },
+  // --- GRIP: csúszásgátló taposófelület-minták (procedurális SVG, induló készlet) ---
+  {
+    id: 'antislip', line: 'grip', name: 'Csúszásgátló', available: true,
+    description: 'Domborított, recézett felület – biztos állás minden időjárásban.',
+    keywords: ['csúszásgátló', 'anti-slip', 'recézett', 'taposófelület'],
+    labelFont: FONTS.neutral,
     patternScale: { large: 1, medium: 1, small: 1 },
   },
 ];

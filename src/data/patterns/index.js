@@ -25,6 +25,7 @@ import sunset from './gradient-sunset.js';
 import carbon3d from './carbon-3d.js';
 import hexTech from './hex-tech.js';
 import printTextures from './print-textures.js';
+import gripTextures from './grip-textures.js';
 
 export { PRODUCT_LINES, PATTERN_CATEGORIES, COLORWAYS, DENSITIES, getCategory } from './categories.js';
 
@@ -36,9 +37,13 @@ export const PATTERNS = [
   carbon3d,
   hexTech,
   sunset,
+  ...gripTextures,
 ];
 
 export const DEFAULT_PATTERN_ID = 'cyber-cian-ritka';
+
+/** A taposófelület (GRIP vonal) alapértelmezett mintája, ha bekapcsolják a prémium csúszásgátló extrát. */
+export const DEFAULT_STANDING_SURFACE_PATTERN_ID = gripTextures[0].id;
 
 /** A feltöltött kép mintája ezt az id-t kapja; nem szerepel a statikus listában. */
 export const UPLOAD_PATTERN_ID = 'user-upload';

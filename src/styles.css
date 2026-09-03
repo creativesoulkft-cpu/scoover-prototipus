@@ -7,6 +7,7 @@
   --muted: #8b93a1;
   --accent: #ff6a1a;
   --accent-2: #19e6c1;
+  --accent-gold: #f6c445;
   color-scheme: dark;
 }
 
@@ -99,12 +100,22 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .piece-list li .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); flex: none; }
 .piece-list li.off { color: var(--muted); text-decoration: line-through; }
 .piece-list li.off .dot { background: var(--border); }
+.standing-badge { margin-left: auto; font-size: 10px; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px;
+  background: rgba(246,196,69,.16); color: var(--accent-gold); border: 1px solid rgba(246,196,69,.4); }
+
+/* --- taposófelület: önálló prémium extra, saját minta-galériával --- */
+.standing-surface-panel summary { flex-wrap: wrap; gap: 8px; }
+.premium-pill { font-size: 10px; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px;
+  background: rgba(246,196,69,.16); color: var(--accent-gold); border: 1px solid rgba(246,196,69,.4); font-weight: 700; }
+.standing-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin: 8px 0 10px; cursor: pointer; }
+.standing-toggle input { width: 16px; height: 16px; accent-color: var(--accent-gold); cursor: pointer; }
 
 /* --- galéria: fülek, szűrők, kategória-jelzések --- */
 .tabs { display: flex; gap: 4px; background: var(--panel-2); padding: 4px; border-radius: 10px; margin: 4px 0 8px; }
-.tab { flex: 1; background: none; border: none; color: var(--muted); font: inherit; font-weight: 700; letter-spacing: .08em;
-  padding: 8px; border-radius: 7px; cursor: pointer; }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none;
+  color: var(--muted); font: inherit; font-weight: 700; letter-spacing: .08em; padding: 8px; border-radius: 7px; cursor: pointer; }
 .tab.active { background: var(--panel); color: var(--text); box-shadow: 0 1px 0 var(--border); }
+.tab-tagline { font-weight: 500; letter-spacing: normal; font-size: 11px; color: var(--muted); text-transform: none; }
 .filters { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid transparent; color: var(--muted);

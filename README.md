@@ -27,6 +27,11 @@ npm run build    # dist/ – statikusan hosztolható
   textúra fölött, saját rétegben, a darab alakjára vágva, kategóriánként más
   betűtípussal (Orbitron / Anton / Rajdhani), automatikus fehér/fekete színnel a
   háttér világossága alapján; ki/be kapcsolható, szöveg és céldarab szerkeszthető
+- **taposófelület (állófelület) mint önálló prémium extra**: a `deck-top` darab
+  (`standingSurface: true`) saját, a fő mintától teljesen független mintaszálat
+  visz – 3. termékvonal (GRIP), csak erre a felületre szánt csúszásgátló
+  textúrákkal (`grip-textures.js`); ki/bekapcsolható, bekapcsolva arany
+  szegéllyel kiemelve a vásznon és jelölve a darablistában
 - saját kép feltöltése (JPG/PNG/WebP, kliens oldali kicsinyítés)
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
@@ -45,6 +50,7 @@ src/
       index.js        #   regiszter
       categories.js   #   termékvonalak, stíluskategóriák (+ betűtípus, csempe-lépték), színek, sűrűség
       print-textures.js #  a 9 nyomtatott textúra bejegyzései (kép: public/patterns/)
+      grip-textures.js #   3 procedurális csúszásgátló textúra a taposófelülethez (GRIP vonal)
       _helpers.js     #   procedurális csempe-segédek
       solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js
   components/
@@ -150,10 +156,13 @@ A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből
    URL-ről, cache-elhető CDN-en). A React-kód nem változik, csak a `load()`
    forrása. 20 modell × 15 minta így is csak a kiválasztott párost tölti.
 6. **Webshop-összekötés.** A konfigurátor kimenete egy rendelési JSON:
-   `{ modelId, patternId | uploadId, transform, pieces: [id, enabled], preview: png }`.
-   Ezt egy "Kosárba" gomb küldi a webshopnak (WooCommerce/Shopify egyedi termék-meta),
-   árazás darabszám és felület (mm²) alapján, a preview PNG-t a `<svg>`-ből
-   kliens oldalon rendereljük (canvas → dataURL).
+   `{ modelId, patternId | uploadId, transform, pieces: [id, enabled], preview: png,
+   standingSurface: { enabled, patternId } }`. A `standingSurface` a taposófelület
+   prémium csúszásgátló extráját viszi önálló tételként, függetlenül a fő
+   árazási szinttől (alap/kész/egyszín). Ezt egy "Kosárba" gomb küldi a
+   webshopnak (WooCommerce/Shopify egyedi termék-meta), árazás darabszám és
+   felület (mm²) alapján, a preview PNG-t a `<svg>`-ből kliens oldalon
+   rendereljük (canvas → dataURL).
 7. **Minőség.** Egységtesztek az adatfájlok sémájára (minden darabnak van `d`,
    egyedi `id`), vizuális regressziós teszt (Playwright screenshot) modellenként,
    hogy egy vágófájl-frissítés ne törje el csendben az előnézetet.

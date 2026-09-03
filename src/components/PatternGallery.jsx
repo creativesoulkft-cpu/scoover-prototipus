@@ -40,8 +40,8 @@ function Chip({ active, onClick, children, swatch }) {
   );
 }
 
-export default function PatternGallery({ selectedId, onSelect, uploadedPattern }) {
-  const [line, setLine] = useState('print');
+export default function PatternGallery({ selectedId, onSelect, uploadedPattern, fixedLine }) {
+  const [line, setLine] = useState(fixedLine ?? 'print');
   const [density, setDensity] = useState('all');
   const [colorway, setColorway] = useState('all');
 
@@ -60,16 +60,19 @@ export default function PatternGallery({ selectedId, onSelect, uploadedPattern }
 
   return (
     <div className="pattern-gallery">
-      <div className="tabs" role="tablist">
-        {PRODUCT_LINES.map((l) => (
-          <button key={l.id} type="button" role="tab" aria-selected={line === l.id}
-            className={`tab${line === l.id ? ' active' : ''}`} onClick={() => setLine(l.id)} title={l.description}>
-            {l.name}
-          </button>
-        ))}
-      </div>
+      {!fixedLine && (
+        <div className="tabs" role="tablist">
+          {PRODUCT_LINES.map((l) => (
+            <button key={l.id} type="button" role="tab" aria-selected={line === l.id}
+              className={`tab${line === l.id ? ' active' : ''}`} onClick={() => setLine(l.id)} title={l.description}>
+              {l.name}
+              {l.tagline && <span className="tab-tagline">{l.tagline}</span>}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {uploadedPattern && (
+      {!fixedLine && uploadedPattern && (
         <section className="pattern-group">
           <h4>Saját kép</h4>
           <div className="pattern-grid">

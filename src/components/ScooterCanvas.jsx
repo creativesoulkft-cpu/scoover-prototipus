@@ -26,6 +26,8 @@ const DECOR_COLORS = {
 };
 
 const SIZE_CLASSES = ['large', 'medium', 'small'];
+/** A taposófelület (standingSurface) kiemelő színe – akkor is látszik, ha a vágóvonalak ki vannak kapcsolva. */
+const STANDING_SURFACE_ACCENT = '#f6c445';
 
 function Decor({ items }) {
   return items.map((d, i) => {
@@ -54,6 +56,9 @@ export default function ScooterCanvas({
   pattern,
   transform,
   patternScale,        // { large, medium, small } – kategória/minta szerinti csempe-lépték
+  standingSurfacePattern,      // a taposófelület saját, a fő mintától független mintája (GRIP vonal)
+  standingSurfaceEnabled = false,
+  standingSurfacePatternScale,
   sizeAwareTiling = true,
   exploded = false,
   showCutLines = true,
@@ -74,6 +79,17 @@ export default function ScooterCanvas({
   const classes = tiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
   const defIdFor = (size) => `fill${uid}-${classes.includes(size) ? size : 'large'}`;
 
+  // A taposófelület csak akkor kap saját mintát, ha be van kapcsolva a prémium
+  // csúszásgátló extra; a def-halmaz és a lépték teljesen független a fő mintáétól.
+  const gripActive = standingSurfaceEnabled && Boolean(standingSurfacePattern);
+  const gripTiled = standingSurfacePattern?.type === 'image-tile' || standingSurfacePattern?.type === 'tile';
+  const gripClasses = gripTiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
+  const gripDefIdFor = (size) => `grip${uid}-${gripClasses.includes(size) ? size : 'large'}`;
+  const fillForPiece = (piece) =>
+    gripActive && piece.standingSurface
+      ? fillFor(standingSurfacePattern, gripDefIdFor(piece.size))
+      : fillFor(pattern, defIdFor(piece.size));
+
 
   return (
     <svg
@@ -92,6 +108,15 @@ export default function ScooterCanvas({
             transform={transform}
             viewBox={model.viewBox}
             scale={sizeAwareTiling ? (patternScale?.[size] ?? 1) : 1}
+          />
+        ))}
+        {gripActive && gripClasses.map((size) => (
+          <PatternDefs
+            key={`grip-${size}`}
+            pattern={standingSurfacePattern}
+            defId={gripDefIdFor(size)}
+            viewBox={model.viewBox}
+            scale={sizeAwareTiling ? (standingSurfacePatternScale?.[size] ?? 1) : 1}
           />
         ))}
         {/* sraffozás a fólia nélkül hagyott darabokhoz */}
@@ -119,16 +144,16 @@ export default function ScooterCanvas({
             >
               <path
                 d={piece.d}
-                fill={disabled ? `url(#${hatchId})` : fillFor(pattern, defIdFor(piece.size))}
-                stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
-                strokeWidth={hovered ? 2.5 : 1}
+                fill={disabled ? `url(#${hatchId})` : fillForPiece(piece)}
+                stroke={hovered ? '#ffffff' : piece.standingSurface ? STANDING_SURFACE_ACCENT : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
+                strokeWidth={hovered ? 2.5 : piece.standingSurface ? 2 : 1}
                 strokeLinejoin="round"
                 vectorEffect="non-scaling-stroke"
                 style={{ cursor: 'pointer' }}
                 onMouseEnter={() => onHover?.(piece.id)}
                 onClick={() => onTogglePiece?.(piece.id)}
               >
-                <title>{piece.name}{disabled ? ' (fólia nélkül)' : ''}</title>
+                <title>{piece.name}{piece.standingSurface ? ' – Prémium csúszásgátló felület' : ''}{disabled ? ' (fólia nélkül)' : ''}</title>
               </path>
             </g>
           );

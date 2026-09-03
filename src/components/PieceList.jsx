@@ -23,6 +23,7 @@ export default function PieceList({ pieces, hoveredId, disabledPieces, onHover, 
                   onClick={() => onToggle(p.id)}
                 >
                   <span className="dot" />{p.name}
+                  {p.standingSurface && <span className="standing-badge" title="Külön anyag- és minta-döntési pont">Csúszásgátló</span>}
                 </li>
               );
             })}

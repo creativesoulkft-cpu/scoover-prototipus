@@ -19,6 +19,8 @@ import LabelLayer from './LabelLayer.jsx';
 import { assetUrl } from '../utils/assets.js';
 
 const SIZE_CLASSES = ['large', 'medium', 'small'];
+/** A taposófelület (standingSurface) kiemelő színe – akkor is látszik, ha a vágóvonalak ki vannak kapcsolva. */
+const STANDING_SURFACE_ACCENT = '#f6c445';
 
 export default function PhotoCanvas({
   view,               // model.photoView: { image, viewBox, pieces[], shading }
@@ -26,6 +28,9 @@ export default function PhotoCanvas({
   pattern,
   transform,
   patternScale,
+  standingSurfacePattern,      // a taposófelület saját, a fő mintától független mintája (GRIP vonal)
+  standingSurfaceEnabled = false,
+  standingSurfacePatternScale,
   sizeAwareTiling = true,
   showCutLines = false,
   disabledPieces,
@@ -53,6 +58,19 @@ export default function PhotoCanvas({
     pre: piece.patternTransform,
   });
 
+  // A taposófelület csak akkor kap saját mintát, ha be van kapcsolva a prémium
+  // csúszásgátló extra; a def-halmaz és a lépték teljesen független a fő mintáétól.
+  const gripActive = standingSurfaceEnabled && Boolean(standingSurfacePattern);
+  const gripTiled = standingSurfacePattern?.type === 'image-tile' || standingSurfacePattern?.type === 'tile';
+  const gripClasses = gripTiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
+  const gripSizeOf = (piece) => (gripClasses.includes(piece.size) ? piece.size : 'large');
+  const gripDefIdFor = (piece) =>
+    piece.patternTransform ? `grip${uid}-${piece.id}` : `grip${uid}-${gripSizeOf(piece)}`;
+  const fillForPiece = (piece) =>
+    gripActive && piece.standingSurface
+      ? fillFor(standingSurfacePattern, gripDefIdFor(piece))
+      : fillFor(pattern, defIdFor(piece));
+
   const activePieces = view.pieces.filter((p) => !disabledPieces?.has(p.id));
   const clipId = `clip${uid}`;
   const filterId = `shade${uid}`;
@@ -76,6 +94,15 @@ export default function PhotoCanvas({
             transform={withTransform(piece)} viewBox={view.viewBox}
             scale={sizeAwareTiling ? (patternScale?.[sizeOf(piece)] ?? 1) : 1} />
         ))}
+        {gripActive && gripClasses.map((size) => (
+          <PatternDefs key={`grip-${size}`} pattern={standingSurfacePattern} defId={`grip${uid}-${size}`}
+            viewBox={view.viewBox} scale={sizeAwareTiling ? (standingSurfacePatternScale?.[size] ?? 1) : 1} />
+        ))}
+        {gripActive && view.pieces.filter((p) => p.standingSurface && p.patternTransform).map((piece) => (
+          <PatternDefs key={`grip-${piece.id}`} pattern={standingSurfacePattern} defId={gripDefIdFor(piece)}
+            transform={{ pre: piece.patternTransform }} viewBox={view.viewBox}
+            scale={sizeAwareTiling ? (standingSurfacePatternScale?.[gripSizeOf(piece)] ?? 1) : 1} />
+        ))}
         {/* az összes aktív darab uniója – erre vágjuk az árnyalás-réteget */}
         <clipPath id={clipId}>
           {activePieces.map((p) => <path key={p.id} d={p.d} />)}
@@ -98,7 +125,7 @@ export default function PhotoCanvas({
       {/* 2. minta a maszkokban */}
       <g className="pieces">
         {activePieces.map((piece) => (
-          <path key={piece.id} d={piece.d} fill={fillFor(pattern, defIdFor(piece))}
+          <path key={piece.id} d={piece.d} fill={fillForPiece(piece)}
             stroke="none" />
         ))}
       </g>
@@ -117,12 +144,12 @@ export default function PhotoCanvas({
           return (
             <path key={piece.id} d={piece.d}
               fill={disabled ? 'rgba(0,0,0,0.35)' : 'transparent'}
-              stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
-              strokeWidth={hovered ? 2.5 : 1} vectorEffect="non-scaling-stroke"
+              stroke={hovered ? '#ffffff' : piece.standingSurface ? STANDING_SURFACE_ACCENT : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
+              strokeWidth={hovered ? 2.5 : piece.standingSurface ? 2 : 1} vectorEffect="non-scaling-stroke"
               style={{ cursor: 'pointer' }}
               onMouseEnter={() => onHover?.(piece.id)}
               onClick={() => onTogglePiece?.(piece.id)}>
-              <title>{piece.name}{disabled ? ' (fólia nélkül)' : ''}</title>
+              <title>{piece.name}{piece.standingSurface ? ' – Prémium csúszásgátló felület' : ''}{disabled ? ' (fólia nélkül)' : ''}</title>
             </path>
           );
         })}
