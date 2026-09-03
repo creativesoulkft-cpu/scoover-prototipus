@@ -48,6 +48,9 @@ const centroid = (pts) => [
  */
 function buildModel(p) {
   const { rearHub, frontHub, wheelR, deck, top, splitStem } = p;
+  // Tengelyszakaszok (villa/csukló/kormányoszlop) aránya a tengelyen –
+  // modellenként felülírható, ha a valódi arányok eltérnek az alapértelmezettől.
+  const segT = { fork: [0.2, 0.49], joint: [0.5, 0.62], stem: [0.63, 0.92], ...p.segT };
   const axis = [top[0] - frontHub[0], top[1] - frontHub[1]];
   const len = Math.hypot(...axis);
   const dir = [axis[0] / len, axis[1] / len];
@@ -67,18 +70,24 @@ function buildModel(p) {
     [top[0] + 54, top[1] + 22], [top[0] - 54, top[1] + 22],
   ];
   add('display', 'Kormány-középrész (kijelzőborítás)', 'front', disp);
+  const [stemT0, stemT1] = segT.stem;
   if (splitStem) {
-    add('stem-upper', 'Kormányoszlop – felső', 'front', axisQuad(0.79, 0.92, 15));
-    add('stem-lower', 'Kormányoszlop – alsó', 'front', axisQuad(0.63, 0.78, 15));
+    const stemMid = (stemT0 + stemT1) / 2;
+    add('stem-upper', 'Kormányoszlop – felső', 'front', axisQuad(stemMid, stemT1, 15));
+    add('stem-lower', 'Kormányoszlop – alsó', 'front', axisQuad(stemT0, stemMid, 15));
   } else {
-    add('stem', 'Kormányoszlop', 'front', axisQuad(0.63, 0.92, 15));
+    add('stem', 'Kormányoszlop', 'front', axisQuad(stemT0, stemT1, 15));
   }
-  add('joint', 'Csuklóborítás (hajtás)', 'front', axisQuad(0.5, 0.62, 26));
-  add('fork', 'Első villaborítás', 'front', axisQuad(0.2, 0.49, 20));
+  add('joint', 'Csuklóborítás (hajtás)', 'front', axisQuad(...segT.joint, 26));
+  add('fork', 'Első villaborítás', 'front', axisQuad(...segT.fork, 20));
+  const lampT = p.lampT ?? (segT.joint[0] + segT.joint[1]) / 2;
 
   // --- dekk-nyak: a dekk elejétől a villa hátsó éléig ---
   const [dx0, dx1] = deck.x;
-  add('neck', 'Dekk-nyak / első lengőkar-borítás', 'deck', [
+  // Valódi fotó alapján mért, a csuklóborítás melletti lengőkar-burkolatot is
+  // magába foglaló forma (bulge) – ha a modell megadja, azt használjuk;
+  // egyébként az egyszerű, tengelyre támaszkodó négyszög az alapértelmezett.
+  add('neck', 'Dekk-nyak / első lengőkar-borítás', 'deck', p.neckPoints ?? [
     [dx1 - 2, deck.top + 2], [dx1 + 2, deck.bottom],
     side(0.36, -20), side(0.5, -20),
   ]);
@@ -162,7 +171,7 @@ function buildModel(p) {
     { type: 'circle', cx: top[0], cy: top[1] - 24, r: 9, fill: 'grip' },
     { type: 'line', x1: top[0] + 40, y1: top[1] - 22, x2: top[0] + 78, y2: top[1] - 12, stroke: 'grip' },
     // fényszóró a csukló elején
-    { type: 'circle', cx: r1(side(0.56, 32)[0]), cy: r1(side(0.56, 32)[1]), r: 6, fill: 'lamp' },
+    { type: 'circle', cx: r1(side(lampT, 32)[0]), cy: r1(side(lampT, 32)[1]), r: 6, fill: 'lamp' },
   ];
 
   return { pieces, decor };
@@ -171,12 +180,24 @@ function buildModel(p) {
 // ---------- modellek paraméterei ----------
 const MODELS = [
   {
+    // Geometria a termékfotóból (public/models/kukirin-g2-photo.jpg) mért
+    // valódi arányok alapján (kerékméret, tengelyhossz/dőlésszög, dekkhossz),
+    // hogy a vázlat felismerhetően ugyanazt a modellt ábrázolja, mint a fotó.
     id: 'kukirin-g2', name: 'Kukirin G2', brand: 'Kukirin',
     description: 'Kompakt, dupla felfüggesztésű városi roller – 11 fóliázható darab.',
-    viewBox: { width: 1000, height: 560 },
-    rearHub: [175, 440], frontHub: [830, 440], wheelR: 70,
-    deck: { x: [250, 650], top: 378, bottom: 428 }, top: [720, 80],
+    viewBox: { width: 1000, height: 820 },
+    rearHub: [164, 702], frontHub: [830, 702], wheelR: 70,
+    deck: { x: [362, 672], top: 622, bottom: 687 }, top: [727, 47],
     splitStem: false,
+    // a villa nagy része takarásban van a lengőkar-burkolat mögött, a csukló
+    // és a kormányoszlop viszont a fotón mérthez képest jóval hosszabb/meredekebb
+    segT: { fork: [0.06, 0.28], joint: [0.3, 0.4], stem: [0.42, 0.95] },
+    // a csuklóborítás melletti lengőkar-burkolat (rugóház) valódi sziluettje,
+    // a fotó darab-maszkjából (tools/photo-masks/kukirin-g2.json → neck) mérve
+    neckPoints: [
+      [814, 507], [755, 507], [670, 624], [728, 607],
+      [674, 687], [760, 635], [767, 621], [804, 604], [824, 556],
+    ],
   },
   {
     id: 'kukirin-g2-master', name: 'Kukirin G2 Master', brand: 'Kukirin',
