@@ -40,6 +40,26 @@ button.link:hover { text-decoration: underline; }
 .hover-label { padding: 6px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border);
   min-width: 220px; text-align: center; font-size: 13px; }
 
+/* Mobilon a vászon a tetejére "tapad" görgetéskor, hogy a csúszkák (Méret,
+   Eltolás, Forgatás) és a feliratkártyák állítása közben is látszódjon a
+   hatás – enélkül a vászon a képernyő tetején kívülre görgött ki. A vászon
+   itt a magassága (nem a szélessége) alapján méretezett és középre igazított,
+   hogy jóval kisebb, "előnézet-csík" méretű maradjon, és maradjon hely a
+   csúszkáknak alatta. */
+@media (max-width: 960px) {
+  .stage {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    padding: 10px 16px 8px;
+    gap: 8px;
+    box-shadow: 0 10px 18px -10px rgba(0, 0, 0, .6);
+  }
+  .scooter-canvas { width: auto; height: 26vh; max-width: 100%; max-height: none; display: block; margin: 0 auto; }
+  .stage-footer { font-size: 12px; }
+}
+
 .sidebar { border-left: 1px solid var(--border); background: var(--panel); padding: 8px 16px 24px; overflow-y: auto; max-height: calc(100vh - 61px); }
 @media (max-width: 960px) { .sidebar { border-left: none; border-top: 1px solid var(--border); max-height: none; } }
 details { border-bottom: 1px solid var(--border); padding: 6px 0 12px; }
