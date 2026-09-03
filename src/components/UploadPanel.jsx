@@ -18,7 +18,7 @@ export default function UploadPanel({ onUpload, onClear, uploadedPattern }) {
     setError(null);
     try {
       const img = await prepareUploadedImage(file);
-      onUpload({ type: 'image', name: file.name, category: 'upload', ...img });
+      onUpload({ type: 'image', name: file.name, category: 'upload', ...img }, file);
     } catch (e) {
       setError(e.message);
     } finally {

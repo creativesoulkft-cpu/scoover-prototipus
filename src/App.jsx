@@ -19,6 +19,8 @@ import ModelSelector from './components/ModelSelector.jsx';
 import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls.jsx';
 import LabelControls from './components/LabelControls.jsx';
 import PieceList from './components/PieceList.jsx';
+import CartPanel from './components/CartPanel.jsx';
+import { uploadCustomImage } from './api/cartBridge.js';
 
 /** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
 const newLabel = (text = 'SCOOVER') => ({
@@ -36,6 +38,11 @@ export default function App() {
   const [showCutLines, setShowCutLines] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
   const [labels, setLabels] = useState(() => [newLabel()]);
+  const [includeFootboard, setIncludeFootboard] = useState(false);
+  /** A CUSTOM mintához a szerverre (híd) feltöltött kép állapota – a helyi
+   * dataURL-es előnézettől (uploadedPattern) függetlenül, mert a kosárnak
+   * egy valódi, szerver oldali URL kell (uploadedImageUrl). */
+  const [remoteImage, setRemoteImage] = useState(null);
   /** 'schematic' | 'photo' – a fotós nézet csak akkor elérhető, ha a modellnek van photoView-ja */
   const [view, setView] = useState('schematic');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
@@ -79,15 +86,23 @@ export default function App() {
     });
   }, [modelId]);
 
-  function handleUpload(img) {
+  function handleUpload(img, file) {
     setUploadedPattern(img);
     setPatternId(UPLOAD_PATTERN_ID);
     setTransform(DEFAULT_TRANSFORM);
+    setRemoteImage({ url: null, width: null, height: null, uploading: true, error: null });
+    uploadCustomImage(file)
+      .then(({ url, width, height }) => setRemoteImage({ url, width, height, uploading: false, error: null }))
+      .catch((e) => setRemoteImage({ url: null, width: null, height: null, uploading: false, error: e.message }));
   }
   function handleClearUpload() {
     setUploadedPattern(null);
+    setRemoteImage(null);
     if (patternId === UPLOAD_PATTERN_ID) setPatternId(DEFAULT_PATTERN_ID);
   }
+  // A tier a kiválasztott mintából/feltöltésből adódik: feltöltött kép = custom,
+  // egyébként a minta termékvonala (solid | print).
+  const tier = patternId === UPLOAD_PATTERN_ID ? 'custom' : (pattern?.line ?? 'solid');
 
   const hasPhoto = Boolean(model?.photoView);
   const activeView = view === 'photo' && hasPhoto ? 'photo' : 'schematic';
@@ -229,6 +244,23 @@ export default function App() {
                 onToggle={togglePiece}
               />
             </details>
+          )}
+
+          {model && (
+            <div className="cart-box">
+              <h4>Kosárba teszem</h4>
+              <CartPanel
+                modelId={modelId}
+                modelName={model.name}
+                tier={tier}
+                pattern={pattern}
+                transform={transform}
+                labels={labels}
+                includeFootboard={includeFootboard}
+                onIncludeFootboardChange={setIncludeFootboard}
+                remoteImage={remoteImage}
+              />
+            </div>
           )}
         </aside>
       </main>

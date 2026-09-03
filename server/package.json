@@ -1,0 +1,18 @@
+{
+  "name": "scoover-cart-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Köztes híd szerver: konfigurátor JSON -> hitelesített ár -> WooCommerce Store API kosártétel.",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "image-size": "^1.1.1",
+    "multer": "^1.4.5-lts.1"
+  }
+}

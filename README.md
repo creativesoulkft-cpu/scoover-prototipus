@@ -31,6 +31,9 @@ npm run build    # dist/ – statikusan hosztolható
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
 - vágóvonalak ki/be, darab ki/bekapcsolása kattintással (sraffozott = fólia nélkül)
+- taposófelület (dekk állófelülete) extra ki/bekapcsolása, saját felárral
+- **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
+  hitelesített árral – lásd `server/README.md`
 
 ## Mappastruktúra
 
@@ -58,10 +61,15 @@ src/
     ModelSelector.jsx   # modellválasztó legördülő
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
+    CartPanel.jsx       # taposó-extra, élő ár-előnézet, "Kosárba teszem"
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
   utils/color.js            # világosság → felirat-szín
   utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
+  utils/cartConfig.js       # App state → kosár-híd JSON-csomag
+  api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
+  pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
+server/                     # köztes híd szerver (Node/Express) → WooCommerce Store API; lásd server/README.md
 public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)
 ```
@@ -149,11 +157,17 @@ A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből
    egy JSON-végpont veszi át (lista könnyű metaadattal, modell-geometria külön
    URL-ről, cache-elhető CDN-en). A React-kód nem változik, csak a `load()`
    forrása. 20 modell × 15 minta így is csak a kiválasztott párost tölti.
-6. **Webshop-összekötés.** A konfigurátor kimenete egy rendelési JSON:
-   `{ modelId, patternId | uploadId, transform, pieces: [id, enabled], preview: png }`.
-   Ezt egy "Kosárba" gomb küldi a webshopnak (WooCommerce/Shopify egyedi termék-meta),
-   árazás darabszám és felület (mm²) alapján, a preview PNG-t a `<svg>`-ből
-   kliens oldalon rendereljük (canvas → dataURL).
+6. **Webshop-összekötés – ELKÉSZÜLT (első kör).** A "Kosárba teszem" gomb egy
+   `{ model, tier, category, colorway, density, uploadedImageUrl,
+   imageTransform, labels, includeFootboard, calculatedPrice }` JSON-t küld a
+   `server/` alatti köztes híd szervernek, ami hitelesíti az árat (közös
+   modul: `src/pricing.js`), CUSTOM szintnél ellenőrzi a feltöltött kép
+   felbontását, és a WooCommerce Store API-n keresztül létrehozza a
+   kosártételt. Részletek, környezeti változók, helyi tesztelés valódi
+   WooCommerce nélkül: `server/README.md`. Nyitott pont: a preview PNG még
+   nem generálódik, és a kosár-átadás a klasszikus checkout oldalnak
+   (session-áthidalás) a végleges hosting eldöltével dolgozandó ki – lásd a
+   `server/README.md` "Kosár-átadás a pénztárnak" szakaszát.
 7. **Minőség.** Egységtesztek az adatfájlok sémájára (minden darabnak van `d`,
    egyedi `id`), vizuális regressziós teszt (Playwright screenshot) modellenként,
    hogy egy vágófájl-frissítés ne törje el csendben az előnézetet.
