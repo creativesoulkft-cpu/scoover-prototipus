@@ -32,7 +32,8 @@ export default function PhotoCanvas({
   hoveredId,
   onHover,
   onTogglePiece,
-  label,
+  labels = [],
+  onLabelDrag,
 }) {
   const uid = useId();
   const { width, height } = view.viewBox;
@@ -53,7 +54,6 @@ export default function PhotoCanvas({
   });
 
   const activePieces = view.pieces.filter((p) => !disabledPieces?.has(p.id));
-  const labelPiece = label?.enabled ? view.pieces.find((p) => p.id === label.pieceId) : null;
   const clipId = `clip${uid}`;
   const filterId = `shade${uid}`;
 
@@ -109,11 +109,6 @@ export default function PhotoCanvas({
           clipPath={`url(#${clipId})`} filter={`url(#${filterId})`} />
       </g>
 
-      {/* 4. felirat */}
-      {labelPiece && !disabledPieces?.has(labelPiece.id) && (
-        <LabelLayer piece={labelPiece} text={label.text} font={label.font} color={label.color} exploded={false} />
-      )}
-
       {/* interakció + vágóvonal/kiemelés: átlátszó path-ok legfelül */}
       <g className="hit">
         {view.pieces.map((piece) => {
@@ -132,6 +127,15 @@ export default function PhotoCanvas({
           );
         })}
       </g>
+
+      {/* 4. feliratok – legfelül, hogy húzhatók legyenek */}
+      {labels.filter((l) => l.enabled && !disabledPieces?.has(l.pieceId)).map((l) => {
+        const piece = view.pieces.find((p) => p.id === l.pieceId);
+        return piece ? (
+          <LabelLayer key={l.id} piece={piece} label={l} font={l.font} color={l.color} exploded={false}
+            onDrag={onLabelDrag ? (d) => onLabelDrag(l.id, d) : undefined} />
+        ) : null;
+      })}
     </svg>
   );
 }

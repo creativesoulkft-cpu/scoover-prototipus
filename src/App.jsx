@@ -20,7 +20,11 @@ import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls
 import LabelControls from './components/LabelControls.jsx';
 import PieceList from './components/PieceList.jsx';
 
-const DEFAULT_LABEL = { enabled: true, text: 'SCOOVER', pieceId: null };
+/** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
+const newLabel = (text = 'SCOOVER') => ({
+  id: `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+  enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0, colorMode: 'auto',
+});
 
 export default function App() {
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
@@ -31,7 +35,7 @@ export default function App() {
   const [exploded, setExploded] = useState(false);
   const [showCutLines, setShowCutLines] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
-  const [label, setLabel] = useState(DEFAULT_LABEL);
+  const [labels, setLabels] = useState(() => [newLabel()]);
   /** 'schematic' | 'photo' – a fotós nézet csak akkor elérhető, ha a modellnek van photoView-ja */
   const [view, setView] = useState('schematic');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
@@ -51,11 +55,18 @@ export default function App() {
   // (defaultLabel), ha az aktuális céldarab nem létezik az új modellen.
   useEffect(() => {
     if (!model) return;
-    setLabel((l) => {
-      if (l.pieceId && model.pieces.some((p) => p.id === l.pieceId)) return l;
-      const def = model.pieces.find((p) => p.defaultLabel) ?? model.pieces[0];
-      return { ...l, pieceId: def.id };
-    });
+    const def = model.pieces.find((p) => p.defaultLabel) ?? model.pieces[0];
+    setLabels((ls) => ls.map((l) =>
+      l.pieceId && model.pieces.some((p) => p.id === l.pieceId) ? l : { ...l, pieceId: def.id, dx: 0, dy: 0 },
+    ));
+  }, [model]);
+
+  const updateLabel = useCallback((id, patch) =>
+    setLabels((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l))), []);
+  const removeLabel = useCallback((id) => setLabels((ls) => ls.filter((l) => l.id !== id)), []);
+  const addLabel = useCallback(() => {
+    const def = model?.pieces.find((p) => p.defaultLabel) ?? model?.pieces[0];
+    setLabels((ls) => [...ls, { ...newLabel(ls.length ? 'G2' : 'SCOOVER'), pieceId: def?.id ?? null }]);
   }, [model]);
 
   const disabledPieces = disabledByModel[modelId] ?? new Set();
@@ -83,7 +94,13 @@ export default function App() {
   // az aktív nézet darablistája (a fotós nézet darabjai ugyanazokat az id-kat használják)
   const activePieces = activeView === 'photo' ? model.photoView.pieces : model?.pieces ?? [];
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
-  const labelColor = labelColorFor(pattern);
+  const autoColor = labelColorFor(pattern);
+  // feliratok a renderelőnek: betűtípus a kategóriából, szín az üzemmód szerint
+  const renderLabels = labels.map((l) => ({
+    ...l,
+    font: category.labelFont,
+    color: l.colorMode === 'white' ? '#ffffff' : l.colorMode === 'black' ? '#111111' : autoColor,
+  }));
   const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
   return (
@@ -126,7 +143,8 @@ export default function App() {
                   hoveredId={hoveredId}
                   onHover={setHoveredId}
                   onTogglePiece={togglePiece}
-                  label={{ ...label, font: category.labelFont, color: labelColor }}
+                  labels={renderLabels}
+                  onLabelDrag={updateLabel}
                 />
               ) : (
               <ScooterCanvas
@@ -141,7 +159,8 @@ export default function App() {
                 hoveredId={hoveredId}
                 onHover={setHoveredId}
                 onTogglePiece={togglePiece}
-                label={{ ...label, font: category.labelFont, color: labelColor }}
+                labels={renderLabels}
+                onLabelDrag={updateLabel}
               />
               )}
               <div className="stage-footer">
@@ -164,14 +183,16 @@ export default function App() {
           </details>
 
           <details open>
-            <summary>Felirat</summary>
+            <summary>Feliratok ({labels.length})</summary>
             {model && (
               <LabelControls
-                label={label}
-                onChange={setLabel}
+                labels={labels}
+                onChange={updateLabel}
+                onAdd={addLabel}
+                onRemove={removeLabel}
                 pieces={activePieces}
                 font={category.labelFont}
-                color={labelColor}
+                autoColor={autoColor}
               />
             )}
           </details>

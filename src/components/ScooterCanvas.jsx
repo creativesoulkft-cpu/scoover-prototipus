@@ -56,7 +56,8 @@ export default function ScooterCanvas({
   hoveredId,
   onHover,
   onTogglePiece,
-  label,               // { enabled, text, pieceId, font, color } | null
+  labels = [],         // [{ id, enabled, text, pieceId, scale, dx, dy, rotate, font, color }]
+  onLabelDrag,         // (id, { dx, dy }) => void
 }) {
   const uid = useId();
   const hatchId = `hatch${uid}`;
@@ -68,7 +69,6 @@ export default function ScooterCanvas({
   const classes = tiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
   const defIdFor = (size) => `fill${uid}-${classes.includes(size) ? size : 'large'}`;
 
-  const labelPiece = label?.enabled ? model.pieces.find((p) => p.id === label.pieceId) : null;
 
   return (
     <svg
@@ -130,16 +130,14 @@ export default function ScooterCanvas({
         })}
       </g>
 
-      {/* Feliratréteg: a textúra fölött, vektorosan, saját rétegben */}
-      {labelPiece && !disabledPieces?.has(labelPiece.id) && (
-        <LabelLayer
-          piece={labelPiece}
-          text={label.text}
-          font={label.font}
-          color={label.color}
-          exploded={exploded}
-        />
-      )}
+      {/* Feliratréteg: a textúra fölött, vektorosan, saját rétegben – feliratonként egy */}
+      {labels.filter((l) => l.enabled && !disabledPieces?.has(l.pieceId)).map((l) => {
+        const piece = model.pieces.find((p) => p.id === l.pieceId);
+        return piece ? (
+          <LabelLayer key={l.id} piece={piece} label={l} font={l.font} color={l.color} exploded={exploded}
+            onDrag={onLabelDrag ? (d) => onLabelDrag(l.id, d) : undefined} />
+        ) : null;
+      })}
     </svg>
   );
 }
