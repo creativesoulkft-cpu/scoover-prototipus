@@ -20,6 +20,8 @@ import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls
 import LabelControls from './components/LabelControls.jsx';
 import PieceList from './components/PieceList.jsx';
 import CartPanel from './components/CartPanel.jsx';
+import PriceBar from './components/PriceBar.jsx';
+import { useIsTouch } from './hooks/useIsTouch.js';
 import { uploadCustomImage } from './api/cartBridge.js';
 
 /** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
@@ -38,7 +40,8 @@ export default function App() {
   const [showCutLines, setShowCutLines] = useState(true);
   const [hoveredId, setHoveredId] = useState(null);
   const [labels, setLabels] = useState(() => [newLabel()]);
-  const [includeFootboard, setIncludeFootboard] = useState(false);
+  /** 'none' | 'normal' | 'complex' – felrakás mint szolgáltatás (lásd pricing.js) */
+  const [installation, setInstallation] = useState('none');
   /** A CUSTOM mintához a szerverre (híd) feltöltött kép állapota – a helyi
    * dataURL-es előnézettől (uploadedPattern) függetlenül, mert a kosárnak
    * egy valódi, szerver oldali URL kell (uploadedImageUrl). */
@@ -49,6 +52,7 @@ export default function App() {
   const [disabledByModel, setDisabledByModel] = useState({});
 
   const { model, loading, error } = useScooterModel(modelId);
+  const isTouch = useIsTouch();
 
   // Az aktív minta: a feltöltött kép, vagy a regiszterből a kiválasztott.
   const pattern = useMemo(
@@ -76,6 +80,18 @@ export default function App() {
     setLabels((ls) => [...ls, { ...newLabel(ls.length ? 'G2' : 'SCOOVER'), pieceId: def?.id ?? null }]);
   }, [model]);
 
+  // A taposófelület külön (kültéri csúszásgátló) anyagból készül és külön
+  // árazott extra, ezért alapértelmezetten KI van kapcsolva. Modellenként
+  // egyszer, a modell betöltésekor állítjuk be – utána a felhasználó dönt.
+  useEffect(() => {
+    if (!model) return;
+    setDisabledByModel((prev) => {
+      if (prev[model.id]) return prev;
+      const off = model.pieces.filter((p) => p.footboard).map((p) => p.id);
+      return off.length ? { ...prev, [model.id]: new Set(off) } : prev;
+    });
+  }, [model]);
+
   const disabledPieces = disabledByModel[modelId] ?? new Set();
 
   const togglePiece = useCallback((pieceId) => {
@@ -85,6 +101,19 @@ export default function App() {
       return { ...prev, [modelId]: next };
     });
   }, [modelId]);
+
+  // A taposófelület-darab ki/bekapcsolása EGYBEN a +6 900 Ft-os extra
+  // kapcsolója is – egyetlen állapot, két helyről (darablista, ársáv) vezérelve.
+  const footboardPieceId = model?.pieces.find((p) => p.footboard)?.id ?? null;
+  const includeFootboard = Boolean(footboardPieceId) && !disabledPieces.has(footboardPieceId);
+  const setFootboard = useCallback((on) => {
+    if (!footboardPieceId) return;
+    setDisabledByModel((prev) => {
+      const next = new Set(prev[modelId] ?? []);
+      if (on) next.delete(footboardPieceId); else next.add(footboardPieceId);
+      return { ...prev, [modelId]: next };
+    });
+  }, [footboardPieceId, modelId]);
 
   function handleUpload(img, file) {
     setUploadedPattern(img);
@@ -108,6 +137,8 @@ export default function App() {
   const activeView = view === 'photo' && hasPhoto ? 'photo' : 'schematic';
   // az aktív nézet darablistája (a fotós nézet darabjai ugyanazokat az id-kat használják)
   const activePieces = activeView === 'photo' ? model.photoView.pieces : model?.pieces ?? [];
+  // Egy forrás a darabszámhoz: a fejléc és a Darabok szekció ugyanezt mutatja.
+  const enabledCount = activePieces.filter((p) => !disabledPieces.has(p.id)).length;
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
   const autoColor = labelColorFor(pattern);
   // feliratok a renderelőnek: betűtípus a kategóriából, szín az üzemmód szerint
@@ -181,10 +212,12 @@ export default function App() {
               <div className="stage-footer">
                 <div>
                   <strong>{model.name}</strong>
-                  <span className="muted"> · {model.pieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
+                  <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
                 </div>
                 <div className="hover-label">
-                  {hoveredPiece ? hoveredPiece.name : 'Vidd az egeret egy darab fölé'}
+                  {hoveredPiece
+                    ? hoveredPiece.name
+                    : isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
                 </div>
               </div>
             </>
@@ -192,6 +225,19 @@ export default function App() {
         </section>
 
         <aside className="sidebar">
+          {model && (
+            <PriceBar
+              modelId={modelId}
+              modelName={model.name}
+              tier={tier}
+              includeFootboard={includeFootboard}
+              onFootboardChange={setFootboard}
+              hasFootboardPiece={Boolean(footboardPieceId)}
+              installation={installation}
+              onInstallationChange={setInstallation}
+            />
+          )}
+
           <details open>
             <summary>Minta</summary>
             <PatternGallery selectedId={patternId} onSelect={setPatternId} uploadedPattern={uploadedPattern} />
@@ -240,6 +286,7 @@ export default function App() {
                 pieces={activePieces}
                 hoveredId={hoveredId}
                 disabledPieces={disabledPieces}
+                enabledCount={enabledCount}
                 onHover={setHoveredId}
                 onToggle={togglePiece}
               />
@@ -257,7 +304,7 @@ export default function App() {
                 transform={transform}
                 labels={labels}
                 includeFootboard={includeFootboard}
-                onIncludeFootboardChange={setIncludeFootboard}
+                installation={installation}
                 remoteImage={remoteImage}
               />
             </div>

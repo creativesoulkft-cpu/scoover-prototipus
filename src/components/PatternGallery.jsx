@@ -44,8 +44,12 @@ export default function PatternGallery({ selectedId, onSelect, uploadedPattern }
   const [line, setLine] = useState('print');
   const [density, setDensity] = useState('all');
   const [colorway, setColorway] = useState('all');
+  /** Fejlesztői demó minták (categories.js → dev: true). Élesben sosem
+   *  látszanak; fejlesztői buildben egy kapcsolóval előhozhatók. */
+  const [showDev, setShowDev] = useState(false);
+  const devAvailable = import.meta.env.DEV;
 
-  const categories = PATTERN_CATEGORIES.filter((c) => c.line === line);
+  const categories = PATTERN_CATEGORIES.filter((c) => c.line === line && (!c.dev || (devAvailable && showDev)));
   const inLine = PATTERNS.filter((p) => p.line === line);
 
   // csak a jelenlegi fülön előforduló színvariánsok kerülnek a szűrőbe
@@ -126,6 +130,13 @@ export default function PatternGallery({ selectedId, onSelect, uploadedPattern }
           </section>
         );
       })}
+
+      {devAvailable && (
+        <label className="check dev-toggle" title="Csak fejlesztői buildben látszik – éles buildből teljesen kimarad">
+          <input type="checkbox" checked={showDev} onChange={(e) => setShowDev(e.target.checked)} />
+          Fejlesztői demó minták mutatása
+        </label>
+      )}
     </div>
   );
 }

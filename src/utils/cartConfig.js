@@ -12,11 +12,14 @@ import { calculatePrice } from '../pricing.js';
  * @param {object|null} p.pattern - az aktív mintaobjektum (getPattern eredménye), custom esetén null/upload
  * @param {{scale:number, rotate:number, dx:number, dy:number}} p.transform
  * @param {Array} p.labels - App.jsx labels state (nyers, minden felirat, be- és kikapcsolt is)
- * @param {boolean} p.includeFootboard
+ * @param {boolean} p.includeFootboard - taposófelület extra (a deck-top darab állapota)
+ * @param {'none'|'normal'|'complex'} p.installation - felrakás mint szolgáltatás
  * @param {{url:string, width:number, height:number}|null} p.remoteImage - a szerverre már feltöltött CUSTOM kép
  * @returns {object} a kosárnak küldendő konfiguráció, calculatedPrice-szal együtt
  */
-export function buildCartConfig({ modelId, tier, pattern, transform, labels, includeFootboard, remoteImage }) {
+export function buildCartConfig({
+  modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+}) {
   const config = { model: modelId, tier };
 
   if (tier === 'print') {
@@ -43,6 +46,7 @@ export function buildCartConfig({ modelId, tier, pattern, transform, labels, inc
     }));
 
   config.includeFootboard = Boolean(includeFootboard);
+  config.installation = installation ?? 'none';
 
   // Kliens oldali becslés – a szerver ezt sosem fogadja el módosítás nélkül,
   // mindig újraszámolja ugyanezzel a modullal (src/pricing.js).

@@ -41,6 +41,7 @@ function buildScooverPayload(cartConfig, unitPriceHuf) {
     imageTransform: cartConfig.imageTransform ?? null,
     labels: cartConfig.labels ?? [],
     includeFootboard: Boolean(cartConfig.includeFootboard),
+    installation: cartConfig.installation ?? 'none',
     unitPriceHuf,
     currency: 'HUF',
     requiresApproval: cartConfig.tier === 'custom',

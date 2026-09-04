@@ -181,6 +181,9 @@ function buildModel(p) {
   }
   // a dekk a felirat alapértelmezett helye
   pieces.find((piece) => piece.id === 'deck-side').defaultLabel = true;
+  // a taposófelület külön, kültéri csúszásgátló anyagból készül: opcionális,
+  // külön árazott extra (lásd src/pricing.js), ezért meg van jelölve
+  pieces.find((piece) => piece.id === 'deck-top').footboard = true;
 
   // --- nem fóliázott, csak kontextust adó alkatrészek ---
   const decor = [
@@ -289,7 +292,8 @@ for (const m of MODELS) {
  *
  * Darab-mezők: id, name, group, explode [dx,dy], size (large|medium|small –
  * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
- * defaultLabel (ide kerül alapból a felirat), d (SVG path).
+ * defaultLabel (ide kerül alapból a felirat), footboard (külön anyagból készülő,
+ * külön árazott taposófelület), d (SVG path).
  */
 ${hasPhoto ? `import photoView from './${m.id}.photo.js';\n\n` : ''}export default {
   id: ${JSON.stringify(m.id)},${hasPhoto ? '\n  photoView,' : ''}
@@ -311,7 +315,7 @@ ${pieces.map((pc) => `    {
       name: ${JSON.stringify(pc.name)},
       group: ${JSON.stringify(pc.group)},
       explode: ${JSON.stringify(pc.explode)},
-      size: ${JSON.stringify(pc.size)},${pc.labelAngle !== undefined ? `\n      labelAngle: ${pc.labelAngle},` : ''}${pc.defaultLabel ? '\n      defaultLabel: true,' : ''}
+      size: ${JSON.stringify(pc.size)},${pc.labelAngle !== undefined ? `\n      labelAngle: ${pc.labelAngle},` : ''}${pc.defaultLabel ? '\n      defaultLabel: true,' : ''}${pc.footboard ? '\n      footboard: true,' : ''}
       d: ${JSON.stringify(pc.d)},
     },`).join('\n')}
   ],

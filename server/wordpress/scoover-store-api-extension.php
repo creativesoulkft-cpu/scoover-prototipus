@@ -52,6 +52,7 @@ function scoover_sanitize_payload( array $s ) {
 		'imageTransform'    => is_array( $s['imageTransform'] ?? null ) ? $s['imageTransform'] : null,
 		'labels'            => is_array( $s['labels'] ?? null ) ? $s['labels'] : [],
 		'includeFootboard'  => ! empty( $s['includeFootboard'] ),
+		'installation'      => sanitize_text_field( $s['installation'] ?? 'none' ),
 		'unitPriceHuf'      => isset( $s['unitPriceHuf'] ) ? (float) $s['unitPriceHuf'] : null,
 		'currency'          => sanitize_text_field( $s['currency'] ?? 'HUF' ),
 		'requiresApproval'  => ! empty( $s['requiresApproval'] ),
@@ -109,6 +110,9 @@ add_action( 'woocommerce_checkout_create_order_line_item', function ( $item, $ca
 	if ( ! empty( $s['uploadedImageUrl'] ) ) $item->add_meta_data( 'Feltöltött kép', $s['uploadedImageUrl'], true );
 	if ( ! empty( $s['labels'] ) ) $item->add_meta_data( 'Feliratok', wp_json_encode( $s['labels'], JSON_UNESCAPED_UNICODE ), true );
 	$item->add_meta_data( 'Taposófelület extra', ! empty( $s['includeFootboard'] ) ? 'igen' : 'nem', true );
+	if ( ! empty( $s['installation'] ) && 'none' !== $s['installation'] ) {
+		$item->add_meta_data( 'Felrakás (személyes átvétellel)', $s['installation'], true );
+	}
 
 	// Rejtett (admin listákban nem zavaró) gépi mezők a gyártáshoz/logikához.
 	$item->add_meta_data( '_scoover_requires_approval', ! empty( $s['requiresApproval'] ) ? 'yes' : 'no', true );

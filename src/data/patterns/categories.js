@@ -61,9 +61,12 @@ export const PATTERN_CATEGORIES = [
     description: 'Geometrikus terepmintázat.', keywords: ['camo', 'terep', 'urban'],
     labelFont: FONTS.neutral,
   },
-  // --- prototípus-minták (procedurális SVG, a renderelő képességeinek demója) ---
+  // --- fejlesztői demó: procedurális SVG-minták a renderelő képességeinek
+  //     teszteléséhez (Carbon 3D, Hex-tech, Sunset fade). NEM eladható termék,
+  //     ezért `dev: true` – élesben rejtve marad, a galéria csak fejlesztői
+  //     buildben (import.meta.env.DEV) kínál rá kapcsolót. ---
   {
-    id: 'demo', line: 'print', name: 'Demó (procedurális)', available: true,
+    id: 'demo', line: 'print', name: 'Fejlesztői demó', available: true, dev: true,
     description: 'Kliens oldalon generált SVG-minták a folytonosság tesztelésére.',
     keywords: [], labelFont: FONTS.neutral,
     patternScale: { large: 1, medium: 1, small: 1 },

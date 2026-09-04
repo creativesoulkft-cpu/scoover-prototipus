@@ -93,7 +93,8 @@ curl -X POST http://localhost:8787/api/cart/add \
     "imageTransform": { "scale": 1, "rotate": 0, "dx": 0, "dy": 0 },
     "labels": [],
     "includeFootboard": true,
-    "calculatedPrice": 47800
+    "installation": "none",
+    "calculatedPrice": 66800
   }'
 ```
 
@@ -142,8 +143,9 @@ gyakorlati vázlata**, amikor eldől a végleges WooCommerce-hosting:
    töltsd ki a `WOO_*` környezeti változókat (`WOO_MODE=live`).
 2. Dolgozd ki és teszteld a fenti "Kosár-átadás a pénztárnak" pontot a
    választott megoldással.
-3. Töltsd fel a tényleges Ft-árakat `src/pricing.js`-ben (jelenleg
-   placeholder-értékek – lásd a fájl tetején lévő figyelmeztetést).
+3. Ellenőrizd az árakat `src/pricing.js`-ben (a modell × szint mátrix, a
+   taposófelület-extra és a felrakás díjai) – ez az egyetlen hely, ahol
+   árat módosítani kell, a kliens és a szerver is innen dolgozik.
 4. Cseréld a `/api/upload` helyi fájltárolását (`UPLOAD_DIR`) valódi,
    tartósan elérhető tárhelyre (objektumtároló vagy a WP média-könyvtár),
    mert egy konténer-újraindítás a helyi lemezt törölheti.

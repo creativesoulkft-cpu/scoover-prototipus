@@ -30,8 +30,14 @@ npm run build    # dist/ – statikusan hosztolható
 - saját kép feltöltése (JPG/PNG/WebP, kliens oldali kicsinyítés)
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
-- vágóvonalak ki/be, darab ki/bekapcsolása kattintással (sraffozott = fólia nélkül)
-- taposófelület (dekk állófelülete) extra ki/bekapcsolása, saját felárral
+- vágóvonalak ki/be, darab ki/bekapcsolása kattintással/koppintással (sraffozott = fólia nélkül)
+- **állandóan látható ársáv** (`PriceBar`): élőben frissülő végösszeg, kinyitható
+  bontással (alapár + taposófelület + felrakás); asztali nézetben a jobb oszlop
+  tetejére tapad, mobilon a képernyő aljára rögzül és felfelé nyílik
+- **taposófelület** (dekk állófelülete): külön, kültéri csúszásgátló anyag, ezért a
+  darablistában kiemelve ("Prémium csúszásgátló"), alapból kikapcsolva, és a
+  ki/bekapcsolása egyben a +6 900 Ft-os extra kapcsolója is
+- **felrakás** mint szolgáltatás (normál / komplex), csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
 
@@ -61,11 +67,14 @@ src/
     ModelSelector.jsx   # modellválasztó legördülő
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
-    CartPanel.jsx       # taposó-extra, élő ár-előnézet, "Kosárba teszem"
+    CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
+    PriceBar.jsx        # állandóan látható ársáv, kinyitható árbontással
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
+  hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
   utils/color.js            # világosság → felirat-szín
   utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
+  utils/format.js           # Ft-összeg egységes kiírása
   utils/cartConfig.js       # App state → kosár-híd JSON-csomag
   api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
@@ -73,6 +82,36 @@ server/                     # köztes híd szerver (Node/Express) → WooCommerc
 public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)
 ```
+
+## Árazás – hol kell átírni?
+
+**Minden ár egyetlen fájlban van: `src/pricing.js`.** Ezt importálja a kliens
+(élő ársáv) és a híd szerver (`server/`, hitelesített, szerver oldali
+újraszámolás) is, ezért egy szám átírása mindkét helyen azonnal érvényesül.
+
+```js
+MODEL_PRICES          // modellenként, szintenként (SOLID / PRINT / FULL CUSTOM)
+FOOTBOARD_EXTRA_HUF   // taposófelület extra (jelenleg 6 900 Ft)
+INSTALLATION_OPTIONS  // felrakás: normál / komplex (17 000 / 25 500 Ft)
+```
+
+**Ár módosítása:** írd át a számot a fenti tömbökben/objektumokban. Kész.
+
+**Új modell felvétele:** egy új sor a `MODEL_PRICES`-ba, ahol a kulcs a modell
+id-ja a `src/data/models/index.js` regiszterből, és mind a három szintnek van ára:
+
+```js
+'ninebot-max-g2': { name: 'Segway Ninebot Max G2', solid: 26900, print: 42900, custom: 62900 },
+```
+
+**Új szint felvétele:** egy új bejegyzés a `TIERS` tömbbe (`{ id, name, description }`),
+és minden `MODEL_PRICES`-sorba az új szint ára. A validáció, az ársáv és a
+szerver oldali ellenőrzés adatból dolgozik, ezért kódot nem kell módosítani.
+
+Megjegyzés: a `kukirin-g2-pro-max` és a `race-kit` ára már be van vezetve, de
+hozzájuk még nincs geometria a `src/data/models/` mappában, ezért a
+konfigurátorban még nem választhatók – amint elkészül a vázlatuk, egyetlen
+regiszter-sorral bekapcsolhatók.
 
 ## Fotós nézet (PhotoCanvas)
 

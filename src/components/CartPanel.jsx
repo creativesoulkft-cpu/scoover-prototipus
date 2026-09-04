@@ -1,21 +1,20 @@
 /**
- * "Kosárba teszem" panel: élő ár-előnézet (src/pricing.js, ugyanaz a modul,
- * mint a szerveren), taposófelület extra ki/bekapcsolása, kosárba helyezés
- * a köztes híd szerveren (server/) keresztül, és a hiba-/sikervisszajelzés.
+ * "Kosárba teszem" panel: a köztes híd szerveren (server/) keresztül valódi
+ * WooCommerce kosártételt hoz létre, és megjeleníti a hiba-/sikervisszajelzést.
+ *
+ * Az árbontás nem itt, hanem az állandóan látható ársávban (PriceBar) van –
+ * itt csak a fizetendő végösszeg ismétlődik meg a gomb mellett. Az összeg
+ * ugyanabból a központi modulból jön (src/pricing.js), amit a szerver is
+ * használ az ár hitelesítéséhez.
  */
 import { useState } from 'react';
 import { calculatePrice, requiresManualApproval } from '../pricing.js';
+import { formatHuf } from '../utils/format.js';
 import { buildCartConfig } from '../utils/cartConfig.js';
 import { addToCart } from '../api/cartBridge.js';
 
-const TIER_NAMES = { solid: 'SOLID', print: 'PRINT', custom: 'CUSTOM (egyedi kép)' };
-
-function formatHuf(n) {
-  return `${n.toLocaleString('hu-HU')} Ft`;
-}
-
 export default function CartPanel({
-  modelId, modelName, tier, pattern, transform, labels, includeFootboard, onIncludeFootboardChange, remoteImage,
+  modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
 }) {
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [message, setMessage] = useState(null);
@@ -25,7 +24,7 @@ export default function CartPanel({
   let price = null;
   let priceError = null;
   try {
-    price = calculatePrice({ model: modelId, tier, includeFootboard });
+    price = calculatePrice({ model: modelId, tier, includeFootboard, installation });
   } catch (e) {
     priceError = e.message;
   }
@@ -40,13 +39,15 @@ export default function CartPanel({
     setMessage(null);
     setErrors([]);
     try {
-      const config = buildCartConfig({ modelId, tier, pattern, transform, labels, includeFootboard, remoteImage });
+      const config = buildCartConfig({
+        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+      });
       const res = await addToCart(config);
       setResult(res);
       setStatus('success');
       setMessage(
         res.requiresApproval
-          ? 'Kosárba került! Az egyedi (CUSTOM) tétel fizetés után kézi jóváhagyásra kerül, mielőtt gyártásba megy.'
+          ? 'Kosárba került! Az egyedi (FULL CUSTOM) tétel fizetés után kézi jóváhagyásra kerül, mielőtt gyártásba megy.'
           : 'Kosárba került!',
       );
       if (res.checkoutUrl) {
@@ -61,15 +62,6 @@ export default function CartPanel({
 
   return (
     <div className="controls cart-panel">
-      <label className="check" title="Kültéri csúszásgátló anyagból készül, minden szinten bekapcsolható">
-        <input
-          type="checkbox"
-          checked={includeFootboard}
-          onChange={(e) => onIncludeFootboardChange(e.target.checked)}
-        />
-        Taposófelület extra (csúszásgátló)
-      </label>
-
       {tier === 'custom' && (
         <p className={`muted small${customImageError ? ' error' : ''}`}>
           {customImageUploading && 'Kép feltöltése a szerverre…'}
@@ -81,33 +73,15 @@ export default function CartPanel({
         </p>
       )}
 
-      <div className="price-breakdown">
-        <div className="price-row">
-          <span>{modelName} · {TIER_NAMES[tier]}</span>
-          <span>{price ? formatHuf(price.base) : '–'}</span>
-        </div>
-        {price?.tierSurcharge > 0 && (
-          <div className="price-row muted small">
-            <span>{tier === 'custom' ? 'PRINT + CUSTOM felár (kézi jóváhagyás)' : 'PRINT felár'}</span>
-            <span>+{formatHuf(price.tierSurcharge)}</span>
-          </div>
-        )}
-        {price?.footboardSurcharge > 0 && (
-          <div className="price-row muted small">
-            <span>Taposófelület extra</span>
-            <span>+{formatHuf(price.footboardSurcharge)}</span>
-          </div>
-        )}
-        <div className="price-row price-total">
-          <strong>Összesen</strong>
-          <strong>{price ? formatHuf(price.total) : '–'}</strong>
-        </div>
-        {priceError && <p className="error small">{priceError}</p>}
+      <div className="price-row price-total">
+        <strong>Fizetendő</strong>
+        <strong>{price ? formatHuf(price.total) : '–'}</strong>
       </div>
+      {priceError && <p className="error small">{priceError}</p>}
 
       {requiresManualApproval(tier) && (
         <p className="muted small">
-          A CUSTOM szint fizetés után kézi jóváhagyást igényel (felbontás- és jogtisztaság-ellenőrzés), mielőtt gyártásba kerül.
+          A FULL CUSTOM szint fizetés után kézi jóváhagyást igényel (felbontás- és jogtisztaság-ellenőrzés), mielőtt gyártásba kerül.
         </p>
       )}
 
