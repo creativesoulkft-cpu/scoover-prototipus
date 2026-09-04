@@ -53,6 +53,11 @@ function scoover_sanitize_payload( array $s ) {
 		'labels'            => is_array( $s['labels'] ?? null ) ? $s['labels'] : [],
 		'includeFootboard'  => ! empty( $s['includeFootboard'] ),
 		'installation'      => sanitize_text_field( $s['installation'] ?? 'none' ),
+		// null/hiányzó = teljes kit (minden darabcsoport); egyébként a
+		// ténylegesen kiválasztott (à la carte) darabcsoport-id-k listája.
+		'selectedGroupIds'  => is_array( $s['selectedGroupIds'] ?? null )
+			? array_map( 'sanitize_text_field', $s['selectedGroupIds'] )
+			: null,
 		'unitPriceHuf'      => isset( $s['unitPriceHuf'] ) ? (float) $s['unitPriceHuf'] : null,
 		'currency'          => sanitize_text_field( $s['currency'] ?? 'HUF' ),
 		'requiresApproval'  => ! empty( $s['requiresApproval'] ),
@@ -112,6 +117,9 @@ add_action( 'woocommerce_checkout_create_order_line_item', function ( $item, $ca
 	$item->add_meta_data( 'Taposófelület extra', ! empty( $s['includeFootboard'] ) ? 'igen' : 'nem', true );
 	if ( ! empty( $s['installation'] ) && 'none' !== $s['installation'] ) {
 		$item->add_meta_data( 'Felrakás (személyes átvétellel)', $s['installation'], true );
+	}
+	if ( is_array( $s['selectedGroupIds'] ?? null ) ) {
+		$item->add_meta_data( 'Darabonkénti választás (à la carte)', implode( ', ', $s['selectedGroupIds'] ), true );
 	}
 
 	// Rejtett (admin listákban nem zavaró) gépi mezők a gyártáshoz/logikához.

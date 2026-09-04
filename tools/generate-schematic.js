@@ -185,6 +185,23 @@ function buildModel(p) {
   // külön árazott extra (lásd src/pricing.js), ezért meg van jelölve
   pieces.find((piece) => piece.id === 'deck-top').footboard = true;
 
+  // darabonkénti (à la carte) árcsoport – lásd src/pricing.js PRICE_GROUPS.
+  // Ideiglenes, becsült hozzárendelés a jelenlegi sematikus darabokra; a
+  // valódi vágófájl megérkeztével csak ez a térkép bővül, a logika nem.
+  // Ahol egy csoporthoz több fizikai darab tartozik (pl. osztott
+  // kormányoszlop, dekk oldala + akkudoboz), azok ugyanazt a priceGroup
+  // id-t kapják. A `front-fender`-nek (csak a Master modellen) nincs saját
+  // sora Szilárd G2 PRINT táblázatában, ezért egyelőre árazatlan marad.
+  const priceGroupById = {
+    display: 'display', stem: 'stem', 'stem-upper': 'stem', 'stem-lower': 'stem',
+    joint: 'joint', fork: 'fork', neck: 'neck',
+    'deck-side': 'deck-side', battery: 'deck-side',
+    'rear-swingarm': 'rear-swingarm', 'rear-fender': 'rear-fender',
+  };
+  for (const piece of pieces) {
+    if (priceGroupById[piece.id]) piece.priceGroup = priceGroupById[piece.id];
+  }
+
   // --- nem fóliázott, csak kontextust adó alkatrészek ---
   const decor = [
     { type: 'line', x1: 40, y1: rearHub[1] + wheelR + 2, x2: p.viewBox.width - 40, y2: rearHub[1] + wheelR + 2, stroke: 'ground' },
@@ -293,7 +310,8 @@ for (const m of MODELS) {
  * Darab-mezők: id, name, group, explode [dx,dy], size (large|medium|small –
  * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
  * defaultLabel (ide kerül alapból a felirat), footboard (külön anyagból készülő,
- * külön árazott taposófelület), d (SVG path).
+ * külön árazott taposófelület), priceGroup (darabonkénti árcsoport id-ja,
+ * lásd src/pricing.js PRICE_GROUPS), d (SVG path).
  */
 ${hasPhoto ? `import photoView from './${m.id}.photo.js';\n\n` : ''}export default {
   id: ${JSON.stringify(m.id)},${hasPhoto ? '\n  photoView,' : ''}
@@ -315,7 +333,7 @@ ${pieces.map((pc) => `    {
       name: ${JSON.stringify(pc.name)},
       group: ${JSON.stringify(pc.group)},
       explode: ${JSON.stringify(pc.explode)},
-      size: ${JSON.stringify(pc.size)},${pc.labelAngle !== undefined ? `\n      labelAngle: ${pc.labelAngle},` : ''}${pc.defaultLabel ? '\n      defaultLabel: true,' : ''}${pc.footboard ? '\n      footboard: true,' : ''}
+      size: ${JSON.stringify(pc.size)},${pc.labelAngle !== undefined ? `\n      labelAngle: ${pc.labelAngle},` : ''}${pc.defaultLabel ? '\n      defaultLabel: true,' : ''}${pc.footboard ? '\n      footboard: true,' : ''}${pc.priceGroup ? `\n      priceGroup: ${JSON.stringify(pc.priceGroup)},` : ''}
       d: ${JSON.stringify(pc.d)},
     },`).join('\n')}
   ],

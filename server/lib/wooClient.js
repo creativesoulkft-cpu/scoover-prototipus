@@ -42,6 +42,9 @@ function buildScooverPayload(cartConfig, unitPriceHuf) {
     labels: cartConfig.labels ?? [],
     includeFootboard: Boolean(cartConfig.includeFootboard),
     installation: cartConfig.installation ?? 'none',
+    // hiányzó/undefined = teljes kit (minden darabcsoport); egyébként a
+    // ténylegesen kiválasztott (à la carte) darabcsoport-id-k listája.
+    selectedGroupIds: cartConfig.selectedGroupIds ?? null,
     unitPriceHuf,
     currency: 'HUF',
     requiresApproval: cartConfig.tier === 'custom',

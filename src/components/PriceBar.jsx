@@ -27,6 +27,7 @@ export default function PriceBar({
   modelId, modelName, tier,
   includeFootboard, onFootboardChange, hasFootboardPiece,
   installation, onInstallationChange,
+  selectedGroupIds, totalGroupCount,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -42,15 +43,16 @@ export default function PriceBar({
     );
   }
 
-  const price = calculatePrice({ model: modelId, tier, includeFootboard, installation });
+  const price = calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedGroupIds });
   const tierName = getTier(tier)?.name ?? tier;
   const installationName = INSTALLATION_OPTIONS.find((o) => o.id === installation)?.name ?? 'Nem kérem';
+  const selectedCount = selectedGroupIds?.length ?? totalGroupCount ?? 0;
 
   return (
     <div className="price-bar">
       <div className="pb-main">
         <div className="pb-total">
-          <span className="muted small">{modelName} · {tierName}</span>
+          <span className="muted small">{modelName} · {tierName}{!price.isFullKit && ` · ${selectedCount}/${totalGroupCount} darab`}</span>
           <strong className="pb-amount">{formatHuf(price.total)}</strong>
         </div>
         <button
@@ -63,9 +65,24 @@ export default function PriceBar({
         </button>
       </div>
 
+      {!price.minimumOrder.ok && (
+        <p className="error small pb-min-warning">{price.minimumOrder.message}</p>
+      )}
+
       {open && (
         <div className="pb-details">
-          <Row label={`Alapár · ${modelName} · ${tierName}`} amount={formatHuf(price.base)} />
+          <Row
+            label={price.isFullKit
+              ? `Alapár · ${modelName} · ${tierName} (teljes kit)`
+              : `Darabonkénti ár · ${modelName} · ${tierName} (${selectedCount}/${totalGroupCount} darab)`}
+            amount={formatHuf(price.base)}
+          />
+          {!price.isFullKit && (
+            <p className="muted small">
+              A darabok Darabok listájában ki/bekapcsolhatod, mely részek legyenek fóliázva – minél többet
+              választasz, annál jobb az egységár, a teljes kit áráig.
+            </p>
+          )}
 
           {hasFootboardPiece && (
             <Row

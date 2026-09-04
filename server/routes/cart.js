@@ -43,6 +43,10 @@ router.post('/api/cart/add', async (req, res) => {
     throw e;
   }
 
+  if (!price.minimumOrder.ok) {
+    return res.status(400).json({ ok: false, message: price.minimumOrder.message });
+  }
+
   // A kliens becslése (cartConfig.calculatedPrice) csak tájékoztató jellegű –
   // a ténylegesen a WooCommerce-nek küldött ár mindig a fenti, frissen
   // számolt `price.total`. Csak jelezzük, ha eltért, hogy a felület tudjon

@@ -100,6 +100,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .piece-list li.off { color: var(--muted); text-decoration: line-through; }
 .piece-list li.off .dot { background: var(--border); }
 .piece-list li .piece-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.piece-list li .piece-price { margin-left: auto; flex: none; color: var(--muted); font-size: 12px; }
+.piece-list li.off .piece-price { text-decoration: line-through; }
 /* taposófelület: más anyag (kültéri csúszásgátló), külön árazott extra */
 .piece-list li.footboard { border: 1px dashed var(--accent); background: rgba(255, 106, 26, .07); }
 .piece-list li.footboard .dot { background: var(--accent); }
@@ -172,6 +174,7 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 .pb-row.muted, .pb-row.muted .check { color: var(--muted); }
 .pb-sum { border-top: 1px solid var(--border); padding-top: 8px; font-size: 15px; }
 .pb-install-options { display: flex; flex-direction: column; gap: 4px; padding: 2px 0 4px 24px; }
+.pb-min-warning { margin: 6px 0 0; }
 
 @media (max-width: 960px) {
   .price-bar { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20;

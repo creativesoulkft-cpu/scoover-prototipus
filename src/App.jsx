@@ -23,6 +23,9 @@ import CartPanel from './components/CartPanel.jsx';
 import PriceBar from './components/PriceBar.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
 import { uploadCustomImage } from './api/cartBridge.js';
+import { logDevPriceTable } from './utils/devPriceTable.js';
+
+if (import.meta.env.DEV) logDevPriceTable();
 
 /** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
 const newLabel = (text = 'SCOOVER') => ({
@@ -94,14 +97,6 @@ export default function App() {
 
   const disabledPieces = disabledByModel[modelId] ?? new Set();
 
-  const togglePiece = useCallback((pieceId) => {
-    setDisabledByModel((prev) => {
-      const next = new Set(prev[modelId] ?? []);
-      next.has(pieceId) ? next.delete(pieceId) : next.add(pieceId);
-      return { ...prev, [modelId]: next };
-    });
-  }, [modelId]);
-
   // A taposófelület-darab ki/bekapcsolása EGYBEN a +6 900 Ft-os extra
   // kapcsolója is – egyetlen állapot, két helyről (darablista, ársáv) vezérelve.
   const footboardPieceId = model?.pieces.find((p) => p.footboard)?.id ?? null;
@@ -139,6 +134,28 @@ export default function App() {
   const activePieces = activeView === 'photo' ? model.photoView.pieces : model?.pieces ?? [];
   // Egy forrás a darabszámhoz: a fejléc és a Darabok szekció ugyanezt mutatja.
   const enabledCount = activePieces.filter((p) => !disabledPieces.has(p.id)).length;
+
+  // Egy névhez (árcsoporthoz, pl. "Dekk oldala") több fizikai darab-azonosító
+  // is tartozhat (pieces[].priceGroup) – ezek egyetlen közös be-/kikapcsoló
+  // gombként viselkednek, és egyetlen közös áruk van (lásd src/pricing.js
+  // PRICE_GROUPS). A taposófelület (footboard: true) ettől független, saját
+  // extraként kezelt darab, sosem tartozik árcsoporthoz.
+  const activeGroupIds = [...new Set(activePieces.filter((p) => p.priceGroup).map((p) => p.priceGroup))];
+  const selectedGroupIds = activeGroupIds.filter((gid) =>
+    activePieces.filter((p) => p.priceGroup === gid).every((p) => !disabledPieces.has(p.id)));
+
+  const togglePiece = useCallback((pieceId) => {
+    const piece = activePieces.find((p) => p.id === pieceId);
+    const memberIds = piece?.priceGroup
+      ? activePieces.filter((p) => p.priceGroup === piece.priceGroup).map((p) => p.id)
+      : [pieceId];
+    setDisabledByModel((prev) => {
+      const next = new Set(prev[modelId] ?? []);
+      const turningOn = next.has(pieceId);
+      for (const id of memberIds) { turningOn ? next.delete(id) : next.add(id); }
+      return { ...prev, [modelId]: next };
+    });
+  }, [modelId, activePieces]);
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
   const autoColor = labelColorFor(pattern);
   // feliratok a renderelőnek: betűtípus a kategóriából, szín az üzemmód szerint
@@ -235,6 +252,8 @@ export default function App() {
               hasFootboardPiece={Boolean(footboardPieceId)}
               installation={installation}
               onInstallationChange={setInstallation}
+              selectedGroupIds={selectedGroupIds}
+              totalGroupCount={activeGroupIds.length}
             />
           )}
 
@@ -289,6 +308,8 @@ export default function App() {
                 enabledCount={enabledCount}
                 onHover={setHoveredId}
                 onToggle={togglePiece}
+                modelId={modelId}
+                tier={tier}
               />
             </details>
           )}
@@ -306,6 +327,7 @@ export default function App() {
                 includeFootboard={includeFootboard}
                 installation={installation}
                 remoteImage={remoteImage}
+                selectedGroupIds={selectedGroupIds}
               />
             </div>
           )}

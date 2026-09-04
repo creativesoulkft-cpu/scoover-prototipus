@@ -15,6 +15,7 @@ import { addToCart } from '../api/cartBridge.js';
 
 export default function CartPanel({
   modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+  selectedGroupIds,
 }) {
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [message, setMessage] = useState(null);
@@ -24,7 +25,7 @@ export default function CartPanel({
   let price = null;
   let priceError = null;
   try {
-    price = calculatePrice({ model: modelId, tier, includeFootboard, installation });
+    price = calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedGroupIds });
   } catch (e) {
     priceError = e.message;
   }
@@ -32,7 +33,8 @@ export default function CartPanel({
   const customImageMissing = tier === 'custom' && !remoteImage?.url;
   const customImageUploading = tier === 'custom' && remoteImage?.uploading;
   const customImageError = tier === 'custom' ? remoteImage?.error : null;
-  const canSubmit = status !== 'submitting' && !customImageMissing && !customImageUploading && !priceError;
+  const belowMinimum = price ? !price.minimumOrder.ok : false;
+  const canSubmit = status !== 'submitting' && !customImageMissing && !customImageUploading && !priceError && !belowMinimum;
 
   async function handleSubmit() {
     setStatus('submitting');
@@ -40,7 +42,7 @@ export default function CartPanel({
     setErrors([]);
     try {
       const config = buildCartConfig({
-        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage, selectedGroupIds,
       });
       const res = await addToCart(config);
       setResult(res);
@@ -78,6 +80,7 @@ export default function CartPanel({
         <strong>{price ? formatHuf(price.total) : '–'}</strong>
       </div>
       {priceError && <p className="error small">{priceError}</p>}
+      {belowMinimum && <p className="error small">{price.minimumOrder.message}</p>}
 
       {requiresManualApproval(tier) && (
         <p className="muted small">

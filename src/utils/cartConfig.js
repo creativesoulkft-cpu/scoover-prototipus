@@ -15,12 +15,14 @@ import { calculatePrice } from '../pricing.js';
  * @param {boolean} p.includeFootboard - taposófelület extra (a deck-top darab állapota)
  * @param {'none'|'normal'|'complex'} p.installation - felrakás mint szolgáltatás
  * @param {{url:string, width:number, height:number}|null} p.remoteImage - a szerverre már feltöltött CUSTOM kép
+ * @param {string[]} [p.selectedGroupIds] - bekapcsolt darabár-csoportok; hiányzó/teljes esetén a teljes kit ára számít
  * @returns {object} a kosárnak küldendő konfiguráció, calculatedPrice-szal együtt
  */
 export function buildCartConfig({
-  modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+  modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage, selectedGroupIds,
 }) {
   const config = { model: modelId, tier };
+  if (selectedGroupIds) config.selectedGroupIds = selectedGroupIds;
 
   if (tier === 'print') {
     config.category = pattern?.category ?? null;

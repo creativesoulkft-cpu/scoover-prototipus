@@ -8,7 +8,9 @@
  *
  * Darab-mezők: id, name, group, explode [dx,dy], size (large|medium|small –
  * a csempézett minta léptékéhez), labelAngle (felirat forgatása, opcionális),
- * defaultLabel (ide kerül alapból a felirat), d (SVG path).
+ * defaultLabel (ide kerül alapból a felirat), footboard (külön anyagból készülő,
+ * külön árazott taposófelület), priceGroup (darabonkénti árcsoport id-ja,
+ * lásd src/pricing.js PRICE_GROUPS), d (SVG path).
  */
 import photoView from './kukirin-g2.photo.js';
 
@@ -45,6 +47,7 @@ export default {
       group: "front",
       explode: [26.8,-48],
       size: "medium",
+      priceGroup: "display",
       d: "M 669 33 L 785 33 L 781 55 L 673 55 Z",
     },
     {
@@ -54,6 +57,7 @@ export default {
       explode: [42.3,-35.1],
       size: "large",
       labelAngle: -98.9,
+      priceGroup: "stem",
       d: "M 801.6 424.6 L 741.8 44.7 L 712.2 49.3 L 771.9 429.2 Z",
     },
     {
@@ -63,6 +67,7 @@ export default {
       explode: [54.7,5.8],
       size: "medium",
       labelAngle: -98.9,
+      priceGroup: "joint",
       d: "M 746 446 L 812 446 L 814 513 L 744 513 Z",
     },
     {
@@ -71,6 +76,7 @@ export default {
       group: "front",
       explode: [39.8,37.9],
       size: "large",
+      priceGroup: "fork",
       d: "M 679 662 L 722 674 L 772 690 L 814 701 L 830 705 L 844 709 L 847 719 L 830 725 L 772 727 L 722 725 L 687 715 L 677 692 Z",
     },
     {
@@ -79,6 +85,7 @@ export default {
       group: "deck",
       explode: [47.5,27.8],
       size: "large",
+      priceGroup: "neck",
       d: "M 820 515 L 757 515 L 757 518 L 750 523 L 745 522 L 746 515 L 737 515 L 736 536 L 733 540 L 733 544 L 695 588 L 664 647 L 692 689 L 744 677 L 745 673 L 741 671 L 740 663 L 744 660 L 744 652 L 749 646 L 746 636 L 753 627 L 758 625 L 822 525 Z",
     },
     {
@@ -98,6 +105,7 @@ export default {
       explode: [4.4,54.8],
       size: "large",
       defaultLabel: true,
+      priceGroup: "deck-side",
       d: "M 356 636 L 678 636 L 672 687 L 362 687 Z",
     },
     {
@@ -106,6 +114,9 @@ export default {
       group: "deck",
       explode: [3.7,54.9],
       size: "medium",
+      /** Ideiglenesen a "Dekk oldala" árcsoportba sorolva (a dekk alsó
+       *  fóliázott felülete) – a valódi vágófájl megérkeztével pontosítható. */
+      priceGroup: "deck-side",
       d: "M 374 690 L 660 690 L 648 709 L 386 709 Z",
     },
     {
@@ -114,6 +125,7 @@ export default {
       group: "rear",
       explode: [-40.6,37.1],
       size: "large",
+      priceGroup: "rear-swingarm",
       d: "M 358 644 L 358 687 L 174 730 A 30 30 0 1 1 174 674 Z",
     },
     {
@@ -122,6 +134,7 @@ export default {
       group: "rear",
       explode: [-49.1,24.8],
       size: "large",
+      priceGroup: "rear-fender",
       d: "M 67 604 L 122 596 L 185 593 L 227 609 L 240 632 L 234 649 L 132 650 L 72 645 Z",
     },
   ],
