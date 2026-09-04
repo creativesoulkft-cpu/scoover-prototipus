@@ -40,6 +40,12 @@ button.link:hover { text-decoration: underline; }
 .hover-label { padding: 6px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border);
   min-width: 220px; text-align: center; font-size: 13px; }
 
+.share-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.share-panel .btn-primary { flex: 1 1 240px; }
+.share-quick-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-quick-row .btn { font-size: 13px; }
+@media (max-width: 960px) { .share-panel { flex-direction: column; align-items: stretch; } }
+
 /* Mobilon a vászon a tetejére "tapad" görgetéskor, hogy a csúszkák (Méret,
    Eltolás, Forgatás) és a feliratkártyák állítása közben is látszódjon a
    hatás – enélkül a vászon a képernyő tetején kívülre görgött ki. A vászon

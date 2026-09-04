@@ -40,6 +40,11 @@ npm run build    # dist/ – statikusan hosztolható
 - **felrakás** mint szolgáltatás (normál / komplex), csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
+- **"Mentsd le a tervedet!"**: a látható konfiguráció (minta/saját kép, felirat,
+  darabválasztás) éles, vízjelezett PNG-ként letölthető (modell, szint, ár a
+  képen), plusz Web Share API gyorsgombok (WhatsApp, Instagram) mobilon –
+  lásd `src/utils/exportImage.js`. Kliens oldali, szerver oldali mentés nincs;
+  a fiókos mentés terve `src/components/ShareExportPanel.jsx` végén, kommentben.
 
 ## Mappastruktúra
 
@@ -69,6 +74,7 @@ src/
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
     CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
     PriceBar.jsx        # állandóan látható ársáv, kinyitható árbontással
+    ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
   hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
@@ -76,6 +82,7 @@ src/
   utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
   utils/format.js           # Ft-összeg egységes kiírása
   utils/cartConfig.js       # App state → kosár-híd JSON-csomag
+  utils/exportImage.js      # SVG → vízjelezett, megosztható PNG (natív szerializálás + Canvas)
   api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
 server/                     # köztes híd szerver (Node/Express) → WooCommerce Store API; lásd server/README.md

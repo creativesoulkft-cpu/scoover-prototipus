@@ -6,7 +6,7 @@
  * Az adat (modellek, minták, kategóriák) a src/data mappában él; a komponensek
  * csak megjelenítenek.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_MODEL_ID } from './data/models/index.js';
 import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from './data/patterns/index.js';
 import { useScooterModel } from './hooks/useScooterModel.js';
@@ -21,9 +21,12 @@ import LabelControls from './components/LabelControls.jsx';
 import PieceList from './components/PieceList.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import PriceBar from './components/PriceBar.jsx';
+import ShareExportPanel from './components/ShareExportPanel.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
 import { uploadCustomImage } from './api/cartBridge.js';
 import { logDevPriceTable } from './utils/devPriceTable.js';
+import { calculatePrice, getTier, hasPrice } from './pricing.js';
+import { formatHuf } from './utils/format.js';
 
 if (import.meta.env.DEV) logDevPriceTable();
 
@@ -53,6 +56,8 @@ export default function App() {
   const [view, setView] = useState('schematic');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
   const [disabledByModel, setDisabledByModel] = useState({});
+  /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
+  const canvasWrapRef = useRef(null);
 
   const { model, loading, error } = useScooterModel(modelId);
   const isTouch = useIsTouch();
@@ -166,6 +171,12 @@ export default function App() {
   }));
   const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
+  // Az export-kártyához (ShareExportPanel) ugyanazzal a központi modullal
+  // számolt ár – nem duplikáljuk az árazási logikát.
+  const exportPrice = model && hasPrice(modelId)
+    ? calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedGroupIds })
+    : null;
+
   return (
     <div className="app">
       <header className="topbar">
@@ -193,14 +204,31 @@ export default function App() {
                     className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
                 </div>
               )}
-              {activeView === 'photo' ? (
-                <PhotoCanvas
-                  view={model.photoView}
-                  modelName={model.name}
+              <div ref={canvasWrapRef}>
+                {activeView === 'photo' ? (
+                  <PhotoCanvas
+                    view={model.photoView}
+                    modelName={model.name}
+                    pattern={pattern}
+                    transform={transform}
+                    patternScale={patternScale}
+                    sizeAwareTiling={sizeAwareTiling}
+                    showCutLines={showCutLines}
+                    disabledPieces={disabledPieces}
+                    hoveredId={hoveredId}
+                    onHover={setHoveredId}
+                    onTogglePiece={togglePiece}
+                    labels={renderLabels}
+                    onLabelDrag={updateLabel}
+                  />
+                ) : (
+                <ScooterCanvas
+                  model={model}
                   pattern={pattern}
                   transform={transform}
                   patternScale={patternScale}
                   sizeAwareTiling={sizeAwareTiling}
+                  exploded={exploded}
                   showCutLines={showCutLines}
                   disabledPieces={disabledPieces}
                   hoveredId={hoveredId}
@@ -209,23 +237,8 @@ export default function App() {
                   labels={renderLabels}
                   onLabelDrag={updateLabel}
                 />
-              ) : (
-              <ScooterCanvas
-                model={model}
-                pattern={pattern}
-                transform={transform}
-                patternScale={patternScale}
-                sizeAwareTiling={sizeAwareTiling}
-                exploded={exploded}
-                showCutLines={showCutLines}
-                disabledPieces={disabledPieces}
-                hoveredId={hoveredId}
-                onHover={setHoveredId}
-                onTogglePiece={togglePiece}
-                labels={renderLabels}
-                onLabelDrag={updateLabel}
-              />
-              )}
+                )}
+              </div>
               <div className="stage-footer">
                 <div>
                   <strong>{model.name}</strong>
@@ -237,6 +250,16 @@ export default function App() {
                     : isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
                 </div>
               </div>
+
+              {exportPrice && (
+                <ShareExportPanel
+                  canvasWrapRef={canvasWrapRef}
+                  modelName={model.name}
+                  tierLabel={getTier(tier)?.name ?? tier}
+                  patternName={pattern?.name}
+                  priceText={formatHuf(exportPrice.total)}
+                />
+              )}
             </>
           )}
         </section>
