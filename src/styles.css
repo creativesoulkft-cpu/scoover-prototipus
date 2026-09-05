@@ -111,6 +111,14 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 .footboard-editor-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; }
 .footboard-price { color: var(--accent); font-size: 17px; }
+/* "Felülnézet — így fogod látni, amikor ráállsz." – a szerkesztő nézetének magyarázata */
+.footboard-viewnote { margin: 0; color: var(--text); font-weight: 600; }
+/* a felülnézeti dekk fekvő, ~4:1 – ne nyúljon a magasságával teljes vászonra */
+.footboard-canvas { max-height: 46vh; }
+
+/* fő darab (a feltöltött kép lényege ide kerül) */
+.focus-piece { margin-top: 10px; }
+.focus-piece select { width: 100%; }
 
 .share-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .share-panel .btn-primary { flex: 1 1 240px; }

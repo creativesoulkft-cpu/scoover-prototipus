@@ -12,6 +12,7 @@ import { calculatePrice, requiresManualApproval } from '../pricing.js';
 import { formatHuf } from '../utils/format.js';
 import { buildCartConfig } from '../utils/cartConfig.js';
 import { addToCart } from '../api/cartBridge.js';
+import { trackAddToCart } from '../utils/analytics.js';
 
 export default function CartPanel({
   modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
@@ -48,6 +49,10 @@ export default function CartPanel({
         footboardDesign,
       });
       const res = await addToCart(config);
+      trackAddToCart({
+        modelName, tier, total: price?.total,
+        isFullKit: price?.isFullKit, pieceCount: selectedGroupIds?.length,
+      });
       setResult(res);
       setStatus('success');
       setMessage(

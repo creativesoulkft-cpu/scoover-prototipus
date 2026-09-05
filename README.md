@@ -86,7 +86,7 @@ src/
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
     QuickNav.jsx        # rögzített gyorsnavigáció (Minta/Feliratok/Darabok/Taposó), aktív-szekció kiemeléssel
-    FootboardEditor.jsx # taposófelület önálló, nagyított tervező nézete
+    FootboardEditor.jsx # taposófelület önálló, FELÜLNÉZETI tervezője (valós arány)
     CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
     PriceBar.jsx        # állandóan látható ársáv, árbontással és megtakarítás-sávval
     ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
@@ -101,6 +101,9 @@ src/
   utils/labelStyle.js       # egy felirat tényleges betűtípusa/színe (kategória vagy felülbírálás)
   utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
   utils/format.js           # Ft-összeg egységes kiírása
+  data/footboardFlat.js     # a taposó síkba terített kontúrja (közelítés – cserélendő a valódi vágókontúrra)
+  utils/pathBox.js          # SVG path befoglaló doboza DOM nélkül (a "fő darab" középpontjához)
+  utils/analytics.js        # GA4-kompatibilis eseménymérés (egyelőre csak konzolra logol)
   utils/cartConfig.js       # App state → kosár-híd JSON-csomag (a taposó saját tervét is idesorolja)
   utils/exportImage.js      # SVG → vízjelezett, megosztható PNG (natív szerializálás + Canvas)
   api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
@@ -230,6 +233,43 @@ A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből
    raszteres marad. Így a felirat minden felbontáson éles.
 5. **Rendelési JSON** kiegészül: `labels: [{ pieceId, text, fontId, color, transform }]` – a webshop
    ebből mutat előnézetet és ebből készül a gyártási fájl.
+
+## Mérés (GA4) – egy sorral élesíthető
+
+A `src/utils/analytics.js` GA4-kompatibilis egyedi eseményeket készít elő.
+**Amíg nincs bekötve a GA4, minden esemény csak a konzolra megy** – így
+fejlesztés közben látszik, mi mérődne, de adat sehova nem megy.
+
+**Élesítés:** tedd be a gtag.js kódot az `index.html`-be, majd az
+`analytics.js` tetején állítsd az `ENABLED`-et `true`-ra. Ennyi.
+
+| esemény | mikor | fő paraméterek |
+|---|---|---|
+| `configurator_opened` | betöltéskor, egyszer | `model` |
+| `tier_selected` | szintváltás (a mintaválasztásból adódik) | `tier` |
+| `pattern_selected` | konkrét minta választása | `pattern_name`, `pattern_id` |
+| `image_uploaded` | saját kép feltöltése | `image_width/height`, `focus_piece` |
+| `footboard_toggled` | taposó-extra be/ki (ársávból ÉS darablistából is) | `included` |
+| `design_saved` | terv mentése képként | `model`, `tier`, `method` |
+| `add_to_cart` | sikeres kosárba helyezés | `value`, `currency`, `full_kit`, `piece_count` |
+
+Minden esemény kap egy `seconds_since_open` paramétert (a konfigurátor
+megnyitása óta eltelt idő) – ebből látszik, mennyi idő után jut el a vevő a
+kosárig, és hol akad el. Személyes adat egyetlen eseménybe sem kerül.
+
+## Fő darab – hova essen a feltöltött kép lényege
+
+A saját kép nem egyben kerül a rollerre: a darabok külön vágott fóliák, a kép
+szétoszlik köztük, és a lényege (pl. egy kutya feje) alapból a vászon közepére,
+gyakran két darab közé esne. Az EGYEDI fülön ezért választható **fő darab**
+(alapból `deck-side`, a legnagyobb és legjobban látható felület).
+
+A megoldás nem a `transform` állapotba ír, hanem **rendereléskor** ad hozzá egy
+eltolást (`imageFocus` az `App.jsx`-ben): így a felhasználói csúszkák tartománya
+és az "Alaphelyzet" gomb változatlan marad, a finomhangolás pedig a fókuszhoz
+képest értendő. Az eltolást a darab (illetve az árcsoport összes darabjának)
+befoglaló dobozából számoljuk – `utils/pathBox.js`, DOM nélkül, mert a darab
+akkor is lehet fókuszban, amikor épp nincs kirajzolva.
 
 ## Scoover elemkészlet – jövőbeli funkció (VÁZLAT, nincs megvalósítva)
 

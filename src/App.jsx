@@ -27,6 +27,11 @@ import FootboardEditor from './components/FootboardEditor.jsx';
 import FullscreenPreview from './components/FullscreenPreview.jsx';
 import SplitHandle, { nearestSnap } from './components/SplitHandle.jsx';
 import { useMediaQuery, NARROW_QUERY } from './hooks/useMediaQuery.js';
+import { piecesCenter } from './utils/pathBox.js';
+import {
+  trackConfiguratorOpened, trackTierSelected, trackPatternSelected,
+  trackImageUploaded, trackFootboardToggled,
+} from './utils/analytics.js';
 import FontColorPicker from './components/FontColorPicker.jsx';
 import Slider from './components/Slider.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
@@ -44,6 +49,13 @@ const newLabel = (text = 'SCOOVER') => ({
   enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0,
   fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
 });
+
+/**
+ * Saját kép feltöltésénél a kép a roller darabjaira oszlik szét. A "fő darab"
+ * az, amelyikre a kép LÉNYEGE (középpontja) essen – alapból a dekk oldala, mert
+ * az a legnagyobb és a legjobban látható felület.
+ */
+const DEFAULT_FOCUS_PIECE_ID = 'deck-side';
 
 /** Osztott nézet: a kép magassága %-ban csúszka-húzás közben (a legnagyobb előnézet). */
 const SLIDER_PREVIEW_PCT = 70;
@@ -84,6 +96,8 @@ export default function App() {
   const [fullscreen, setFullscreen] = useState(false);
   /** Az érintős "koppints egy darabra" súgó csak egyszer, az elején kell – utána ⓘ ikon. */
   const [hintDismissed, setHintDismissed] = useState(false);
+  /** Saját képnél: melyik darabra essen a kép lényege (lásd DEFAULT_FOCUS_PIECE_ID). */
+  const [focusPieceId, setFocusPieceId] = useState(DEFAULT_FOCUS_PIECE_ID);
 
   // --- Osztott nézet (keskeny képernyő): fent a rögzített előnézet, lent a
   // saját görgetésű vezérlőpanel. A kettő aránya húzható, és csúszka-húzás
@@ -135,6 +149,11 @@ export default function App() {
     const t = setTimeout(() => setHintDismissed(true), 8000);
     return () => clearTimeout(t);
   }, []);
+
+  // --- Mérés (lásd utils/analytics.js – egyelőre csak konzolra logol) ---
+  useEffect(() => { trackConfiguratorOpened({ model: DEFAULT_MODEL_ID }); }, []);
+  // A szint- és mintaváltás mérése lentebb, a `tier` kiszámítása után van
+  // (a `tier` a mintából adódik, és const – itt még a temporal dead zone-ban lenne).
 
   /**
    * Csúszka megfogásakor a panel automatikusan lecsúszik, hogy a lehető
@@ -223,6 +242,7 @@ export default function App() {
   const includeFootboard = Boolean(footboardPieceId) && !disabledPieces.has(footboardPieceId);
   const setFootboard = useCallback((on) => {
     if (!footboardPieceId) return;
+    trackFootboardToggled(on);
     setDisabledByModel((prev) => {
       const next = new Set(prev[modelId] ?? []);
       if (on) next.delete(footboardPieceId); else next.add(footboardPieceId);
@@ -262,6 +282,9 @@ export default function App() {
     setUploadedPattern(img);
     setPatternId(UPLOAD_PATTERN_ID);
     setTransform(DEFAULT_TRANSFORM);
+    // a kép lényege alapból a legnagyobb, legjobban látható darabra kerül
+    setFocusPieceId(DEFAULT_FOCUS_PIECE_ID);
+    trackImageUploaded({ width: img?.originalWidth, height: img?.originalHeight, focusPieceId: DEFAULT_FOCUS_PIECE_ID });
     setRemoteImage({ url: null, width: null, height: null, uploading: true, error: null });
     uploadCustomImage(file)
       .then(({ url, width, height }) => setRemoteImage({ url, width, height, uploading: false, error: null }))
@@ -275,6 +298,19 @@ export default function App() {
   // A tier a kiválasztott mintából/feltöltésből adódik: feltöltött kép = custom,
   // egyébként a minta termékvonala (solid | print).
   const tier = patternId === UPLOAD_PATTERN_ID ? 'custom' : (pattern?.line ?? 'solid');
+
+  // A szint és a minta is a kiválasztásból ADÓDIK, ezért a derived értéket
+  // figyeljük; az első renderelés nem "váltás", azt kihagyjuk.
+  const firstTier = useRef(true);
+  useEffect(() => {
+    if (firstTier.current) { firstTier.current = false; return; }
+    trackTierSelected(tier);
+  }, [tier]);
+  const firstPattern = useRef(true);
+  useEffect(() => {
+    if (firstPattern.current) { firstPattern.current = false; return; }
+    if (pattern && patternId !== UPLOAD_PATTERN_ID) trackPatternSelected(pattern);
+  }, [patternId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasPhoto = Boolean(model?.photoView);
   const activeView = view === 'photo' && hasPhoto ? 'photo' : 'schematic';
@@ -299,6 +335,9 @@ export default function App() {
       : [pieceId];
     // Az első koppintás után a súgó feleslegessé válik (lásd stage-footer).
     setHintDismissed(true);
+    // A taposó a DARABLISTÁBÓL is kapcsolható (nem csak az ársáv jelölőnégyzetével),
+    // ezért a mérés itt is kell – különben a kikapcsolások fele nem látszana.
+    if (piece?.footboard) trackFootboardToggled(disabledPieces.has(pieceId));
     // Ha teljes kitet vásárolna, de kikapcsol egy árazott darabot, attól kezdve
     // darabonkénti (à la carte) módban van – a választó ezt tükrözi.
     if (piece?.priceGroup && pieceMode === 'kit' && !disabledPieces.has(pieceId)) setPieceMode('pieces');
@@ -321,6 +360,69 @@ export default function App() {
     });
   }, [modelId, activePieces]);
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
+
+  /**
+   * "Fő darab": a feltöltött kép a darabok között oszlik szét, és a lényege
+   * (a kép közepe) alapból a vászon közepére esne – ami gyakran két darab közé
+   * vagy egy alig látható részre kerül. Ez az eltolás viszi a kép közepét a
+   * kiválasztott darab közepére. NEM a transform state-be írjuk, hanem
+   * rendereléskor adjuk hozzá: így a felhasználói csúszkák tartománya és az
+   * "Alaphelyzet" gomb változatlan marad, a finomhangolás pedig a fókuszhoz
+   * képest értendő.
+   */
+  const imageFocus = useMemo(() => {
+    const vb = activeView === 'photo' ? model?.photoView?.viewBox : model?.viewBox;
+    if (tier !== 'custom' || !focusPieceId || !vb) return { fx: 0, fy: 0 };
+    const target = activePieces.find((p) => p.id === focusPieceId);
+    if (!target) return { fx: 0, fy: 0 };
+    const members = target.priceGroup
+      ? activePieces.filter((p) => p.priceGroup === target.priceGroup)
+      : [target];
+    const c = piecesCenter(members);
+    if (!c) return { fx: 0, fy: 0 };
+    // hova kerül a kép közepe a jelenlegi nagyítás/forgatás után (lásd PatternDefs
+    // transformString: translate → rotate(a vászon közepe körül) → scale)
+    const s = transform.scale ?? 1;
+    const r = ((transform.rotate ?? 0) * Math.PI) / 180;
+    const hx = vb.width / 2, hy = vb.height / 2;
+    const px = s * hx, py = s * hy;
+    const rx = hx + (px - hx) * Math.cos(r) - (py - hy) * Math.sin(r);
+    const ry = hy + (px - hx) * Math.sin(r) + (py - hy) * Math.cos(r);
+    return { fx: Math.round(c.cx - rx), fy: Math.round(c.cy - ry) };
+  }, [tier, focusPieceId, model, activeView, activePieces, transform.scale, transform.rotate]);
+
+  /**
+   * A fő darab választható értékei: árcsoportonként EGY sor (a több fizikai
+   * darabból álló csoportok – pl. "Dekk oldala" – egyként viselkednek), a
+   * taposófelület nélkül (annak saját, önálló szerkesztője van).
+   */
+  const focusPieceOptions = useMemo(() => {
+    const seen = new Set();
+    return activePieces
+      .filter((p) => !p.footboard)
+      .filter((p) => {
+        const key = p.priceGroup ?? p.id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((p) => ({ id: p.id, name: p.name }));
+  }, [activePieces]);
+
+  // Modell- vagy nézetváltás után a korábbi fő darab már nem biztos, hogy létezik
+  // (más a darablista) – ilyenkor a dekk oldalára, végszükségben az elsőre esünk vissza.
+  useEffect(() => {
+    if (!focusPieceOptions.length) return;
+    if (focusPieceOptions.some((p) => p.id === focusPieceId)) return;
+    const fallback = focusPieceOptions.find((p) => p.id === DEFAULT_FOCUS_PIECE_ID) ?? focusPieceOptions[0];
+    setFocusPieceId(fallback.id);
+  }, [focusPieceOptions, focusPieceId]);
+
+  /** A ténylegesen kirajzolt (és a rendelésbe kerülő) minta-transzformáció. */
+  const renderTransform = imageFocus.fx || imageFocus.fy
+    ? { ...transform, dx: transform.dx + imageFocus.fx, dy: transform.dy + imageFocus.fy }
+    : transform;
+
   const autoColor = labelColorFor(pattern);
   // feliratok a renderelőnek: betűtípus a kategóriából VAGY a felirat saját
   // felülbírálásából, szín az üzemmód szerint (lásd utils/labelStyle.js)
@@ -344,7 +446,7 @@ export default function App() {
       view={model.photoView}
       modelName={model.name}
       pattern={pattern}
-      transform={transform}
+      transform={renderTransform}
       patternScale={patternScale}
       sizeAwareTiling={sizeAwareTiling}
       showCutLines={showCutLines}
@@ -359,7 +461,7 @@ export default function App() {
     <ScooterCanvas
       model={model}
       pattern={pattern}
-      transform={transform}
+      transform={renderTransform}
       patternScale={patternScale}
       sizeAwareTiling={sizeAwareTiling}
       exploded={exploded}
@@ -476,6 +578,7 @@ export default function App() {
 
               {footboardEditMode ? (
                 <FootboardEditor
+                  model={model}
                   piece={footboardPiece}
                   pattern={footboardPattern}
                   transform={footboardTransform}
@@ -602,6 +705,9 @@ export default function App() {
                   onUpload={handleUpload}
                   onClear={handleClearUpload}
                   uploadStatus={remoteImage}
+                  focusPieceId={focusPieceId}
+                  onFocusPieceChange={setFocusPieceId}
+                  focusPieceOptions={focusPieceOptions}
                 />
               </details>
 
@@ -667,7 +773,7 @@ export default function App() {
                 modelName={model.name}
                 tier={tier}
                 pattern={pattern}
-                transform={transform}
+                transform={renderTransform}
                 labels={labels}
                 includeFootboard={includeFootboard}
                 installation={installation}

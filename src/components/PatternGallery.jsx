@@ -45,7 +45,10 @@ function Chip({ active, onClick, children, swatch }) {
   );
 }
 
-export default function PatternGallery({ selectedId, onSelect, uploadedPattern, onUpload, onClear, uploadStatus }) {
+export default function PatternGallery({
+  selectedId, onSelect, uploadedPattern, onUpload, onClear, uploadStatus,
+  focusPieceId, onFocusPieceChange, focusPieceOptions,
+}) {
   const [line, setLine] = useState(selectedId === UPLOAD_PATTERN_ID ? 'custom' : 'print');
   const [density, setDensity] = useState('all');
   const [colorway, setColorway] = useState('all');
@@ -82,9 +85,26 @@ export default function PatternGallery({ selectedId, onSelect, uploadedPattern, 
 
       {line === 'custom' ? (
         <section className="pattern-group">
+          {/* A kép nem egyben kerül a rollerre: a darabok külön vágott fóliák, a
+              kép szétoszlik köztük. Ezért kell megmondani, hova essen a lényege. */}
+          <p className="note-info small">
+            A képed a roller darabjaira oszlik szét. Válaszd ki, melyik darabra kerüljön a kép lényege.
+          </p>
           <UploadPanel onUpload={onUpload} onClear={onClear} uploadedPattern={uploadedPattern} />
           {uploadStatus?.uploading && <p className="muted small">Kép feltöltése a szerverre…</p>}
           {uploadStatus?.error && <p className="error small">{uploadStatus.error}</p>}
+
+          {focusPieceOptions?.length > 0 && (
+            <label className="field focus-piece">
+              <span>Fő darab – ide kerül a kép lényege</span>
+              <select value={focusPieceId ?? ''} onChange={(e) => onFocusPieceChange?.(e.target.value)}>
+                {focusPieceOptions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
+
           {uploadedPattern && (
             <div className="pattern-grid">
               <PatternCard pattern={{ ...uploadedPattern, id: UPLOAD_PATTERN_ID }}

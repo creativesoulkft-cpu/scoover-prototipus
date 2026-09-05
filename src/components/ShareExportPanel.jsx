@@ -17,6 +17,7 @@
  */
 import { useState } from 'react';
 import { renderConfigToPng, downloadBlob, blobToFile } from '../utils/exportImage.js';
+import { trackDesignSaved } from '../utils/analytics.js';
 
 function slugify(text) {
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-');
@@ -40,6 +41,7 @@ export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, 
     try {
       const { blob, filename } = await buildFile();
       downloadBlob(blob, filename);
+      trackDesignSaved({ modelName, tier: tierLabel, method: 'download' });
       setStatus('idle');
     } catch (e) {
       setStatus('error');
@@ -63,6 +65,7 @@ export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, 
         // nincs natív megosztás (pl. desktop) – essünk vissza letöltésre
         downloadBlob(blob, filename);
       }
+      trackDesignSaved({ modelName, tier: tierLabel, method: 'share' });
       setStatus('idle');
     } catch (e) {
       // a felhasználó megszakíthatja a natív megosztást (AbortError) – ez nem hiba
