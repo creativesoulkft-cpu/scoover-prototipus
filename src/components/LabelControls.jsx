@@ -44,6 +44,12 @@ function LabelCard({ label, index, pieces, categoryFont, autoColor, onChange, on
 export default function LabelControls({ labels, onChange, onAdd, onRemove, pieces, font, autoColor }) {
   return (
     <div className="controls">
+      {/* Fontos árazási tisztázás: a felirat NEM tesz EGYEDI (saját képes) kategóriába –
+          minden szinten jár, felár nélkül. Lásd data/patterns/categories.js szintleírásait. */}
+      <p className="note-info small">
+        A feliratok testreszabása <strong>minden szinten ingyenes</strong> (SOLID és PRINT is) – nem számít
+        egyedi képfeltöltésnek, és nem drágítja a fóliát.
+      </p>
       <p className="muted small">
         Alapértelmezett betűtípus: <strong style={{ fontFamily: font.family, fontWeight: font.weight }}>{font.family}</strong>
         {' '}(a minta kategóriája adja, feliratonként felülírható) · a feliratot a vásznon egérrel is húzhatod

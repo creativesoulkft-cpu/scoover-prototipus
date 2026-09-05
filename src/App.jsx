@@ -24,6 +24,7 @@ import PriceBar from './components/PriceBar.jsx';
 import ShareExportPanel from './components/ShareExportPanel.jsx';
 import QuickNav from './components/QuickNav.jsx';
 import FootboardEditor from './components/FootboardEditor.jsx';
+import FullscreenPreview from './components/FullscreenPreview.jsx';
 import FontColorPicker from './components/FontColorPicker.jsx';
 import Slider from './components/Slider.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
@@ -69,6 +70,13 @@ export default function App() {
   const [view, setView] = useState('photo');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
   const [disabledByModel, setDisabledByModel] = useState({});
+  /** 'kit' | 'pieces' – teljes szettet vagy darabonként válogat a vevő (Darabok szekció
+   *  tetején lévő választó). Alapértelmezés a teljes kit: az a legjobb ár/érték. */
+  const [pieceMode, setPieceMode] = useState('kit');
+  /** Teljes képernyős, csippentéssel nagyítható előnézet (FullscreenPreview.jsx). */
+  const [fullscreen, setFullscreen] = useState(false);
+  /** Az érintős "koppints egy darabra" súgó csak egyszer, az elején kell – utána ⓘ ikon. */
+  const [hintDismissed, setHintDismissed] = useState(false);
   /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
   const canvasWrapRef = useRef(null);
 
@@ -101,6 +109,13 @@ export default function App() {
       l.pieceId && model.pieces.some((p) => p.id === l.pieceId) ? l : { ...l, pieceId: def.id, dx: 0, dy: 0 },
     ));
   }, [model]);
+
+  // A "koppints egy darabra" súgó csak az első pillanatokban kell: magától
+  // eltűnik, utána egy ⓘ ikon hozza vissza (lásd stage-footer).
+  useEffect(() => {
+    const t = setTimeout(() => setHintDismissed(true), 8000);
+    return () => clearTimeout(t);
+  }, []);
 
   const updateLabel = useCallback((id, patch) =>
     setLabels((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l))), []);
@@ -205,10 +220,26 @@ export default function App() {
     const memberIds = piece?.priceGroup
       ? activePieces.filter((p) => p.priceGroup === piece.priceGroup).map((p) => p.id)
       : [pieceId];
+    // Az első koppintás után a súgó feleslegessé válik (lásd stage-footer).
+    setHintDismissed(true);
+    // Ha teljes kitet vásárolna, de kikapcsol egy árazott darabot, attól kezdve
+    // darabonkénti (à la carte) módban van – a választó ezt tükrözi.
+    if (piece?.priceGroup && pieceMode === 'kit' && !disabledPieces.has(pieceId)) setPieceMode('pieces');
     setDisabledByModel((prev) => {
       const next = new Set(prev[modelId] ?? []);
       const turningOn = next.has(pieceId);
       for (const id of memberIds) { turningOn ? next.delete(id) : next.add(id); }
+      return { ...prev, [modelId]: next };
+    });
+  }, [modelId, activePieces, pieceMode, disabledPieces]);
+
+  /** A Darabok szekció "Teljes kit" gombja: minden ÁRAZOTT darab vissza be.
+   *  A taposófelület külön extra (más anyag, külön ár) – azt nem érinti. */
+  const selectFullKit = useCallback(() => {
+    setPieceMode('kit');
+    setDisabledByModel((prev) => {
+      const next = new Set(prev[modelId] ?? []);
+      for (const p of activePieces) { if (p.priceGroup) next.delete(p.id); }
       return { ...prev, [modelId]: next };
     });
   }, [modelId, activePieces]);
@@ -229,6 +260,42 @@ export default function App() {
     ? calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedGroupIds })
     : null;
 
+  // Ugyanaz a vászon kell a beágyazott előnézetbe ÉS a teljes képernyős
+  // nagyításba (FullscreenPreview) – egy helyen írjuk le, két helyen rendereljük.
+  const canvasEl = !model ? null : activeView === 'photo' ? (
+    <PhotoCanvas
+      view={model.photoView}
+      modelName={model.name}
+      pattern={pattern}
+      transform={transform}
+      patternScale={patternScale}
+      sizeAwareTiling={sizeAwareTiling}
+      showCutLines={showCutLines}
+      disabledPieces={disabledPieces}
+      hoveredId={hoveredId}
+      onHover={setHoveredId}
+      onTogglePiece={togglePiece}
+      labels={renderLabels}
+      onLabelDrag={updateLabel}
+    />
+  ) : (
+    <ScooterCanvas
+      model={model}
+      pattern={pattern}
+      transform={transform}
+      patternScale={patternScale}
+      sizeAwareTiling={sizeAwareTiling}
+      exploded={exploded}
+      showCutLines={showCutLines}
+      disabledPieces={disabledPieces}
+      hoveredId={hoveredId}
+      onHover={setHoveredId}
+      onTogglePiece={togglePiece}
+      labels={renderLabels}
+      onLabelDrag={updateLabel}
+    />
+  );
+
   return (
     <div className="app">
       <header className="topbar">
@@ -248,11 +315,39 @@ export default function App() {
           {!model && loading && <p className="muted">Modell betöltése…</p>}
           {model && (
             <>
-              <QuickNav
-                footboardActive={footboardEditMode}
-                onToggleFootboard={() => setFootboardEditMode((v) => !v)}
-                footboardAvailable={Boolean(footboardPieceId)}
-              />
+              {/* Mobilon CSAK ez a blokk (gyorsnavigáció + vászon) tapad a képernyő
+                  tetejére – a képaláírás, a súgó és a mentés-gomb a tartalommal
+                  görög, így a rögzített fejrész alacsony marad, és a rollerre
+                  jut a hely (korábban a fejrész a képernyő ~60%-át elvitte). */}
+              <div className="stage-sticky">
+                <QuickNav
+                  footboardActive={footboardEditMode}
+                  onToggleFootboard={() => setFootboardEditMode((v) => !v)}
+                  footboardAvailable={Boolean(footboardPieceId)}
+                />
+
+                {!footboardEditMode && (
+                  <div className="canvas-wrap" ref={canvasWrapRef}>
+                    {canvasEl}
+                    {hasPhoto && (
+                      <div className="view-switch" role="tablist">
+                        <button type="button" role="tab" aria-selected={activeView === 'schematic'}
+                          className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
+                        <button type="button" role="tab" aria-selected={activeView === 'photo'}
+                          className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
+                      </div>
+                    )}
+                    <button type="button" className="canvas-icon-btn" title="Teljes képernyős előnézet"
+                      aria-label="Teljes képernyős előnézet" onClick={() => setFullscreen(true)}>⛶</button>
+                  </div>
+                )}
+              </div>
+
+              {fullscreen && (
+                <FullscreenPreview title={`${model.name} · ${pattern?.name ?? 'nincs minta'}`} onClose={() => setFullscreen(false)}>
+                  {canvasEl}
+                </FullscreenPreview>
+              )}
 
               {footboardEditMode ? (
                 <FootboardEditor
@@ -268,59 +363,21 @@ export default function App() {
                 />
               ) : (
                 <>
-                  {hasPhoto && (
-                    <div className="view-switch" role="tablist">
-                      <button type="button" role="tab" aria-selected={activeView === 'schematic'}
-                        className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
-                      <button type="button" role="tab" aria-selected={activeView === 'photo'}
-                        className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
-                    </div>
-                  )}
-                  <div ref={canvasWrapRef}>
-                    {activeView === 'photo' ? (
-                      <PhotoCanvas
-                        view={model.photoView}
-                        modelName={model.name}
-                        pattern={pattern}
-                        transform={transform}
-                        patternScale={patternScale}
-                        sizeAwareTiling={sizeAwareTiling}
-                        showCutLines={showCutLines}
-                        disabledPieces={disabledPieces}
-                        hoveredId={hoveredId}
-                        onHover={setHoveredId}
-                        onTogglePiece={togglePiece}
-                        labels={renderLabels}
-                        onLabelDrag={updateLabel}
-                      />
-                    ) : (
-                    <ScooterCanvas
-                      model={model}
-                      pattern={pattern}
-                      transform={transform}
-                      patternScale={patternScale}
-                      sizeAwareTiling={sizeAwareTiling}
-                      exploded={exploded}
-                      showCutLines={showCutLines}
-                      disabledPieces={disabledPieces}
-                      hoveredId={hoveredId}
-                      onHover={setHoveredId}
-                      onTogglePiece={togglePiece}
-                      labels={renderLabels}
-                      onLabelDrag={updateLabel}
-                    />
-                    )}
-                  </div>
                   <div className="stage-footer">
                     <div>
                       <strong>{model.name}</strong>
                       <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
                     </div>
-                    <div className="hover-label">
-                      {hoveredPiece
-                        ? hoveredPiece.name
-                        : isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
-                    </div>
+                    {hoveredPiece ? (
+                      <div className="hover-label">{hoveredPiece.name}</div>
+                    ) : isTouch && hintDismissed ? (
+                      <button type="button" className="hint-icon" title="Hogyan használd?"
+                        aria-label="Súgó" onClick={() => setHintDismissed(false)}>ⓘ</button>
+                    ) : (
+                      <div className="hover-label">
+                        {isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
+                      </div>
+                    )}
                   </div>
 
                   {exportPrice && (
@@ -459,6 +516,9 @@ export default function App() {
                     tier={tier}
                     selectedGroupIds={selectedGroupIds}
                     totalGroupCount={activeGroupIds.length}
+                    mode={pieceMode}
+                    onSelectFullKit={selectFullKit}
+                    onSelectPieces={() => setPieceMode('pieces')}
                   />
                 </details>
               )}

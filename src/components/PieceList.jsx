@@ -41,7 +41,7 @@ function buildRows(pieces) {
 
 export default function PieceList({
   pieces, hoveredId, disabledPieces, enabledCount, onHover, onToggle, modelId, tier,
-  selectedGroupIds, totalGroupCount,
+  selectedGroupIds, totalGroupCount, mode = 'pieces', onSelectFullKit, onSelectPieces,
 }) {
   const isTouch = useIsTouch();
   const rows = buildRows(pieces);
@@ -55,15 +55,35 @@ export default function PieceList({
   // érnél el, ha a maradék darabokat is bepipálnád.
   const showDiscountInfo = hasPrice(modelId) && totalGroupCount > 0 && selectedGroupIds;
   const info = showDiscountInfo ? getPartialPricingInfo(modelId, tier, selectedGroupIds) : null;
+  /** Mennyivel jár jobban a teljes kittel, mint ha ugyanezt darabonként venné. */
+  const kitSavings = info?.kitPrice != null ? info.listSum - info.kitPrice : 0;
+  const kitActive = mode === 'kit';
 
   return (
     <div className="piece-list" onMouseLeave={() => onHover(null)}>
+      {info && (
+        <div className="kit-choice" role="group" aria-label="Teljes kit vagy egyes darabok">
+          <button type="button" className={`kit-btn${kitActive ? ' active' : ''}`}
+            aria-pressed={kitActive} onClick={onSelectFullKit}>
+            <strong>Teljes kit</strong>
+            <span className="kit-price">{formatHuf(info.kitPrice)}</span>
+            {kitSavings > 0 && <span className="kit-savings">−{formatHuf(kitSavings)}</span>}
+          </button>
+          <button type="button" className={`kit-btn${!kitActive ? ' active' : ''}`}
+            aria-pressed={!kitActive} onClick={onSelectPieces}>
+            <strong>Egyes darabok</strong>
+            <span className="kit-price">{kitActive ? 'te válogatsz' : formatHuf(info.total)}</span>
+            <span className="muted small">darabáras</span>
+          </button>
+        </div>
+      )}
+
       <p className="muted small">
         {active} / {pieces.length} darab fóliázva ·{' '}
         {isTouch ? 'koppints egy sorra a ki-/bekapcsoláshoz' : 'kattints egy sorra a ki/bekapcsoláshoz'}
       </p>
 
-      {info && info.count > 0 && (
+      {info && info.count > 0 && !kitActive && (
         <div className="piece-discount-info">
           <div className="pdi-row">
             <span>{info.isFullKit ? 'Teljes kit ára' : `Darabár most (${info.count}/${info.totalGroups} darab)`}</span>
@@ -89,7 +109,9 @@ export default function PieceList({
             {rows.filter((r) => r.group === g).map((r) => {
               const off = r.memberIds.every((id) => disabledPieces?.has(id));
               const hovered = r.memberIds.includes(hoveredId);
-              const price = r.priceGroup ? getGroupPrice(modelId, tier, r.priceGroup) : null;
+              // Teljes kit módban a darab-listaár félrevezető lenne (nem azt fizeti),
+              // ezért csak darabonkénti módban mutatjuk.
+              const price = r.priceGroup && !kitActive ? getGroupPrice(modelId, tier, r.priceGroup) : null;
               return (
                 <li key={r.key}
                   className={`${hovered ? 'hovered' : ''}${off ? ' off' : ''}${r.footboard ? ' footboard' : ''}`}

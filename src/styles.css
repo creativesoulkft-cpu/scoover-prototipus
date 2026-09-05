@@ -32,12 +32,25 @@ button.link:hover { text-decoration: underline; }
 @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
 
 .stage { padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.stage-sticky { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.canvas-wrap { position: relative; min-width: 0; }
 .scooter-canvas { width: 100%; height: auto; max-height: 72vh;
   background: radial-gradient(ellipse at 50% 60%, #1c2027 0%, var(--bg) 70%);
   border: 1px solid var(--border); border-radius: 14px; }
 .stage-footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
 .hover-label { padding: 6px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border);
   min-width: 220px; text-align: center; font-size: 13px; }
+/* az érintős súgó összecsukott állapota – egy koppintással újra előhozható */
+.hint-icon { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+  font: inherit; font-size: 16px; line-height: 1; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
+.hint-icon:hover { border-color: var(--accent); color: var(--text); }
+
+/* Vászon-overlay gombok: nem foglalnak külön sort, a képen ülnek. */
+.canvas-icon-btn { position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: rgba(23, 26, 31, .82); border: 1px solid var(--border); color: var(--text);
+  font-size: 16px; line-height: 1; width: 36px; height: 36px; border-radius: 9px; cursor: pointer;
+  backdrop-filter: blur(3px); }
+.canvas-icon-btn:hover { border-color: var(--accent); }
 
 /* --- gyorsnavigáció: mindig látható marad görgetés közben --- */
 .quick-nav { position: sticky; top: 0; z-index: 7; display: flex; gap: 6px; flex-wrap: wrap;
@@ -74,22 +87,51 @@ button.link:hover { text-decoration: underline; }
 
 /* Mobilon a vászon a tetejére "tapad" görgetéskor, hogy a csúszkák (Méret,
    Eltolás, Forgatás) és a feliratkártyák állítása közben is látszódjon a
-   hatás – enélkül a vászon a képernyő tetején kívülre görgött ki. A vászon
-   itt a magassága (nem a szélessége) alapján méretezett és középre igazított,
-   hogy jóval kisebb, "előnézet-csík" méretű maradjon, és maradjon hely a
-   csúszkáknak alatta. */
+   hatás – enélkül a vászon a képernyő tetején kívülre görgött ki.
+   FONTOS: csak a .stage-sticky (gyorsnavigáció + vászon) tapad, a képaláírás,
+   a súgó és a "Mentsd le a tervedet" gomb a tartalommal görög. Korábban az
+   egész .stage volt sticky, és a fejrész a képernyő ~60%-át elvitte, amitől a
+   roller akkorára zsugorodott, hogy a grafika nem látszott rajta. Az így
+   felszabaduló helyen a vászon 26vh helyett 42vh (~1,6×). */
 @media (max-width: 960px) {
-  .stage {
+  /* Kompakt fejléc: az alcím és a hosszú cím mobilon két-négy sorba tördelődött,
+     és ~150px-et vett el a rollertől. */
+  .topbar { padding: 8px 16px; gap: 10px; }
+  .topbar .brand p { display: none; }
+  .topbar h1 { font-size: 15px; }
+  .brand-logo { height: 26px; }
+  .topbar select { min-width: 0; }
+  .topbar .field { flex: 1; min-width: 0; }
+
+  .stage { padding: 10px 16px 8px; gap: 8px; }
+  /* a képaláírás és a súgó külön sorban, teljes szélességben – így nem szorul
+     4 sorba tördelt, kilógó buborékba */
+  .stage-footer { flex-direction: column; align-items: stretch; gap: 6px; }
+  .hover-label { width: 100%; }
+  .hint-icon { align-self: flex-start; }
+
+  /* tömörebb ársáv-bontás, hogy a nyitott bontás se vegyen el sok helyet */
+  .pb-details { gap: 4px; }
+  .pb-row { font-size: 12.5px; }
+  .pb-details > p.muted.small { display: none; }
+  .stage-sticky {
     position: sticky;
     top: 0;
     z-index: 5;
     background: var(--bg);
-    padding: 10px 16px 8px;
+    padding-bottom: 8px;
     gap: 8px;
     box-shadow: 0 10px 18px -10px rgba(0, 0, 0, .6);
   }
-  .scooter-canvas { width: auto; height: 26vh; max-width: 100%; max-height: none; display: block; margin: 0 auto; }
+  .scooter-canvas { width: auto; height: 42vh; max-width: 100%; max-height: none; display: block; margin: 0 auto; }
   .stage-footer { font-size: 12px; }
+  /* FIGYELEM: itt sosem `flex: 1` – a stage-footer mobilon oszlop-irányú, ott a
+     flex-basis MAGASSÁGKÉNT értelmeződne (lásd a share-panel korábbi hibáját). */
+  .hover-label { min-width: 0; }
+  /* a nézetváltó a sarokba húzódik és zsugorodik, hogy ne takarja a rollert */
+  .view-switch { left: 10px; transform: none; padding: 3px; }
+  .view-switch button { padding: 5px 10px; font-size: 12px; }
+  .canvas-icon-btn { width: 32px; height: 32px; font-size: 14px; }
 }
 
 .sidebar { border-left: 1px solid var(--border); background: var(--panel); padding: 8px 16px 24px; overflow-y: auto; max-height: calc(100vh - 61px); }
@@ -141,6 +183,19 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   font-weight: 700; letter-spacing: .04em; border-radius: 999px; padding: 1px 7px; text-decoration: none; }
 .piece-list li.off .premium-pill { background: var(--border); color: var(--muted); }
 
+/* --- kit / darab választó: két nagy, egyértelmű gomb a Darabok tetején --- */
+.kit-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.kit-btn { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left;
+  background: var(--panel-2); border: 2px solid var(--border); border-radius: 10px; padding: 10px;
+  color: var(--muted); font: inherit; cursor: pointer; }
+.kit-btn:hover { border-color: var(--muted); }
+.kit-btn strong { color: var(--text); font-size: 13px; }
+.kit-btn.active { border-color: var(--accent); background: rgba(255, 106, 26, .1); color: var(--text); }
+.kit-btn .kit-price { font-size: 15px; font-weight: 700; color: var(--text); }
+.kit-btn .kit-savings { font-size: 11px; font-weight: 700; color: var(--accent-2);
+  background: rgba(25, 230, 193, .12); border-radius: 999px; padding: 1px 7px; margin-top: 2px; }
+@media (max-width: 380px) { .kit-choice { grid-template-columns: 1fr; } }
+
 /* --- darabonkénti kedvezmény átláthatósága: minél többet választasz, annál
    olcsóbb – ez itt, a döntés helyén (Darabok lista) élőben látszik, nem csak
    az ársáv elrejtett bontásában --- */
@@ -186,8 +241,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   padding: 8px 10px; font: inherit; }
 .field select { min-width: 0; }
 
-/* --- nézetváltó (vázlat / fotó) --- */
-.view-switch { display: inline-flex; gap: 4px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 4px; align-self: center; }
+/* --- nézetváltó (vázlat / fotó): a képen ül overlay-ként, nem foglal külön
+   sort. Asztalin a kép tetején középen, mobilon a bal felső sarokban, kisebben. --- */
+.view-switch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 2;
+  display: inline-flex; gap: 4px; background: rgba(23, 26, 31, .82); border: 1px solid var(--border);
+  border-radius: 10px; padding: 4px; backdrop-filter: blur(3px); }
 .view-switch button { background: none; border: none; color: var(--muted); font: inherit; font-weight: 600; padding: 6px 14px; border-radius: 7px; cursor: pointer; }
 .view-switch button.active { background: var(--panel-2); color: var(--text); }
 .scooter-canvas.photo { background: #f2f2f2; }
@@ -213,6 +271,26 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 .pb-amount { font-size: 22px; line-height: 1.1; }
 .pb-discount-badge { margin-left: 8px; font-size: 12px; font-weight: 700; color: var(--accent-2);
   background: rgba(25, 230, 193, .12); border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+
+/* Darab ki-/bekapcsolásakor felugró változás-jelzés: a vevő rögtön érzi a
+   döntése hatását ("−4 200 Ft"), nem kell az összeget fejben követnie. */
+.pb-delta { margin-left: 8px; font-size: 13px; font-weight: 700; vertical-align: middle;
+  display: inline-block; animation: pb-delta-pop 1.6s ease forwards; }
+.pb-delta.down { color: var(--accent-2); }
+.pb-delta.up { color: var(--accent); }
+@keyframes pb-delta-pop {
+  0%   { opacity: 0; transform: translateY(6px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* Állandó, jól látható sáv: mennyivel jár jobban a teljes kittel. */
+.pb-savings { margin-top: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12.5px;
+  background: rgba(255, 106, 26, .12); border: 1px solid rgba(255, 106, 26, .35); color: var(--text); }
+.pb-savings.earned { background: rgba(25, 230, 193, .12); border-color: rgba(25, 230, 193, .35); }
+.pb-savings strong { color: var(--accent); }
+.pb-savings.earned strong { color: var(--accent-2); }
 .pb-toggle { background: none; border: 1px solid var(--border); color: var(--text); font: inherit; font-size: 12px;
   padding: 6px 10px; border-radius: 999px; cursor: pointer; flex: none; }
 .pb-toggle:hover { border-color: var(--accent); }
@@ -235,9 +313,33 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
   .pb-details { margin-top: 0; margin-bottom: 10px; border-top: none;
     border-bottom: 1px solid var(--border); padding-top: 0; padding-bottom: 10px;
     max-height: 46vh; overflow-y: auto; }
-  /* hogy a lap alja ne csússzon a rögzített ársáv alá */
-  .sidebar { padding-bottom: 104px; }
+  /* Hogy a lap alja SOHA ne csússzon a rögzített ársáv alá: az ársáv a saját,
+     mért magasságát írja a --price-bar-h változóba (PriceBar.jsx), ehhez jön
+     +24px levegő. A fix 104px azért volt hibás, mert az ársáv magassága a
+     nyitott bontástól és a figyelmeztetésektől függően változik. */
+  .sidebar { padding-bottom: calc(var(--price-bar-h, 104px) + 24px); }
 }
+
+/* kiemelt tájékoztató doboz (pl. "a felirat minden szinten ingyenes") */
+.note-info { margin: 0 0 8px; padding: 8px 10px; border-radius: 8px; color: var(--text);
+  background: rgba(25, 230, 193, .1); border: 1px solid rgba(25, 230, 193, .3); }
+
+/* --- teljes képernyős előnézet (FullscreenPreview.jsx) --- */
+.fs-preview { position: fixed; inset: 0; z-index: 60; background: var(--bg);
+  display: flex; flex-direction: column; }
+.fs-stage { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: grab; }
+.fs-stage:active { cursor: grabbing; }
+.fs-content { position: absolute; inset: 0; transform-origin: 0 0;
+  display: flex; align-items: center; justify-content: center; }
+.fs-content svg { width: 100%; height: 100%; max-height: none; border: none; border-radius: 0;
+  /* a nagyítás/mozgatás gesztusé – ne kapcsoljon ki darabot véletlen koppintás */
+  pointer-events: none; }
+.fs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--panel); border-top: 1px solid var(--border); }
+.fs-actions { display: flex; gap: 8px; }
+.fs-actions .btn { padding: 8px 12px; }
+.fs-actions .btn-close { background: var(--accent); border-color: var(--accent); color: #16110b; }
 
 .dev-toggle { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); color: var(--muted); font-size: 12px; }
 

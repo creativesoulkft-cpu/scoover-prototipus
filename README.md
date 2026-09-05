@@ -196,6 +196,43 @@ A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből
 5. **Rendelési JSON** kiegészül: `labels: [{ pieceId, text, fontId, color, transform }]` – a webshop
    ebből mutat előnézetet és ebből készül a gyártási fájl.
 
+## Scoover elemkészlet – jövőbeli funkció (VÁZLAT, nincs megvalósítva)
+
+Előre megrajzolt, vektoros grafikai elemek, amiket a vevő szabadon a rollerre
+húzhat és pozicionálhat – ugyanúgy, ahogy ma a feliratokat. A motocross-
+iparágban ez bevett gyakorlat (szponzorlogó-készletek a matricaszettekben), és
+**nulla extra gyártási költséggel** jelentősen növeli a testreszabás élményét:
+ugyanaz a nyomtatott ív készül, csak más vektorok kerülnek rá.
+
+**Elemtípusok:** villámok, ék/csík-sávok, rajtszám-keretek (a szám a vevőé),
+feliratblokkok/„szalagok", sebesség-vonalak, sarok- és élkiemelők, egyszerű
+geometrikus alakzatok (háromszög-raszter, hexagon-mező).
+
+**Adatmodell** – a meglévő felirat-logika mintájára (`src/App.jsx` `labels[]`,
+`utils/labelStyle.js`, `LabelLayer.jsx`):
+
+```js
+// src/data/decals/index.js (tervezett)
+{ id: 'bolt-01', name: 'Villám', category: 'motocross',
+  d: 'M … Z',                 // egyetlen, normalizált path 0..100 koordinátatérben
+  aspect: 0.42,               // szélesség/magasság arány a helyes skálázáshoz
+  colorable: true }           // egyszínű elem, a vevő színt választhat hozzá
+// az App állapotában:  decals: [{ id, pieceId, x, y, scale, rotate, color, flipX }]
+```
+
+**Renderelés:** új `DecalLayer.jsx` a `LabelLayer` mellé, ugyanabba a darab-
+`clipPath`-ba – így az elem sem lóghat le a darabról, és a szétnyitott/fotós
+nézetben is együtt mozog vele. A húzás ugyanaz a pointer-event logika, ami a
+feliratnál már működik.
+
+**Gyártás felé:** a rendelési JSON `decals[]` tömbbel bővül (ugyanaz a szerver
+oldali sanitizálás, mint a feliratoknál – lásd `server/wordpress/…php`), a
+nyomtatási fájlban pedig a felirat-réteggel egy rétegre kerül, vektorosan.
+
+**Üzleti megjegyzés:** az elemkészlet a PRINT szint része maradjon, felár nélkül
+(mint a feliratok) – nem tesz EGYEDI kategóriába, mert nem vevői képfeltöltés.
+Az EGYEDI szint továbbra is kizárólag a saját kép feltöltése.
+
 ## Út a végleges rendszerhez (vázlat)
 
 1. **Valódi vágófájlok importálása.** Az Illustrator/CAD SVG-exportból egy
