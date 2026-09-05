@@ -20,6 +20,7 @@ import {
   INSTALLATION_OPTIONS, INSTALLATION_NOTE, getPartialPricingInfo,
 } from '../pricing.js';
 import { formatHuf } from '../utils/format.js';
+import { useMediaQuery, NARROW_QUERY } from '../hooks/useMediaQuery.js';
 
 function Row({ label, amount, muted, children }) {
   return (
@@ -72,7 +73,12 @@ export default function PriceBar({
   installation, onInstallationChange,
   selectedGroupIds, totalGroupCount,
 }) {
-  const [open, setOpen] = useState(true);
+  /* A bontás asztalin alapból NYITVA – ott van hely rá. Az osztott (keskeny)
+     nézetben viszont a képernyő alján rögzített sáv a vezérlőpanel felét is
+     elvenné a nyitott bontással, ezért ott csukva indul; egy koppintás
+     kinyitja. */
+  const isNarrow = useMediaQuery(NARROW_QUERY);
+  const [open, setOpen] = useState(!isNarrow);
   const barRef = useRef(null);
   useReportHeight(barRef);
 

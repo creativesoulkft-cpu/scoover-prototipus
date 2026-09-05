@@ -88,11 +88,14 @@ src/
     QuickNav.jsx        # rögzített gyorsnavigáció (Minta/Feliratok/Darabok/Taposó), aktív-szekció kiemeléssel
     FootboardEditor.jsx # taposófelület önálló, nagyított tervező nézete
     CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
-    PriceBar.jsx        # állandóan látható ársáv, kinyitható árbontással
+    PriceBar.jsx        # állandóan látható ársáv, árbontással és megtakarítás-sávval
     ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
+    FullscreenPreview.jsx # teljes képernyős, csippentéssel nagyítható előnézet
+    SplitHandle.jsx     # húzható elválasztó a kép/vezérlők felosztásához (osztott nézet)
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
   hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
   hooks/useScrollSpy.js     # QuickNav aktív-szekció figyelése görgetés közben
+  hooks/useMediaQuery.js    # keskeny (osztott) elrendezés? – DOM-átrendezéshez, nem csak stílushoz
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
   utils/color.js            # világosság → felirat-szín
   utils/labelStyle.js       # egy felirat tényleges betűtípusa/színe (kategória vagy felülbírálás)
@@ -137,6 +140,38 @@ Megjegyzés: a `kukirin-g2-pro-max` és a `race-kit` ára már be van vezetve, d
 hozzájuk még nincs geometria a `src/data/models/` mappában, ezért a
 konfigurátorban még nem választhatók – amint elkészül a vázlatuk, egyetlen
 regiszter-sorral bekapcsolhatók.
+
+## Elrendezés: osztott nézet (a kép mindig látszik)
+
+Az oldal **soha nem görög egyben** – az `.app` egy képernyőnyi magas
+(`100dvh`, `-webkit-fill-available` és `100vh` fallbackkel), és két, egymástól
+független régió van:
+
+| | asztali (≥1024px) | keskeny (<1024px) |
+|---|---|---|
+| előnézet | bal oszlop, rögzített | felső sáv, rögzített (alapból 45%) |
+| vezérlők | jobb oszlop, saját görgetéssel | alsó sáv, saját görgetéssel |
+| gyorsnavigáció | a kép fölött | az alsó panel tetején tapadva |
+| ársáv | a panel tetején, bontás nyitva | a képernyő alján rögzítve, bontás csukva |
+
+Így a roller akkor is látszik, amikor a vevő lent a csúszkákat állítja – korábban
+emiatt kellett le-fel görgetni minden apró módosítás ellenőrzéséhez.
+
+**A felosztás** a `.layout` `--split-h` változója (a kép magassága %-ban), amit
+az `App.jsx` `splitPct` állapota ad. Háromféleképpen változik:
+
+1. a `SplitHandle` húzásával (elengedéskor a legközelebbi rögzülő pozícióra ugrik:
+   70% / 45% / 25% – lásd `SPLIT_SNAPS`), vagy fel/le nyíllal, dupla kattintásra alap;
+2. **automatikusan csúszka-húzáskor**: az `App.jsx` globális `pointerdown`-figyelője
+   bármely `input[type=range]`-re 70%-ra nagyítja az előnézetet, elengedés után
+   1 mp-cel visszaáll. Ezért nem kell egyetlen csúszkának sem külön prop – a
+   minta-illesztés, a feliratkártyák és a taposó-szerkesztő is ugyanígy működik;
+3. a képernyő átméretezésekor (media query váltás).
+
+**Amit a DOM-ban is át kell rendezni:** a képaláírás/súgó és a "Mentsd le a
+tervedet" gomb asztalin a kép alatt, keskeny nézetben a görgethető panel tetején
+van. Ezt CSS-sel nem lehet megoldani, ezért a `useMediaQuery` hook adja meg
+Reactnek, hova rendereljen (`belowCanvasEl` az `App.jsx`-ben).
 
 ## Fotós nézet (PhotoCanvas)
 

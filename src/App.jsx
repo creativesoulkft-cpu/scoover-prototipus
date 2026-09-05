@@ -25,6 +25,8 @@ import ShareExportPanel from './components/ShareExportPanel.jsx';
 import QuickNav from './components/QuickNav.jsx';
 import FootboardEditor from './components/FootboardEditor.jsx';
 import FullscreenPreview from './components/FullscreenPreview.jsx';
+import SplitHandle, { nearestSnap } from './components/SplitHandle.jsx';
+import { useMediaQuery, NARROW_QUERY } from './hooks/useMediaQuery.js';
 import FontColorPicker from './components/FontColorPicker.jsx';
 import Slider from './components/Slider.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
@@ -42,6 +44,11 @@ const newLabel = (text = 'SCOOVER') => ({
   enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0,
   fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
 });
+
+/** Osztott nézet: a kép magassága %-ban csúszka-húzás közben (a legnagyobb előnézet). */
+const SLIDER_PREVIEW_PCT = 70;
+/** Ennyi idő után áll vissza a felosztás, miután a felhasználó elengedte a csúszkát. */
+const SLIDER_RESTORE_MS = 1000;
 
 /** A taposófelület saját, egyetlen felirata – nincs pieceId-je, mindig a taposóra kerül. */
 const newFootboardLabel = () => ({
@@ -77,6 +84,18 @@ export default function App() {
   const [fullscreen, setFullscreen] = useState(false);
   /** Az érintős "koppints egy darabra" súgó csak egyszer, az elején kell – utána ⓘ ikon. */
   const [hintDismissed, setHintDismissed] = useState(false);
+
+  // --- Osztott nézet (keskeny képernyő): fent a rögzített előnézet, lent a
+  // saját görgetésű vezérlőpanel. A kettő aránya húzható, és csúszka-húzás
+  // közben automatikusan a legnagyobb előnézetre vált. ---
+  const isNarrow = useMediaQuery(NARROW_QUERY);
+  /** A KÉP magassága a nézet százalékában (a maradék a vezérlőpanelé). */
+  const [splitPct, setSplitPct] = useState(45);
+  const [splitDragging, setSplitDragging] = useState(false);
+  const layoutRef = useRef(null);
+  /** Csúszka-húzás előtti felosztás, hogy elengedés után vissza tudjunk állni. */
+  const splitBeforeSlider = useRef(null);
+  const restoreTimer = useRef(null);
   /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
   const canvasWrapRef = useRef(null);
 
@@ -115,6 +134,52 @@ export default function App() {
   useEffect(() => {
     const t = setTimeout(() => setHintDismissed(true), 8000);
     return () => clearTimeout(t);
+  }, []);
+
+  /**
+   * Csúszka megfogásakor a panel automatikusan lecsúszik, hogy a lehető
+   * legtöbb látszódjon az előnézetből, elengedés után 1 mp-cel visszaáll.
+   * Globális pointer-figyelő, mert csúszka a minta-illesztésben, a
+   * feliratkártyákon és a taposó-szerkesztőben is van – így egyikbe sem kell
+   * külön propot fűzni (bármely natív `input[type=range]`-re működik).
+   */
+  useEffect(() => {
+    if (!isNarrow) return undefined;
+    const isSlider = (t) => t instanceof HTMLInputElement && t.type === 'range';
+
+    const onDown = (e) => {
+      if (!isSlider(e.target)) return;
+      clearTimeout(restoreTimer.current);
+      setSplitPct((cur) => {
+        if (splitBeforeSlider.current === null) splitBeforeSlider.current = cur;
+        return SLIDER_PREVIEW_PCT;
+      });
+    };
+    const onUp = () => {
+      if (splitBeforeSlider.current === null) return;
+      clearTimeout(restoreTimer.current);
+      restoreTimer.current = setTimeout(() => {
+        if (splitBeforeSlider.current !== null) setSplitPct(splitBeforeSlider.current);
+        splitBeforeSlider.current = null;
+      }, SLIDER_RESTORE_MS);
+    };
+
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('pointerup', onUp);
+      document.removeEventListener('pointercancel', onUp);
+      clearTimeout(restoreTimer.current);
+    };
+  }, [isNarrow]);
+
+  /** Kézi átméretezés: felülírja a csúszka-automatika függőben lévő visszaállítását. */
+  const setSplitManually = useCallback((pct) => {
+    clearTimeout(restoreTimer.current);
+    splitBeforeSlider.current = null;
+    setSplitPct(pct);
   }, []);
 
   const updateLabel = useCallback((id, patch) =>
@@ -296,6 +361,39 @@ export default function App() {
     />
   );
 
+  // A kép alatti sáv (képaláírás/súgó + mentés-gomb): asztalin a kép alá, keskeny
+  // nézetben a görgethető panel tetejére kerül – ezért külön változó.
+  const belowCanvasEl = !model ? null : (
+    <>
+      <div className="stage-footer">
+        <div>
+          <strong>{model.name}</strong>
+          <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
+        </div>
+        {hoveredPiece ? (
+          <div className="hover-label">{hoveredPiece.name}</div>
+        ) : isTouch && hintDismissed ? (
+          <button type="button" className="hint-icon" title="Hogyan használd?"
+            aria-label="Súgó" onClick={() => setHintDismissed(false)}>ⓘ</button>
+        ) : (
+          <div className="hover-label">
+            {isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
+          </div>
+        )}
+      </div>
+
+      {exportPrice && (
+        <ShareExportPanel
+          canvasWrapRef={canvasWrapRef}
+          modelName={model.name}
+          tierLabel={getTier(tier)?.name ?? tier}
+          patternName={pattern?.name}
+          priceText={formatHuf(exportPrice.total)}
+        />
+      )}
+    </>
+  );
+
   return (
     <div className="app">
       <header className="topbar">
@@ -309,39 +407,44 @@ export default function App() {
         <ModelSelector value={modelId} onChange={setModelId} />
       </header>
 
-      <main className="layout">
+      {/* Osztott nézet: a --split-h a felső (kép) régió magassága. Keskeny
+          képernyőn a két régió külön görög – a kép SOSEM fut ki a képernyőről,
+          miközben a vevő lent a csúszkákat állítja. */}
+      <main
+        className={`layout${splitDragging ? ' dragging' : ''}`}
+        ref={layoutRef}
+        style={{ '--split-h': `${splitPct}%` }}
+      >
         <section className="stage">
           {error && <p className="error">Hiba a modell betöltésekor: {error.message}</p>}
           {!model && loading && <p className="muted">Modell betöltése…</p>}
           {model && (
             <>
-              {/* Mobilon CSAK ez a blokk (gyorsnavigáció + vászon) tapad a képernyő
-                  tetejére – a képaláírás, a súgó és a mentés-gomb a tartalommal
-                  görög, így a rögzített fejrész alacsony marad, és a rollerre
-                  jut a hely (korábban a fejrész a képernyő ~60%-át elvitte). */}
-              <div className="stage-sticky">
+              {/* Asztalin a gyorsnavigáció a kép fölött van; keskeny nézetben a
+                  görgethető panel tetejére kerül (lásd lentebb, a sidebarban). */}
+              {!isNarrow && (
                 <QuickNav
                   footboardActive={footboardEditMode}
                   onToggleFootboard={() => setFootboardEditMode((v) => !v)}
                   footboardAvailable={Boolean(footboardPieceId)}
                 />
+              )}
 
-                {!footboardEditMode && (
-                  <div className="canvas-wrap" ref={canvasWrapRef}>
-                    {canvasEl}
-                    {hasPhoto && (
-                      <div className="view-switch" role="tablist">
-                        <button type="button" role="tab" aria-selected={activeView === 'schematic'}
-                          className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
-                        <button type="button" role="tab" aria-selected={activeView === 'photo'}
-                          className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
-                      </div>
-                    )}
-                    <button type="button" className="canvas-icon-btn" title="Teljes képernyős előnézet"
-                      aria-label="Teljes képernyős előnézet" onClick={() => setFullscreen(true)}>⛶</button>
-                  </div>
-                )}
-              </div>
+              {!footboardEditMode && (
+                <div className="canvas-wrap" ref={canvasWrapRef}>
+                  {canvasEl}
+                  {hasPhoto && (
+                    <div className="view-switch" role="tablist">
+                      <button type="button" role="tab" aria-selected={activeView === 'schematic'}
+                        className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
+                      <button type="button" role="tab" aria-selected={activeView === 'photo'}
+                        className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
+                    </div>
+                  )}
+                  <button type="button" className="canvas-icon-btn" title="Teljes képernyős előnézet"
+                    aria-label="Teljes képernyős előnézet" onClick={() => setFullscreen(true)}>⛶</button>
+                </div>
+              )}
 
               {fullscreen && (
                 <FullscreenPreview title={`${model.name} · ${pattern?.name ?? 'nincs minta'}`} onClose={() => setFullscreen(false)}>
@@ -362,40 +465,34 @@ export default function App() {
                   onBack={() => setFootboardEditMode(false)}
                 />
               ) : (
-                <>
-                  <div className="stage-footer">
-                    <div>
-                      <strong>{model.name}</strong>
-                      <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
-                    </div>
-                    {hoveredPiece ? (
-                      <div className="hover-label">{hoveredPiece.name}</div>
-                    ) : isTouch && hintDismissed ? (
-                      <button type="button" className="hint-icon" title="Hogyan használd?"
-                        aria-label="Súgó" onClick={() => setHintDismissed(false)}>ⓘ</button>
-                    ) : (
-                      <div className="hover-label">
-                        {isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
-                      </div>
-                    )}
-                  </div>
-
-                  {exportPrice && (
-                    <ShareExportPanel
-                      canvasWrapRef={canvasWrapRef}
-                      modelName={model.name}
-                      tierLabel={getTier(tier)?.name ?? tier}
-                      patternName={pattern?.name}
-                      priceText={formatHuf(exportPrice.total)}
-                    />
-                  )}
-                </>
+                /* Keskeny nézetben ezek a görgethető panel tetejére kerülnek –
+                   a felső régió csak a képnek van fenntartva. */
+                !isNarrow && belowCanvasEl
               )}
             </>
           )}
         </section>
 
+        {isNarrow && model && (
+          <SplitHandle
+            pct={splitPct}
+            onChange={setSplitManually}
+            onDragStateChange={setSplitDragging}
+            containerRef={layoutRef}
+          />
+        )}
+
         <aside className="sidebar">
+          {isNarrow && model && (
+            <QuickNav
+              footboardActive={footboardEditMode}
+              onToggleFootboard={() => setFootboardEditMode((v) => !v)}
+              footboardAvailable={Boolean(footboardPieceId)}
+            />
+          )}
+
+          {isNarrow && !footboardEditMode && belowCanvasEl}
+
           {model && (
             <PriceBar
               modelId={modelId}
