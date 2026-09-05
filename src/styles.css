@@ -64,7 +64,14 @@ button.link:hover { text-decoration: underline; }
 .share-panel .btn-primary { flex: 1 1 240px; }
 .share-quick-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .share-quick-row .btn { font-size: 13px; }
-@media (max-width: 960px) { .share-panel { flex-direction: column; align-items: stretch; } }
+@media (max-width: 960px) {
+  .share-panel { flex-direction: column; align-items: stretch; }
+  /* a 240px flex-basis vízszintes minimumnak készült (asztali, sor-irányú
+     elrendezés) – oszlop-irányú (mobil) elrendezésben ugyanez MAGASSÁGKÉNT
+     értelmeződne, a flex-grow-vel együtt egy óriási, majdnem négyzet alakú
+     gombot eredményezve, ami eltakarja az alatta lévő tartalmat. */
+  .share-panel .btn-primary { flex: none; }
+}
 
 /* Mobilon a vászon a tetejére "tapad" görgetéskor, hogy a csúszkák (Méret,
    Eltolás, Forgatás) és a feliratkártyák állítása közben is látszódjon a
