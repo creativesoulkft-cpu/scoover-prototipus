@@ -42,7 +42,9 @@ for p in cfg['pieces']:
     extra = ''
     if 'labelAngle' in p: extra += f", labelAngle: {p['labelAngle']}"
     if p.get('defaultLabel'): extra += ', defaultLabel: true'
+    if p.get('footboard'): extra += ', footboard: true'
     if 'patternTransform' in p: extra += f", patternTransform: '{p['patternTransform']}'"
+    if 'priceGroup' in p: extra += f", priceGroup: '{p['priceGroup']}'"
     lines.append(f"    {{ id: '{p['id']}', name: '{p['name']}', group: '{p['group']}', size: '{p['size']}'{extra},\n      d: '{d}' }},")
     print(f"{p['id']:16s} terület={area:6d} px²")
 

@@ -12,8 +12,11 @@
  * külön árazott taposófelület), priceGroup (darabonkénti árcsoport id-ja,
  * lásd src/pricing.js PRICE_GROUPS), d (SVG path).
  */
+import photoView from './kukirin-g2-master.photo.js';
+
 export default {
   id: "kukirin-g2-master",
+  photoView,
   name: "Kukirin G2 Master",
   brand: "Kukirin",
   description: "Nagyobb kerekű, hosszabb dekkű változat, osztott kormányoszloppal – 12 darab.",
