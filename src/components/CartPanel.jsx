@@ -52,7 +52,7 @@ export default function CartPanel({
       setStatus('success');
       setMessage(
         res.requiresApproval
-          ? 'Kosárba került! Az egyedi (FULL CUSTOM) tétel fizetés után kézi jóváhagyásra kerül, mielőtt gyártásba megy.'
+          ? 'Kosárba került! Az EGYEDI tétel fizetés után kézi jóváhagyásra kerül, mielőtt gyártásba megy.'
           : 'Kosárba került!',
       );
       if (res.checkoutUrl) {
@@ -74,7 +74,7 @@ export default function CartPanel({
           {!customImageUploading && !customImageError && remoteImage?.url &&
             `Kép feltöltve: ${remoteImage.width}×${remoteImage.height} px`}
           {!customImageUploading && !customImageError && !remoteImage?.url &&
-            'Tölts fel egy képet a "Saját kép" panelen a kosárba tételhez.'}
+            'Tölts fel egy képet a Minta szekció "EGYEDI" fülén a kosárba tételhez.'}
         </p>
       )}
 
@@ -89,7 +89,7 @@ export default function CartPanel({
 
       {requiresManualApproval(tier) && (
         <p className="muted small">
-          A FULL CUSTOM szint fizetés után kézi jóváhagyást igényel (felbontás- és jogtisztaság-ellenőrzés), mielőtt gyártásba kerül.
+          Az EGYEDI szint fizetés után kézi jóváhagyást igényel (felbontás- és jogtisztaság-ellenőrzés), mielőtt gyártásba kerül.
         </p>
       )}
 

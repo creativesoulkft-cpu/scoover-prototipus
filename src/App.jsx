@@ -15,7 +15,6 @@ import { assetUrl } from './utils/assets.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
 import PhotoCanvas from './components/PhotoCanvas.jsx';
 import PatternGallery from './components/PatternGallery.jsx';
-import UploadPanel from './components/UploadPanel.jsx';
 import ModelSelector from './components/ModelSelector.jsx';
 import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls.jsx';
 import LabelControls from './components/LabelControls.jsx';
@@ -358,14 +357,14 @@ export default function App() {
             <>
               <details open>
                 <summary>Taposó – minta</summary>
-                <PatternGallery selectedId={footboardPatternId} onSelect={setFootboardPatternId} uploadedPattern={footboardUploadedPattern} />
-              </details>
-
-              <details open>
-                <summary>Taposó – saját kép</summary>
-                <UploadPanel onUpload={handleFootboardUpload} onClear={handleFootboardClearUpload} uploadedPattern={footboardUploadedPattern} />
-                {footboardRemoteImage?.uploading && <p className="muted small">Kép feltöltése a szerverre…</p>}
-                {footboardRemoteImage?.error && <p className="error small">{footboardRemoteImage.error}</p>}
+                <PatternGallery
+                  selectedId={footboardPatternId}
+                  onSelect={setFootboardPatternId}
+                  uploadedPattern={footboardUploadedPattern}
+                  onUpload={handleFootboardUpload}
+                  onClear={handleFootboardClearUpload}
+                  uploadStatus={footboardRemoteImage}
+                />
               </details>
 
               <details open>
@@ -419,27 +418,14 @@ export default function App() {
             <>
               <details open id="section-minta">
                 <summary>Minta</summary>
-                <PatternGallery selectedId={patternId} onSelect={setPatternId} uploadedPattern={uploadedPattern} />
-              </details>
-
-              <details open id="section-feliratok">
-                <summary>Feliratok ({labels.length})</summary>
-                {model && (
-                  <LabelControls
-                    labels={labels}
-                    onChange={updateLabel}
-                    onAdd={addLabel}
-                    onRemove={removeLabel}
-                    pieces={activePieces}
-                    font={category.labelFont}
-                    autoColor={autoColor}
-                  />
-                )}
-              </details>
-
-              <details>
-                <summary>Saját kép</summary>
-                <UploadPanel onUpload={handleUpload} onClear={handleClearUpload} uploadedPattern={uploadedPattern} />
+                <PatternGallery
+                  selectedId={patternId}
+                  onSelect={setPatternId}
+                  uploadedPattern={uploadedPattern}
+                  onUpload={handleUpload}
+                  onClear={handleClearUpload}
+                  uploadStatus={remoteImage}
+                />
               </details>
 
               <details>
@@ -460,7 +446,7 @@ export default function App() {
 
               {model && (
                 <details id="section-darabok">
-                  <summary>Darabok ({activePieces.length})</summary>
+                  <summary>Darabok ({enabledCount}/{activePieces.length})</summary>
                   <PieceList
                     pieces={activePieces}
                     hoveredId={hoveredId}
@@ -470,9 +456,26 @@ export default function App() {
                     onToggle={togglePiece}
                     modelId={modelId}
                     tier={tier}
+                    selectedGroupIds={selectedGroupIds}
+                    totalGroupCount={activeGroupIds.length}
                   />
                 </details>
               )}
+
+              <details open id="section-feliratok">
+                <summary>Feliratok ({labels.length})</summary>
+                {model && (
+                  <LabelControls
+                    labels={labels}
+                    onChange={updateLabel}
+                    onAdd={addLabel}
+                    onRemove={removeLabel}
+                    pieces={activePieces}
+                    font={category.labelFont}
+                    autoColor={autoColor}
+                  />
+                )}
+              </details>
             </>
           )}
 

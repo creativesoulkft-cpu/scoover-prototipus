@@ -10,7 +10,7 @@
  * kapnak – ezek egyelőre csak vizuálisan ki/bekapcsolhatók.
  */
 import { useIsTouch } from '../hooks/useIsTouch.js';
-import { FOOTBOARD_EXTRA_HUF, getGroupPrice } from '../pricing.js';
+import { FOOTBOARD_EXTRA_HUF, getGroupPrice, getPartialPricingInfo, hasPrice } from '../pricing.js';
 import { formatHuf } from '../utils/format.js';
 
 const GROUP_NAMES = { front: 'Első rész', deck: 'Dekk', rear: 'Hátsó rész' };
@@ -39,11 +39,22 @@ function buildRows(pieces) {
   return rows;
 }
 
-export default function PieceList({ pieces, hoveredId, disabledPieces, enabledCount, onHover, onToggle, modelId, tier }) {
+export default function PieceList({
+  pieces, hoveredId, disabledPieces, enabledCount, onHover, onToggle, modelId, tier,
+  selectedGroupIds, totalGroupCount,
+}) {
   const isTouch = useIsTouch();
   const rows = buildRows(pieces);
   const groups = [...new Set(rows.map((r) => r.group))];
   const active = enabledCount ?? pieces.filter((p) => !disabledPieces?.has(p.id)).length;
+
+  // Átláthatóság: a lenti soroknál mutatott ár mindig LISTAÁR (mintha csak azt
+  // az egy darabot választanád) – a tényleges végösszeg ennél olcsóbb, mert a
+  // kiválasztott darabok száma nő -> a kedvezmény is nő, a teljes kit áráig.
+  // Ez a panel teszi láthatóvá, hogy MOST mennyi ez a kedvezmény, és mit
+  // érnél el, ha a maradék darabokat is bepipálnád.
+  const showDiscountInfo = hasPrice(modelId) && totalGroupCount > 0 && selectedGroupIds;
+  const info = showDiscountInfo ? getPartialPricingInfo(modelId, tier, selectedGroupIds) : null;
 
   return (
     <div className="piece-list" onMouseLeave={() => onHover(null)}>
@@ -51,6 +62,26 @@ export default function PieceList({ pieces, hoveredId, disabledPieces, enabledCo
         {active} / {pieces.length} darab fóliázva ·{' '}
         {isTouch ? 'koppints egy sorra a ki-/bekapcsoláshoz' : 'kattints egy sorra a ki/bekapcsoláshoz'}
       </p>
+
+      {info && info.count > 0 && (
+        <div className="piece-discount-info">
+          <div className="pdi-row">
+            <span>{info.isFullKit ? 'Teljes kit ára' : `Darabár most (${info.count}/${info.totalGroups} darab)`}</span>
+            <strong>{formatHuf(info.total)}</strong>
+          </div>
+          <div className="pdi-bar" title={`${info.count} / ${info.totalGroups} darab kiválasztva`}>
+            <div className="pdi-bar-fill" style={{ width: `${Math.round((info.count / info.totalGroups) * 100)}%` }} />
+          </div>
+          <p className="muted small">
+            {info.isFullKit
+              ? `Az összes darabot választottad – ez a teljes kit ára (külön-külön ${formatHuf(info.listSum)} lenne).`
+              : `A lenti árak listaárak (mintha csak azt az egyet választanád). Most kb. ${info.discountPct}% `
+                + `kedvezményt kapsz rájuk – minél többet pipálsz be, annál nagyobbat, egészen a teljes kitig `
+                + `(${formatHuf(info.kitPrice)}, ${info.maxDiscountPct}% kedvezmény a listaárhoz képest).`}
+          </p>
+        </div>
+      )}
+
       {groups.map((g) => (
         <div key={g} className="piece-group">
           <h4>{GROUP_NAMES[g] ?? g}</h4>

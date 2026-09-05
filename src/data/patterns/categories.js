@@ -7,10 +7,17 @@
  * kódmódosítás nem kell.
  */
 
-/** Termékvonalak: SOLID = egyszínű vágott vinyl, PRINT = nyomtatott mintás fólia. */
+/**
+ * Termékvonalak – a Minta szekció 3 füle. A `description` a fül alatt
+ * mindig látható, rövid magyarázó szöveg (Szilárd által megadott, pontos
+ * szöveg – itt nem a kódnak kell "eladnia" a különbséget, hanem ennek).
+ * A harmadik ("custom") fül nem beépített mintát ad, hanem a saját kép
+ * feltöltését – lásd PatternGallery.jsx.
+ */
 export const PRODUCT_LINES = [
-  { id: 'solid', name: 'SOLID', description: 'Egyszínű, nyomtatás nélküli vágott fólia' },
-  { id: 'print', name: 'PRINT', description: 'Nyomtatott, mintás fólia' },
+  { id: 'solid', name: 'SOLID', description: 'Egyszínű fólia minta nélkül. Letisztult, gyorsan elkészül, a legkedvezőbb áron.' },
+  { id: 'print', name: 'PRINT', description: 'Kész Scoover grafikák. Egyedi mintázat, azonnal választható, prémium megjelenés.' },
+  { id: 'custom', name: 'EGYEDI', description: 'A saját képed vagy grafikád a rolleren. Teljesen egyedi, csak a tiéd.' },
 ];
 
 /**

@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import {
   calculatePrice, getTier, hasPrice, FOOTBOARD_EXTRA_HUF,
-  INSTALLATION_OPTIONS, INSTALLATION_NOTE,
+  INSTALLATION_OPTIONS, INSTALLATION_NOTE, getPartialPricingInfo,
 } from '../pricing.js';
 import { formatHuf } from '../utils/format.js';
 
@@ -47,13 +47,19 @@ export default function PriceBar({
   const tierName = getTier(tier)?.name ?? tier;
   const installationName = INSTALLATION_OPTIONS.find((o) => o.id === installation)?.name ?? 'Nem kérem';
   const selectedCount = selectedGroupIds?.length ?? totalGroupCount ?? 0;
+  const discountInfo = !price.isFullKit && selectedGroupIds?.length
+    ? getPartialPricingInfo(modelId, tier, selectedGroupIds)
+    : null;
 
   return (
     <div className="price-bar">
       <div className="pb-main">
         <div className="pb-total">
           <span className="muted small">{modelName} · {tierName}{!price.isFullKit && ` · ${selectedCount}/${totalGroupCount} darab`}</span>
-          <strong className="pb-amount">{formatHuf(price.total)}</strong>
+          <strong className="pb-amount">
+            {formatHuf(price.total)}
+            {discountInfo?.discountPct > 0 && <span className="pb-discount-badge">-{discountInfo.discountPct}%</span>}
+          </strong>
         </div>
         <button
           type="button"
@@ -79,8 +85,8 @@ export default function PriceBar({
           />
           {!price.isFullKit && (
             <p className="muted small">
-              A darabok Darabok listájában ki/bekapcsolhatod, mely részek legyenek fóliázva – minél többet
-              választasz, annál jobb az egységár, a teljes kit áráig.
+              A Darabok listájában ki/bekapcsolhatod, mely részek legyenek fóliázva – minél többet választasz,
+              annál jobb az egységár (lásd a kedvezmény-sávot ott), a teljes kit áráig.
             </p>
           )}
 

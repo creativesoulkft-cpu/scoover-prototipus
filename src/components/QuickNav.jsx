@@ -1,5 +1,5 @@
 /**
- * Rögzített gyorsnavigációs sáv: Minta / Feliratok / Darabok a megfelelő
+ * Rögzített gyorsnavigációs sáv: Minta / Darabok / Feliratok a megfelelő
  * oldalsáv-szekcióhoz görget (smooth scroll, nyitja is, ha zárva volt); a
  * Taposó gomb ehelyett a taposó-szerkesztő nézetet kapcsolja be/ki – lásd
  * FootboardEditor.jsx. A görgetéssel elért szekció gombja automatikusan
@@ -9,8 +9,8 @@ import { useScrollSpy } from '../hooks/useScrollSpy.js';
 
 const SECTIONS = [
   { id: 'section-minta', label: 'Minta' },
-  { id: 'section-feliratok', label: 'Feliratok' },
   { id: 'section-darabok', label: 'Darabok' },
+  { id: 'section-feliratok', label: 'Feliratok' },
 ];
 
 function scrollToSection(id) {

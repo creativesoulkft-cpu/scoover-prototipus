@@ -24,7 +24,7 @@ export const CURRENCY = 'HUF';
 export const TIERS = [
   { id: 'solid', name: 'SOLID', description: 'Egyszínű, nyomtatás nélküli vágott fólia' },
   { id: 'print', name: 'PRINT', description: 'Kész, jóváhagyott galéria-minta' },
-  { id: 'custom', name: 'FULL CUSTOM', description: 'Saját feltöltött kép – kézi jóváhagyással' },
+  { id: 'custom', name: 'EGYEDI', description: 'Saját feltöltött kép – kézi jóváhagyással' },
 ];
 
 export const TIER_IDS = TIERS.map((t) => t.id);
@@ -138,6 +138,30 @@ export function calculatePartialTotal(model, tier, selectedGroupIds) {
   const t = n > 1 ? (k - 1) / (n - 1) : 1; // 0 (1 darab) .. 1 (mind, de azt a fenti ág már lekezelte)
   const discount = maxDiscount * t;
   return Math.round(selectedSum * (1 - discount));
+}
+
+/**
+ * Átláthatósági infó a Darabok listához és az ársávhoz: mennyi a JELENLEGI
+ * kedvezmény a kiválasztott darabok listaár-összegéhez képest, és mekkora a
+ * teljes kit ára/kedvezménye végpontként – hogy világos legyen, miért éri meg
+ * több darabot bepipálni (lásd `calculatePartialTotal` fejléce).
+ * @returns {{count:number, totalGroups:number, total:number, listSum:number,
+ *            selectedListSum:number, kitPrice:number|null, discountPct:number,
+ *            maxDiscountPct:number, isFullKit:boolean}}
+ */
+export function getPartialPricingInfo(model, tier, selectedGroupIds) {
+  const all = getGroupPrices(model, tier);
+  const n = all.length;
+  const k = selectedGroupIds.length;
+  const kitPrice = MODEL_PRICES[model]?.[tier] ?? null;
+  const listSum = all.reduce((s, g) => s + g.price, 0);
+  const selectedListSum = all
+    .filter((g) => selectedGroupIds.includes(g.id))
+    .reduce((s, g) => s + g.price, 0);
+  const total = calculatePartialTotal(model, tier, selectedGroupIds);
+  const discountPct = selectedListSum > 0 ? Math.round((1 - total / selectedListSum) * 100) : 0;
+  const maxDiscountPct = listSum > 0 && kitPrice != null ? Math.round((1 - kitPrice / listSum) * 100) : 0;
+  return { count: k, totalGroups: n, total, listSum, selectedListSum, kitPrice, discountPct, maxDiscountPct, isFullKit: k >= n };
 }
 
 /**
