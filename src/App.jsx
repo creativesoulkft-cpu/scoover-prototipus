@@ -175,6 +175,18 @@ export default function App() {
     };
   }, [isNarrow]);
 
+  /**
+   * Melyik csúszkát húzza épp a felhasználó és milyen értéken – ezt írjuk ki a
+   * kép fölé. Enélkül a felnagyított előnézet magyarázat nélkül maradt: nem
+   * derült ki, hogy miért nőtt meg, és hogy most a csúszkát kell húzni.
+   */
+  const [sliderHint, setSliderHint] = useState(null);
+  useEffect(() => {
+    const onSlider = (e) => setSliderHint(e.detail.active ? { label: e.detail.label, text: e.detail.text } : null);
+    window.addEventListener('scoover:slider', onSlider);
+    return () => window.removeEventListener('scoover:slider', onSlider);
+  }, []);
+
   /** Kézi átméretezés: felülírja a csúszka-automatika függőben lévő visszaállítását. */
   const setSplitManually = useCallback((pct) => {
     clearTimeout(restoreTimer.current);
@@ -443,6 +455,16 @@ export default function App() {
                   )}
                   <button type="button" className="canvas-icon-btn" title="Teljes képernyős előnézet"
                     aria-label="Teljes képernyős előnézet" onClick={() => setFullscreen(true)}>⛶</button>
+
+                  {/* Csúszka-húzás közben: mit állít, milyen értéken – a kép fölé,
+                      hogy a felnagyított előnézet magyarázatot is kapjon. */}
+                  {sliderHint && (
+                    <div className="canvas-slider-hint" aria-live="polite">
+                      <span className="csh-label">{sliderHint.label}</span>
+                      <strong className="csh-value">{sliderHint.text}</strong>
+                      <span className="csh-tip">húzd a csúszkát – itt látod élőben</span>
+                    </div>
+                  )}
                 </div>
               )}
 

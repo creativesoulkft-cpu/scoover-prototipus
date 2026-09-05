@@ -78,7 +78,7 @@ export default function PhotoCanvas({
         ))}
         {/* az összes aktív darab uniója – erre vágjuk az árnyalás-réteget */}
         <clipPath id={clipId}>
-          {activePieces.map((p) => <path key={p.id} d={p.d} />)}
+          {activePieces.map((p) => <path key={p.id} d={p.d} fillRule="evenodd" />)}
         </clipPath>
         {/* szürkeárnyalat + gamma: a sötét fényezés középszürkévé emelve, hogy az
             overlay ne sötétítse be a mintát, csak a fény-árnyékot vigye át */}
@@ -99,7 +99,7 @@ export default function PhotoCanvas({
       <g className="pieces">
         {activePieces.map((piece) => (
           <path key={piece.id} d={piece.d} fill={fillFor(pattern, defIdFor(piece))}
-            stroke="none" />
+            fillRule="evenodd" stroke="none" />
         ))}
       </g>
 
@@ -115,7 +115,7 @@ export default function PhotoCanvas({
           const disabled = disabledPieces?.has(piece.id);
           const hovered = hoveredId === piece.id;
           return (
-            <path key={piece.id} d={piece.d}
+            <path key={piece.id} d={piece.d} fillRule="evenodd"
               fill={disabled ? 'rgba(0,0,0,0.35)' : 'transparent'}
               stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
               strokeWidth={hovered ? 2.5 : 1} vectorEffect="non-scaling-stroke"

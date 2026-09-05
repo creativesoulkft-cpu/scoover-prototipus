@@ -29,12 +29,25 @@ def refine(poly):
     m = np.zeros((H, W), np.uint8)
     cv2.fillPoly(m, [np.array(poly, np.int32)], 255)
     m = cv2.bitwise_and(m, sil)
-    cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # RETR_CCOMP: a külső kontúr MELLETT a lyukakat is visszaadja. Ez lényeges:
+    # egy C alakú darabnál (pl. első villa a rugó körül) a RETR_EXTERNAL a belső
+    # üres részt is befedte, így a minta a fotó fehér hátterére került.
+    cnts, hier = cv2.findContours(m, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     if not cnts:
         raise SystemExit(f'üres maszk: {poly}')
-    c = max(cnts, key=cv2.contourArea)                 # a legnagyobb összefüggő rész
-    c = cv2.approxPolyDP(c, 1.2, True).reshape(-1, 2)  # ~1 px tűréssel egyszerűsítve
-    return 'M ' + ' L '.join(f'{x} {y}' for x, y in c) + ' Z', int(cv2.contourArea(c))
+    outer = [c for c, h in zip(cnts, hier[0]) if h[3] < 0]
+    main = max(outer, key=cv2.contourArea)
+    main_idx = next(i for i, c in enumerate(cnts) if c is main)
+    # csak a fő (legnagyobb) külső alakzat lyukai kellenek, és csak az érdemiek
+    holes = [c for c, h in zip(cnts, hier[0]) if h[3] == main_idx and cv2.contourArea(c) >= 60]
+
+    def sub(c):
+        c = cv2.approxPolyDP(c, 1.2, True).reshape(-1, 2)  # ~1 px tűréssel egyszerűsítve
+        return 'M ' + ' L '.join(f'{x} {y}' for x, y in c) + ' Z'
+
+    d = ' '.join([sub(main), *(sub(h) for h in holes)])
+    area = int(cv2.contourArea(main) - sum(cv2.contourArea(h) for h in holes))
+    return d, area
 
 lines = []
 for p in cfg['pieces']:

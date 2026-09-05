@@ -14,6 +14,12 @@ export default function PatternControls({
   const set = (key) => (v) => onTransformChange({ ...transform, [key]: v });
   return (
     <div className="controls">
+      {/* A csúszka-húzás közbeni automatikus felnagyítás magától nem felfedezhető –
+          ezért mondjuk el egyszer, itt, ahol a csúszkák vannak. */}
+      <p className="note-info small">
+        ✋ Fogd meg és <strong>húzd</strong> valamelyik csúszkát – az előnézet közben automatikusan
+        felnagyul, és a képen látod, mit állítasz. Elengedés után visszaáll.
+      </p>
       <Slider label="Méret" value={transform.scale} min={0.25} max={3} step={0.05}
         onChange={set('scale')} format={(v) => `${v.toFixed(2)}×`} />
       <Slider label="Forgatás" value={transform.rotate} min={0} max={360} step={1}
