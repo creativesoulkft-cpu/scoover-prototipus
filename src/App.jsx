@@ -64,8 +64,9 @@ export default function App() {
    * dataURL-es előnézettől (uploadedPattern) függetlenül, mert a kosárnak
    * egy valódi, szerver oldali URL kell (uploadedImageUrl). */
   const [remoteImage, setRemoteImage] = useState(null);
-  /** 'schematic' | 'photo' – a fotós nézet csak akkor elérhető, ha a modellnek van photoView-ja */
-  const [view, setView] = useState('schematic');
+  /** 'schematic' | 'photo' – alapértelmezetten a fotó (ha a modellnek van photoView-ja;
+   *  ha nincs, az activeView lentebb úgyis vázlatra esik vissza). */
+  const [view, setView] = useState('photo');
   /** Modellenként külön tároljuk a kikapcsolt darabokat: { [modelId]: Set<pieceId> } */
   const [disabledByModel, setDisabledByModel] = useState({});
   /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
