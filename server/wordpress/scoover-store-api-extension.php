@@ -52,6 +52,17 @@ function scoover_sanitize_payload( array $s ) {
 		'imageTransform'    => is_array( $s['imageTransform'] ?? null ) ? $s['imageTransform'] : null,
 		'labels'            => is_array( $s['labels'] ?? null ) ? $s['labels'] : [],
 		'includeFootboard'  => ! empty( $s['includeFootboard'] ),
+		// a taposófelület SAJÁT, a fő mintától független terve (minta/kép/
+		// felirat) – lásd src/components/FootboardEditor.jsx. Csak akkor
+		// nem üres, ha az extra ténylegesen be van kapcsolva.
+		'footboard'         => is_array( $s['footboard'] ?? null ) ? [
+			'category'         => isset( $s['footboard']['category'] ) ? sanitize_text_field( $s['footboard']['category'] ) : null,
+			'colorway'         => isset( $s['footboard']['colorway'] ) ? sanitize_text_field( $s['footboard']['colorway'] ) : null,
+			'density'          => isset( $s['footboard']['density'] ) ? sanitize_text_field( $s['footboard']['density'] ) : null,
+			'uploadedImageUrl' => isset( $s['footboard']['uploadedImageUrl'] ) ? esc_url_raw( $s['footboard']['uploadedImageUrl'] ) : null,
+			'imageTransform'   => is_array( $s['footboard']['imageTransform'] ?? null ) ? $s['footboard']['imageTransform'] : null,
+			'label'            => is_array( $s['footboard']['label'] ?? null ) ? $s['footboard']['label'] : null,
+		] : null,
 		'installation'      => sanitize_text_field( $s['installation'] ?? 'none' ),
 		// null/hiányzó = teljes kit (minden darabcsoport); egyébként a
 		// ténylegesen kiválasztott (à la carte) darabcsoport-id-k listája.
@@ -115,6 +126,13 @@ add_action( 'woocommerce_checkout_create_order_line_item', function ( $item, $ca
 	if ( ! empty( $s['uploadedImageUrl'] ) ) $item->add_meta_data( 'Feltöltött kép', $s['uploadedImageUrl'], true );
 	if ( ! empty( $s['labels'] ) ) $item->add_meta_data( 'Feliratok', wp_json_encode( $s['labels'], JSON_UNESCAPED_UNICODE ), true );
 	$item->add_meta_data( 'Taposófelület extra', ! empty( $s['includeFootboard'] ) ? 'igen' : 'nem', true );
+	if ( ! empty( $s['includeFootboard'] ) && ! empty( $s['footboard'] ) ) {
+		$fb = $s['footboard'];
+		if ( ! empty( $fb['category'] ) ) $item->add_meta_data( 'Taposó – minta-kategória', $fb['category'], true );
+		if ( ! empty( $fb['colorway'] ) ) $item->add_meta_data( 'Taposó – színvariáns', $fb['colorway'], true );
+		if ( ! empty( $fb['uploadedImageUrl'] ) ) $item->add_meta_data( 'Taposó – feltöltött kép', $fb['uploadedImageUrl'], true );
+		if ( ! empty( $fb['label']['text'] ) ) $item->add_meta_data( 'Taposó – felirat', $fb['label']['text'], true );
+	}
 	if ( ! empty( $s['installation'] ) && 'none' !== $s['installation'] ) {
 		$item->add_meta_data( 'Felrakás (személyes átvétellel)', $s['installation'], true );
 	}

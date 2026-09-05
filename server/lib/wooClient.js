@@ -41,6 +41,9 @@ function buildScooverPayload(cartConfig, unitPriceHuf) {
     imageTransform: cartConfig.imageTransform ?? null,
     labels: cartConfig.labels ?? [],
     includeFootboard: Boolean(cartConfig.includeFootboard),
+    // a taposófelület SAJÁT (a fő mintától független) minta/kép/felirat-terve,
+    // csak ha az extra be van kapcsolva – lásd src/components/FootboardEditor.jsx
+    footboard: cartConfig.footboard ?? null,
     installation: cartConfig.installation ?? 'none',
     // hiányzó/undefined = teljes kit (minden darabcsoport); egyébként a
     // ténylegesen kiválasztott (à la carte) darabcsoport-id-k listája.

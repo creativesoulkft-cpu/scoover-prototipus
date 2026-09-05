@@ -15,7 +15,7 @@ import { addToCart } from '../api/cartBridge.js';
 
 export default function CartPanel({
   modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
-  selectedGroupIds,
+  selectedGroupIds, footboardDesign,
 }) {
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [message, setMessage] = useState(null);
@@ -33,8 +33,10 @@ export default function CartPanel({
   const customImageMissing = tier === 'custom' && !remoteImage?.url;
   const customImageUploading = tier === 'custom' && remoteImage?.uploading;
   const customImageError = tier === 'custom' ? remoteImage?.error : null;
+  const footboardImageUploading = includeFootboard && footboardDesign?.uploading;
   const belowMinimum = price ? !price.minimumOrder.ok : false;
-  const canSubmit = status !== 'submitting' && !customImageMissing && !customImageUploading && !priceError && !belowMinimum;
+  const canSubmit = status !== 'submitting' && !customImageMissing && !customImageUploading
+    && !footboardImageUploading && !priceError && !belowMinimum;
 
   async function handleSubmit() {
     setStatus('submitting');
@@ -43,6 +45,7 @@ export default function CartPanel({
     try {
       const config = buildCartConfig({
         modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage, selectedGroupIds,
+        footboardDesign,
       });
       const res = await addToCart(config);
       setResult(res);
@@ -74,6 +77,8 @@ export default function CartPanel({
             'Tölts fel egy képet a "Saját kép" panelen a kosárba tételhez.'}
         </p>
       )}
+
+      {footboardImageUploading && <p className="muted small">Taposó-kép feltöltése a szerverre…</p>}
 
       <div className="price-row price-total">
         <strong>Fizetendő</strong>

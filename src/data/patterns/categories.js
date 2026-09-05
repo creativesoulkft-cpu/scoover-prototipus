@@ -14,13 +14,15 @@ export const PRODUCT_LINES = [
 ];
 
 /**
- * Felirat-betűstílusok kategóriánként (Google Fonts, index.html-ben betöltve).
- * `glyph`: átlagos betűszélesség em-ben – a felirat automatikus méretezéséhez.
+ * Felirat-betűstílusok kategóriánként – ez csak az ALAPÉRTELMEZETT, a teljes
+ * választékot (amit egy felirat felül is írhat) lásd src/data/fonts.js.
  */
+import { getFontOption } from '../fonts.js';
+
 const FONTS = {
-  cyber: { family: 'Orbitron', weight: 900, letterSpacing: '0.14em', glyph: 0.9, skew: 0 },
-  motocross: { family: 'Anton', weight: 400, letterSpacing: '0.05em', glyph: 0.5, skew: -10 },
-  neutral: { family: 'Rajdhani', weight: 700, letterSpacing: '0.1em', glyph: 0.56, skew: 0 },
+  cyber: getFontOption('orbitron'),
+  motocross: getFontOption('anton'),
+  neutral: getFontOption('rajdhani'),
 };
 
 export const PATTERN_CATEGORIES = [

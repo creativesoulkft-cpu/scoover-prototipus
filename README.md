@@ -24,9 +24,12 @@ npm run build    # dist/ – statikusan hosztolható
   darabméret-osztály szerinti léptékkel (dekk ≠ villaborítás); nem varratmentes
   képhez tükrözött 2×2 csempézés (`tiling: 'mirror'`)
 - **feliratréteg** (`LabelLayer`): a "SCOOVER" / modellnév vektoros `<text>`-ként a
-  textúra fölött, saját rétegben, a darab alakjára vágva, kategóriánként más
-  betűtípussal (Orbitron / Anton / Rajdhani), automatikus fehér/fekete színnel a
-  háttér világossága alapján; ki/be kapcsolható, szöveg és céldarab szerkeszthető
+  textúra fölött, saját rétegben, a darab alakjára vágva; alapértelmezett
+  betűtípus/szín a minta kategóriájából jön, de feliratonként felülírható 6
+  Google Fonts közül (Orbitron, Anton, Bebas Neue, Rajdhani, Oswald, Teko) és
+  egy szabad színválasztóval (Auto/Fehér/Fekete/Egyedi szín) – lásd
+  `src/data/fonts.js`, `FontColorPicker.jsx`; ki/be kapcsolható, szöveg és
+  céldarab szerkeszthető
 - saját kép feltöltése (JPG/PNG/WebP, kliens oldali kicsinyítés)
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
@@ -37,6 +40,13 @@ npm run build    # dist/ – statikusan hosztolható
 - **taposófelület** (dekk állófelülete): külön, kültéri csúszásgátló anyag, ezért a
   darablistában kiemelve ("Prémium csúszásgátló"), alapból kikapcsolva, és a
   ki/bekapcsolása egyben a +6 900 Ft-os extra kapcsolója is
+- **taposó-szerkesztő** (`FootboardEditor`): a "Taposó" gombra a fő előnézet
+  helyén a taposófelület nagyított, önálló nézete jelenik meg, teljesen saját
+  mintával/feltöltött képpel/felirattal (a roller fő mintájától függetlenül) –
+  "Vissza a teljes rollerhez" gombbal léphetsz ki belőle
+- **gyorsnavigáció** (`QuickNav`): rögzített gombsor (Minta / Feliratok /
+  Darabok / Taposó) a konfigurátor tetején, sima görgetéssel az adott
+  szekcióhoz; a látott/aktív szekció gombja görgetés közben kiemelődik
 - **felrakás** mint szolgáltatás (normál / komplex), csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
@@ -61,27 +71,34 @@ src/
       print-textures.js #  a 9 nyomtatott textúra bejegyzései (kép: public/patterns/)
       _helpers.js     #   procedurális csempe-segédek
       solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js
+    fonts.js          # felirat-betűtípus regiszter (6 Google Fonts) – kategóriák és feliratok innen választanak
   components/
     ScooterCanvas.jsx   # roller-vázlat: darabok + közös minta-fill + szétnyitás
     PatternDefs.jsx     # minta → SVG <defs> (pattern / gradient / image-tile / image), fill-érték
     LabelLayer.jsx      # vektoros felirat a textúra fölött (getBBox-alapú méretezés, clipPath)
     LabelControls.jsx   # felirat ki/be, szöveg, céldarab
+    FontColorPicker.jsx # betűtípus-választó + szín (Auto/Fehér/Fekete/Egyedi) – közös LabelControls és FootboardEditor közt
+    Slider.jsx          # közös csúszka (minta-illesztés, feliratkártyák, taposó-szerkesztő)
     PatternGallery.jsx  # mintaválasztó galéria
     PatternThumb.jsx    # bélyegkép (ugyanazzal a renderelővel, mint a vászon)
     UploadPanel.jsx     # saját kép feltöltése (drag&drop + fájlválasztó)
     ModelSelector.jsx   # modellválasztó legördülő
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
     PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
+    QuickNav.jsx        # rögzített gyorsnavigáció (Minta/Feliratok/Darabok/Taposó), aktív-szekció kiemeléssel
+    FootboardEditor.jsx # taposófelület önálló, nagyított tervező nézete
     CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
     PriceBar.jsx        # állandóan látható ársáv, kinyitható árbontással
     ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
   hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
+  hooks/useScrollSpy.js     # QuickNav aktív-szekció figyelése görgetés közben
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
   utils/color.js            # világosság → felirat-szín
+  utils/labelStyle.js       # egy felirat tényleges betűtípusa/színe (kategória vagy felülbírálás)
   utils/assets.js           # statikus képek URL-je (normál / egyfájlos build)
   utils/format.js           # Ft-összeg egységes kiírása
-  utils/cartConfig.js       # App state → kosár-híd JSON-csomag
+  utils/cartConfig.js       # App state → kosár-híd JSON-csomag (a taposó saját tervét is idesorolja)
   utils/exportImage.js      # SVG → vízjelezett, megosztható PNG (natív szerializálás + Canvas)
   api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja

@@ -1,25 +1,14 @@
 /**
  * Felirat-beállítások: tetszőleges számú felirat, mindegyik külön
- * szöveggel, céldarabbal, mérettel, eltolással, forgatással és színnel.
- * A betűtípust a minta kategóriája adja (categories.js → labelFont).
+ * szöveggel, céldarabbal, mérettel, eltolással, forgatással, betűtípussal
+ * és színnel. A betűtípus/szín alapértelmezettje a minta kategóriájából jön
+ * (categories.js → labelFont), de feliratonként felülírható – lásd
+ * FontColorPicker.jsx és src/utils/labelStyle.js.
  */
-const COLOR_MODES = [
-  { id: 'auto', name: 'Auto' },
-  { id: 'white', name: 'Fehér' },
-  { id: 'black', name: 'Fekete' },
-];
+import FontColorPicker from './FontColorPicker.jsx';
+import Slider from './Slider.jsx';
 
-function Slider({ label, value, min, max, step, onChange, format }) {
-  return (
-    <label className="slider">
-      <span>{label}<em>{format ? format(value) : value}</em></span>
-      <input type="range" min={min} max={max} step={step} value={value}
-        onChange={(e) => onChange(Number(e.target.value))} />
-    </label>
-  );
-}
-
-function LabelCard({ label, index, pieces, autoColor, onChange, onRemove }) {
+function LabelCard({ label, index, pieces, categoryFont, autoColor, onChange, onRemove }) {
   const set = (patch) => onChange(label.id, patch);
   return (
     <div className={`label-card${label.enabled ? '' : ' off'}`}>
@@ -47,15 +36,7 @@ function LabelCard({ label, index, pieces, autoColor, onChange, onRemove }) {
       <Slider label="Eltolás Y" value={label.dy} min={-150} max={150} step={1} onChange={(v) => set({ dy: v })} />
       <Slider label="Forgatás" value={label.rotate} min={-90} max={90} step={1} onChange={(v) => set({ rotate: v })}
         format={(v) => `${v}°`} />
-      <div className="chip-row">
-        {COLOR_MODES.map((m) => (
-          <button key={m.id} type="button" className={`chip${label.colorMode === m.id ? ' active' : ''}`}
-            onClick={() => set({ colorMode: m.id })}>
-            {m.id === 'auto' && <span className="swatch" style={{ background: autoColor }} />}
-            {m.name}
-          </button>
-        ))}
-      </div>
+      <FontColorPicker label={label} categoryFont={categoryFont} autoColor={autoColor} onChange={set} />
     </div>
   );
 }
@@ -64,11 +45,11 @@ export default function LabelControls({ labels, onChange, onAdd, onRemove, piece
   return (
     <div className="controls">
       <p className="muted small">
-        Betűtípus: <strong style={{ fontFamily: font.family, fontWeight: font.weight }}>{font.family}</strong>
-        {' '}(a minta kategóriája adja) · a feliratot a vásznon egérrel is húzhatod
+        Alapértelmezett betűtípus: <strong style={{ fontFamily: font.family, fontWeight: font.weight }}>{font.family}</strong>
+        {' '}(a minta kategóriája adja, feliratonként felülírható) · a feliratot a vásznon egérrel is húzhatod
       </p>
       {labels.map((l, i) => (
-        <LabelCard key={l.id} label={l} index={i} pieces={pieces} autoColor={autoColor} onChange={onChange} onRemove={onRemove} />
+        <LabelCard key={l.id} label={l} index={i} pieces={pieces} categoryFont={font} autoColor={autoColor} onChange={onChange} onRemove={onRemove} />
       ))}
       <div className="control-row">
         <button type="button" className="btn" onClick={onAdd}>+ Új felirat</button>

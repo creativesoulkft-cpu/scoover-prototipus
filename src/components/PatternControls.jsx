@@ -2,18 +2,10 @@
  * Minta-illesztés: méret, forgatás, eltolás – ugyanaz a transzformáció megy
  * minden darabra, ezért a folytonosság megmarad. Plusz nézeti kapcsolók.
  */
+import Slider from './Slider.jsx';
+
 const DEFAULT_TRANSFORM = { scale: 1, rotate: 0, dx: 0, dy: 0 };
 export { DEFAULT_TRANSFORM };
-
-function Slider({ label, value, min, max, step, onChange, format }) {
-  return (
-    <label className="slider">
-      <span>{label}<em>{format ? format(value) : value}</em></span>
-      <input type="range" min={min} max={max} step={step} value={value}
-        onChange={(e) => onChange(Number(e.target.value))} />
-    </label>
-  );
-}
 
 export default function PatternControls({
   transform, onTransformChange, exploded, onExplodedChange, showCutLines, onShowCutLinesChange, isImage,

@@ -22,18 +22,30 @@ import PieceList from './components/PieceList.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import PriceBar from './components/PriceBar.jsx';
 import ShareExportPanel from './components/ShareExportPanel.jsx';
+import QuickNav from './components/QuickNav.jsx';
+import FootboardEditor from './components/FootboardEditor.jsx';
+import FontColorPicker from './components/FontColorPicker.jsx';
+import Slider from './components/Slider.jsx';
 import { useIsTouch } from './hooks/useIsTouch.js';
 import { uploadCustomImage } from './api/cartBridge.js';
 import { logDevPriceTable } from './utils/devPriceTable.js';
-import { calculatePrice, getTier, hasPrice } from './pricing.js';
+import { calculatePrice, getTier, hasPrice, FOOTBOARD_EXTRA_HUF } from './pricing.js';
 import { formatHuf } from './utils/format.js';
+import { resolveLabelFont, resolveLabelColor } from './utils/labelStyle.js';
 
 if (import.meta.env.DEV) logDevPriceTable();
 
 /** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
 const newLabel = (text = 'SCOOVER') => ({
   id: `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-  enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0, colorMode: 'auto',
+  enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0,
+  fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
+});
+
+/** A taposófelület saját, egyetlen felirata – nincs pieceId-je, mindig a taposóra kerül. */
+const newFootboardLabel = () => ({
+  enabled: false, text: 'SCOOVER', scale: 1, dx: 0, dy: 0, rotate: 0,
+  fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
 });
 
 export default function App() {
@@ -58,6 +70,15 @@ export default function App() {
   const [disabledByModel, setDisabledByModel] = useState({});
   /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
   const canvasWrapRef = useRef(null);
+
+  // --- Taposófelület tervezése: teljesen önálló minta/kép/transzformáció/felirat,
+  // független a roller többi részének mintájától (lásd FootboardEditor.jsx). ---
+  const [footboardEditMode, setFootboardEditMode] = useState(false);
+  const [footboardPatternId, setFootboardPatternId] = useState(DEFAULT_PATTERN_ID);
+  const [footboardUploadedPattern, setFootboardUploadedPattern] = useState(null);
+  const [footboardTransform, setFootboardTransform] = useState(DEFAULT_TRANSFORM);
+  const [footboardRemoteImage, setFootboardRemoteImage] = useState(null);
+  const [footboardLabel, setFootboardLabel] = useState(newFootboardLabel);
 
   const { model, loading, error } = useScooterModel(modelId);
   const isTouch = useIsTouch();
@@ -104,7 +125,8 @@ export default function App() {
 
   // A taposófelület-darab ki/bekapcsolása EGYBEN a +6 900 Ft-os extra
   // kapcsolója is – egyetlen állapot, két helyről (darablista, ársáv) vezérelve.
-  const footboardPieceId = model?.pieces.find((p) => p.footboard)?.id ?? null;
+  const footboardPiece = model?.pieces.find((p) => p.footboard) ?? null;
+  const footboardPieceId = footboardPiece?.id ?? null;
   const includeFootboard = Boolean(footboardPieceId) && !disabledPieces.has(footboardPieceId);
   const setFootboard = useCallback((on) => {
     if (!footboardPieceId) return;
@@ -114,6 +136,34 @@ export default function App() {
       return { ...prev, [modelId]: next };
     });
   }, [footboardPieceId, modelId]);
+
+  // A taposó saját mintája/felirata – teljesen független a roller fő mintájától.
+  const footboardPattern = useMemo(
+    () => (footboardPatternId === UPLOAD_PATTERN_ID ? footboardUploadedPattern : getPattern(footboardPatternId)),
+    [footboardPatternId, footboardUploadedPattern],
+  );
+  const footboardCategory = getCategory(footboardPattern?.category ?? 'solid');
+  const footboardAutoColor = labelColorFor(footboardPattern);
+  const renderFootboardLabel = {
+    ...footboardLabel,
+    font: resolveLabelFont(footboardLabel, footboardCategory.labelFont),
+    color: resolveLabelColor(footboardLabel, footboardAutoColor),
+  };
+
+  function handleFootboardUpload(img, file) {
+    setFootboardUploadedPattern(img);
+    setFootboardPatternId(UPLOAD_PATTERN_ID);
+    setFootboardTransform(DEFAULT_TRANSFORM);
+    setFootboardRemoteImage({ url: null, width: null, height: null, uploading: true, error: null });
+    uploadCustomImage(file)
+      .then(({ url, width, height }) => setFootboardRemoteImage({ url, width, height, uploading: false, error: null }))
+      .catch((e) => setFootboardRemoteImage({ url: null, width: null, height: null, uploading: false, error: e.message }));
+  }
+  function handleFootboardClearUpload() {
+    setFootboardUploadedPattern(null);
+    setFootboardRemoteImage(null);
+    if (footboardPatternId === UPLOAD_PATTERN_ID) setFootboardPatternId(DEFAULT_PATTERN_ID);
+  }
 
   function handleUpload(img, file) {
     setUploadedPattern(img);
@@ -163,11 +213,12 @@ export default function App() {
   }, [modelId, activePieces]);
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
   const autoColor = labelColorFor(pattern);
-  // feliratok a renderelőnek: betűtípus a kategóriából, szín az üzemmód szerint
+  // feliratok a renderelőnek: betűtípus a kategóriából VAGY a felirat saját
+  // felülbírálásából, szín az üzemmód szerint (lásd utils/labelStyle.js)
   const renderLabels = labels.map((l) => ({
     ...l,
-    font: category.labelFont,
-    color: l.colorMode === 'white' ? '#ffffff' : l.colorMode === 'black' ? '#111111' : autoColor,
+    font: resolveLabelFont(l, category.labelFont),
+    color: resolveLabelColor(l, autoColor),
   }));
   const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
@@ -196,69 +247,91 @@ export default function App() {
           {!model && loading && <p className="muted">Modell betöltése…</p>}
           {model && (
             <>
-              {hasPhoto && (
-                <div className="view-switch" role="tablist">
-                  <button type="button" role="tab" aria-selected={activeView === 'schematic'}
-                    className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
-                  <button type="button" role="tab" aria-selected={activeView === 'photo'}
-                    className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
-                </div>
-              )}
-              <div ref={canvasWrapRef}>
-                {activeView === 'photo' ? (
-                  <PhotoCanvas
-                    view={model.photoView}
-                    modelName={model.name}
-                    pattern={pattern}
-                    transform={transform}
-                    patternScale={patternScale}
-                    sizeAwareTiling={sizeAwareTiling}
-                    showCutLines={showCutLines}
-                    disabledPieces={disabledPieces}
-                    hoveredId={hoveredId}
-                    onHover={setHoveredId}
-                    onTogglePiece={togglePiece}
-                    labels={renderLabels}
-                    onLabelDrag={updateLabel}
-                  />
-                ) : (
-                <ScooterCanvas
-                  model={model}
-                  pattern={pattern}
-                  transform={transform}
-                  patternScale={patternScale}
-                  sizeAwareTiling={sizeAwareTiling}
-                  exploded={exploded}
-                  showCutLines={showCutLines}
-                  disabledPieces={disabledPieces}
-                  hoveredId={hoveredId}
-                  onHover={setHoveredId}
-                  onTogglePiece={togglePiece}
-                  labels={renderLabels}
-                  onLabelDrag={updateLabel}
-                />
-                )}
-              </div>
-              <div className="stage-footer">
-                <div>
-                  <strong>{model.name}</strong>
-                  <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
-                </div>
-                <div className="hover-label">
-                  {hoveredPiece
-                    ? hoveredPiece.name
-                    : isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
-                </div>
-              </div>
+              <QuickNav
+                footboardActive={footboardEditMode}
+                onToggleFootboard={() => setFootboardEditMode((v) => !v)}
+                footboardAvailable={Boolean(footboardPieceId)}
+              />
 
-              {exportPrice && (
-                <ShareExportPanel
-                  canvasWrapRef={canvasWrapRef}
-                  modelName={model.name}
-                  tierLabel={getTier(tier)?.name ?? tier}
-                  patternName={pattern?.name}
-                  priceText={formatHuf(exportPrice.total)}
+              {footboardEditMode ? (
+                <FootboardEditor
+                  piece={footboardPiece}
+                  pattern={footboardPattern}
+                  transform={footboardTransform}
+                  label={renderFootboardLabel}
+                  onLabelDrag={(d) => setFootboardLabel((l) => ({ ...l, ...d }))}
+                  price={FOOTBOARD_EXTRA_HUF}
+                  includeFootboard={includeFootboard}
+                  onIncludeFootboardChange={setFootboard}
+                  onBack={() => setFootboardEditMode(false)}
                 />
+              ) : (
+                <>
+                  {hasPhoto && (
+                    <div className="view-switch" role="tablist">
+                      <button type="button" role="tab" aria-selected={activeView === 'schematic'}
+                        className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
+                      <button type="button" role="tab" aria-selected={activeView === 'photo'}
+                        className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
+                    </div>
+                  )}
+                  <div ref={canvasWrapRef}>
+                    {activeView === 'photo' ? (
+                      <PhotoCanvas
+                        view={model.photoView}
+                        modelName={model.name}
+                        pattern={pattern}
+                        transform={transform}
+                        patternScale={patternScale}
+                        sizeAwareTiling={sizeAwareTiling}
+                        showCutLines={showCutLines}
+                        disabledPieces={disabledPieces}
+                        hoveredId={hoveredId}
+                        onHover={setHoveredId}
+                        onTogglePiece={togglePiece}
+                        labels={renderLabels}
+                        onLabelDrag={updateLabel}
+                      />
+                    ) : (
+                    <ScooterCanvas
+                      model={model}
+                      pattern={pattern}
+                      transform={transform}
+                      patternScale={patternScale}
+                      sizeAwareTiling={sizeAwareTiling}
+                      exploded={exploded}
+                      showCutLines={showCutLines}
+                      disabledPieces={disabledPieces}
+                      hoveredId={hoveredId}
+                      onHover={setHoveredId}
+                      onTogglePiece={togglePiece}
+                      labels={renderLabels}
+                      onLabelDrag={updateLabel}
+                    />
+                    )}
+                  </div>
+                  <div className="stage-footer">
+                    <div>
+                      <strong>{model.name}</strong>
+                      <span className="muted"> · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
+                    </div>
+                    <div className="hover-label">
+                      {hoveredPiece
+                        ? hoveredPiece.name
+                        : isTouch ? 'Koppints egy darabra a ki-/bekapcsoláshoz' : 'Vidd az egeret egy darab fölé'}
+                    </div>
+                  </div>
+
+                  {exportPrice && (
+                    <ShareExportPanel
+                      canvasWrapRef={canvasWrapRef}
+                      modelName={model.name}
+                      tierLabel={getTier(tier)?.name ?? tier}
+                      patternName={pattern?.name}
+                      priceText={formatHuf(exportPrice.total)}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
@@ -280,61 +353,126 @@ export default function App() {
             />
           )}
 
-          <details open>
-            <summary>Minta</summary>
-            <PatternGallery selectedId={patternId} onSelect={setPatternId} uploadedPattern={uploadedPattern} />
-          </details>
+          {footboardEditMode ? (
+            <>
+              <details open>
+                <summary>Taposó – minta</summary>
+                <PatternGallery selectedId={footboardPatternId} onSelect={setFootboardPatternId} uploadedPattern={footboardUploadedPattern} />
+              </details>
 
-          <details open>
-            <summary>Feliratok ({labels.length})</summary>
-            {model && (
-              <LabelControls
-                labels={labels}
-                onChange={updateLabel}
-                onAdd={addLabel}
-                onRemove={removeLabel}
-                pieces={activePieces}
-                font={category.labelFont}
-                autoColor={autoColor}
-              />
-            )}
-          </details>
+              <details open>
+                <summary>Taposó – saját kép</summary>
+                <UploadPanel onUpload={handleFootboardUpload} onClear={handleFootboardClearUpload} uploadedPattern={footboardUploadedPattern} />
+                {footboardRemoteImage?.uploading && <p className="muted small">Kép feltöltése a szerverre…</p>}
+                {footboardRemoteImage?.error && <p className="error small">{footboardRemoteImage.error}</p>}
+              </details>
 
-          <details>
-            <summary>Saját kép</summary>
-            <UploadPanel onUpload={handleUpload} onClear={handleClearUpload} uploadedPattern={uploadedPattern} />
-          </details>
+              <details open>
+                <summary>Taposó – minta illesztése</summary>
+                <div className="controls">
+                  <Slider label="Méret" value={footboardTransform.scale} min={0.25} max={3} step={0.05}
+                    onChange={(v) => setFootboardTransform({ ...footboardTransform, scale: v })} format={(v) => `${v.toFixed(2)}×`} />
+                  <Slider label="Forgatás" value={footboardTransform.rotate} min={0} max={360} step={1}
+                    onChange={(v) => setFootboardTransform({ ...footboardTransform, rotate: v })} format={(v) => `${v}°`} />
+                  <Slider label="Eltolás X" value={footboardTransform.dx} min={-300} max={300} step={1}
+                    onChange={(v) => setFootboardTransform({ ...footboardTransform, dx: v })} />
+                  <Slider label="Eltolás Y" value={footboardTransform.dy} min={-300} max={300} step={1}
+                    onChange={(v) => setFootboardTransform({ ...footboardTransform, dy: v })} />
+                  <div className="control-row">
+                    <button type="button" className="link" onClick={() => setFootboardTransform(DEFAULT_TRANSFORM)}>Alaphelyzet</button>
+                  </div>
+                </div>
+              </details>
 
-          <details>
-            <summary>Minta-illesztés és nézet</summary>
-            <PatternControls
-              transform={transform}
-              onTransformChange={setTransform}
-              exploded={exploded}
-              onExplodedChange={setExploded}
-              showCutLines={showCutLines}
-              onShowCutLinesChange={setShowCutLines}
-              isImage={pattern?.type === 'image'}
-              isTiled={isTiled}
-              sizeAwareTiling={sizeAwareTiling}
-              onSizeAwareTilingChange={setSizeAwareTiling}
-            />
-          </details>
+              <details open>
+                <summary>Taposó – felirat</summary>
+                <div className="controls">
+                  <label className="check">
+                    <input type="checkbox" checked={footboardLabel.enabled}
+                      onChange={(e) => setFootboardLabel((l) => ({ ...l, enabled: e.target.checked }))} />
+                    Felirat a taposón
+                  </label>
+                  <label className="field">
+                    <span>Szöveg</span>
+                    <input type="text" value={footboardLabel.text} maxLength={24} placeholder="SCOOVER"
+                      onChange={(e) => setFootboardLabel((l) => ({ ...l, text: e.target.value }))} />
+                  </label>
+                  <Slider label="Méret" value={footboardLabel.scale} min={0.3} max={2} step={0.05}
+                    onChange={(v) => setFootboardLabel((l) => ({ ...l, scale: v }))} format={(v) => `${Math.round(v * 100)}%`} />
+                  <Slider label="Eltolás X" value={footboardLabel.dx} min={-150} max={150} step={1}
+                    onChange={(v) => setFootboardLabel((l) => ({ ...l, dx: v }))} />
+                  <Slider label="Eltolás Y" value={footboardLabel.dy} min={-100} max={100} step={1}
+                    onChange={(v) => setFootboardLabel((l) => ({ ...l, dy: v }))} />
+                  <Slider label="Forgatás" value={footboardLabel.rotate} min={-90} max={90} step={1}
+                    onChange={(v) => setFootboardLabel((l) => ({ ...l, rotate: v }))} format={(v) => `${v}°`} />
+                  <FontColorPicker
+                    label={footboardLabel}
+                    categoryFont={footboardCategory.labelFont}
+                    autoColor={footboardAutoColor}
+                    onChange={(patch) => setFootboardLabel((l) => ({ ...l, ...patch }))}
+                  />
+                </div>
+              </details>
+            </>
+          ) : (
+            <>
+              <details open id="section-minta">
+                <summary>Minta</summary>
+                <PatternGallery selectedId={patternId} onSelect={setPatternId} uploadedPattern={uploadedPattern} />
+              </details>
 
-          {model && (
-            <details>
-              <summary>Darabok ({activePieces.length})</summary>
-              <PieceList
-                pieces={activePieces}
-                hoveredId={hoveredId}
-                disabledPieces={disabledPieces}
-                enabledCount={enabledCount}
-                onHover={setHoveredId}
-                onToggle={togglePiece}
-                modelId={modelId}
-                tier={tier}
-              />
-            </details>
+              <details open id="section-feliratok">
+                <summary>Feliratok ({labels.length})</summary>
+                {model && (
+                  <LabelControls
+                    labels={labels}
+                    onChange={updateLabel}
+                    onAdd={addLabel}
+                    onRemove={removeLabel}
+                    pieces={activePieces}
+                    font={category.labelFont}
+                    autoColor={autoColor}
+                  />
+                )}
+              </details>
+
+              <details>
+                <summary>Saját kép</summary>
+                <UploadPanel onUpload={handleUpload} onClear={handleClearUpload} uploadedPattern={uploadedPattern} />
+              </details>
+
+              <details>
+                <summary>Minta-illesztés és nézet</summary>
+                <PatternControls
+                  transform={transform}
+                  onTransformChange={setTransform}
+                  exploded={exploded}
+                  onExplodedChange={setExploded}
+                  showCutLines={showCutLines}
+                  onShowCutLinesChange={setShowCutLines}
+                  isImage={pattern?.type === 'image'}
+                  isTiled={isTiled}
+                  sizeAwareTiling={sizeAwareTiling}
+                  onSizeAwareTilingChange={setSizeAwareTiling}
+                />
+              </details>
+
+              {model && (
+                <details id="section-darabok">
+                  <summary>Darabok ({activePieces.length})</summary>
+                  <PieceList
+                    pieces={activePieces}
+                    hoveredId={hoveredId}
+                    disabledPieces={disabledPieces}
+                    enabledCount={enabledCount}
+                    onHover={setHoveredId}
+                    onToggle={togglePiece}
+                    modelId={modelId}
+                    tier={tier}
+                  />
+                </details>
+              )}
+            </>
           )}
 
           {model && (
@@ -351,6 +489,13 @@ export default function App() {
                 installation={installation}
                 remoteImage={remoteImage}
                 selectedGroupIds={selectedGroupIds}
+                footboardDesign={{
+                  pattern: footboardPattern,
+                  uploadedImageUrl: footboardRemoteImage?.url ?? null,
+                  uploading: footboardRemoteImage?.uploading ?? false,
+                  transform: footboardTransform,
+                  label: footboardLabel,
+                }}
               />
             </div>
           )}
