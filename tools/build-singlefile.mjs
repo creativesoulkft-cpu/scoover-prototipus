@@ -12,10 +12,10 @@ import { join } from 'node:path';
 
 const outDir = 'dist-single/.tmp';
 
-// public/patterns/ képek data-URL-ként → __INLINE_ASSETS__ (src/utils/assets.js)
+// public/patterns/, public/models/, public/brand/ képek data-URL-ként → __INLINE_ASSETS__ (src/utils/assets.js)
 const inlineAssets = {};
-const MIME = { webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' };
-for (const dir of ['patterns', 'models']) {
+const MIME = { webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', svg: 'image/svg+xml' };
+for (const dir of ['patterns', 'models', 'brand']) {
   for (const file of readdirSync(join('public', dir))) {
     const ext = file.split('.').pop().toLowerCase();
     if (!MIME[ext]) continue;

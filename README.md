@@ -104,6 +104,7 @@ src/
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
 server/                     # köztes híd szerver (Node/Express) → WooCommerce Store API; lásd server/README.md
 public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
+public/brand/               # Scoover logó (SVG a fejlécben, PNG a mentett PNG vízjelén)
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)
 ```
 

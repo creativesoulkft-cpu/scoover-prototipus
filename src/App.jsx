@@ -11,6 +11,7 @@ import { DEFAULT_MODEL_ID } from './data/models/index.js';
 import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from './data/patterns/index.js';
 import { useScooterModel } from './hooks/useScooterModel.js';
 import { labelColorFor } from './utils/color.js';
+import { assetUrl } from './utils/assets.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
 import PhotoCanvas from './components/PhotoCanvas.jsx';
 import PatternGallery from './components/PatternGallery.jsx';
@@ -232,9 +233,9 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="logo">S</span>
+          <img src={assetUrl('brand/scoover-logo.svg')} alt="Scoover" className="brand-logo" />
           <div>
-            <h1>Scoover fólia-konfigurátor</h1>
+            <h1>fólia-konfigurátor</h1>
             <p className="muted">Prototípus · minta-a-darabokra vizuális mag</p>
           </div>
         </div>

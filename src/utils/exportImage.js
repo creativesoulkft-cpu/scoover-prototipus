@@ -20,10 +20,26 @@
  * (`inlineImages`), utána szerializáljuk az SVG-t.
  *
  * A vízjelet és a modell/szint/ár feliratsávot NEM az SVG-be rajzoljuk bele,
- * hanem közvetlenül Canvas 2D `fillText`-tel, a kész raszterkép fölé/alá –
- * ez megbízhatóbb, mint egyedi webfontokat egy önállóan szerializált SVG-n
- * belül rasterizáltatni (ami böngészőnként eltérően viselkedhet).
+ * hanem közvetlenül Canvas 2D `fillText`-tel/`drawImage`-dzsel, a kész
+ * raszterkép fölé/alá – ez megbízhatóbb, mint egyedi webfontokat egy
+ * önállóan szerializált SVG-n belül rasterizáltatni (ami böngészőnként
+ * eltérően viselkedhet).
  */
+import { assetUrl } from './assets.js';
+
+/** A vízjel logója (public/brand/scoover-logo.png) – egyszer töltjük be, minden exporthoz újrahasznosítva. */
+let logoImagePromise = null;
+function loadLogoImage() {
+  if (!logoImagePromise) {
+    logoImagePromise = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('A Scoover logó nem tölthető be.'));
+      img.src = assetUrl('brand/scoover-logo.png');
+    });
+  }
+  return logoImagePromise;
+}
 
 const EXPORT_SCALE = 2.2;
 const FOOTER_HEIGHT = 128;
@@ -159,7 +175,10 @@ export async function renderConfigToPng(svgEl, info) {
   if (typeof document.fonts?.ready?.then === 'function') {
     await document.fonts.ready;
   }
-  const sceneImg = await serializeSvgToImage(svgEl);
+  const [sceneImg, logoImg] = await Promise.all([
+    serializeSvgToImage(svgEl),
+    loadLogoImage().catch((e) => { console.error(e); return null; }), // eslint-disable-line no-console
+  ]);
 
   const vb = svgEl.viewBox.baseVal;
   const sceneW = Math.round((vb?.width || sceneImg.naturalWidth) * EXPORT_SCALE);
@@ -176,34 +195,53 @@ export async function renderConfigToPng(svgEl, info) {
   ctx.fillRect(0, 0, sceneW, sceneH);
   ctx.drawImage(sceneImg, 0, 0, sceneW, sceneH);
 
-  // --- vízjel: finom, félig átlátszó "pill" a jelenet jobb alsó sarkában,
-  // hogy világos képrészlet fölött is jól olvasható maradjon ---
+  // --- vízjel: a valódi Scoover logó + CTA-szöveg, finom, félig átlátszó
+  // "pill" hátérrel a jelenet jobb alsó sarkában, hogy világos képrészlet
+  // fölött is jól olvasható maradjon ---
   const u = EXPORT_SCALE / 2;
   const pad = Math.round(18 * u);
-  const wmLine1 = 'SCOOVER';
   const wmLine2 = 'Tervezd meg a tiédet: scoover.hu';
-  ctx.font = `700 ${Math.round(15 * u)}px Rajdhani, Arial, sans-serif`;
-  const w1 = ctx.measureText(wmLine1).width;
+  const logoH = Math.round(28 * u);
+  const logoW = logoImg ? logoH * (logoImg.naturalWidth / logoImg.naturalHeight) : 0;
   ctx.font = `600 ${Math.round(12 * u)}px Rajdhani, Arial, sans-serif`;
   const w2 = ctx.measureText(wmLine2).width;
-  const pillW = Math.max(w1, w2) + Math.round(28 * u);
-  const pillH = Math.round(52 * u);
+  const innerW = Math.max(logoW, w2);
+  const pillW = innerW + Math.round(28 * u);
+  const pillH = logoImg ? Math.round(62 * u) : Math.round(52 * u);
   const pillX = sceneW - pad - pillW;
   const pillY = sceneH - pad - pillH;
 
-  ctx.fillStyle = 'rgba(10,11,13,0.55)';
+  // finom árnyék + keret, hogy világos hátterű (pl. fotós nézet) jeleneten
+  // se olvadjon bele a fehéres pill háttér
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = Math.round(10 * u);
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
   roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * u));
   ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = Math.max(1, u * 0.6);
+  roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * u));
+  ctx.stroke();
 
+  const contentRight = sceneW - pad - Math.round(14 * u);
+  const contentLeft = pillX + Math.round(14 * u);
+  if (logoImg) {
+    ctx.drawImage(logoImg, contentRight - logoW, pillY + Math.round(10 * u), logoW, logoH);
+  } else {
+    // tartalék, ha a logó valamiért nem tölt be – legalább a márkanév olvasható maradjon
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#16110b';
+    ctx.font = `700 ${Math.round(15 * u)}px Rajdhani, Arial, sans-serif`;
+    ctx.fillText('SCOOVER', contentRight, pillY + Math.round(24 * u));
+  }
   ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'right';
-  const textRight = sceneW - pad - Math.round(14 * u);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `700 ${Math.round(15 * u)}px Rajdhani, Arial, sans-serif`;
-  ctx.fillText(wmLine1, textRight, pillY + Math.round(21 * u));
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#3a3040';
   ctx.font = `600 ${Math.round(12 * u)}px Rajdhani, Arial, sans-serif`;
-  ctx.fillText(wmLine2, textRight, pillY + Math.round(40 * u));
+  ctx.fillText(wmLine2, contentLeft, pillY + pillH - Math.round(14 * u));
 
   // --- alsó infósáv: modell, szint(+minta), ár ---
   ctx.fillStyle = BRAND.bg;
