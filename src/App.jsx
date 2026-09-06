@@ -496,12 +496,14 @@ export default function App() {
         )}
       </div>
 
+      {/* Saját képnél a minta "neve" a nyers fájlnév (pl. egy uuid.jpg), az
+          exportált képre az nem való – ott a semleges "Saját kép" áll. */}
       {exportPrice && (
         <ShareExportPanel
           canvasWrapRef={canvasWrapRef}
           modelName={model.name}
           tierLabel={getTier(tier)?.name ?? tier}
-          patternName={pattern?.name}
+          patternName={patternId === UPLOAD_PATTERN_ID ? 'Saját kép' : pattern?.name}
           priceText={formatHuf(exportPrice.total)}
         />
       )}

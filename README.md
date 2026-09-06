@@ -55,6 +55,11 @@ npm run build    # dist/ – statikusan hosztolható
   képen), plusz Web Share API gyorsgombok (WhatsApp, Instagram) mobilon –
   lásd `src/utils/exportImage.js`. Kliens oldali, szerver oldali mentés nincs;
   a fiókos mentés terve `src/components/ShareExportPanel.jsx` végén, kommentben.
+  A **vízjel kétrétegű**: (1) a teljes képen átfutó, 45°-os, ismétlődő
+  `SCOOVER` / `SCOOVER.HU` felirat ~11% átlátszatlansággal – ez a tényleges
+  védelem, mert kivágással sem tüntethető el; (2) a jobb alsó sarokban a logó
+  és a "Tervezd meg a tiédet: scoover.hu" CTA, teljes átlátszatlansággal, ez
+  hordozza az olvasható információt.
 
 ## Mappastruktúra
 

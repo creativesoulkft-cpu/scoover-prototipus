@@ -167,6 +167,68 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 /**
+ * 1. vízjelréteg: a teljes jelenetre feszülő, 45°-ban ismétlődő felirat.
+ *
+ * Ez az igazi másolásvédelem: a sarokjelölés egy vágással eltüntethető, ez
+ * viszont átszövi a képet, így egy kivágott részleten is ott marad a márka.
+ * Fehér betű sötét kontúrral, hogy a fotós (világos) és a vázlat (sötét)
+ * nézeten is látszódjon, de ~11% átlátszatlansággal, hogy a design maradjon
+ * a főszereplő.
+ *
+ * A felirat két, VÁLTAKOZÓ sorra van bontva ("SCOOVER" / "SCOOVER.HU")
+ * ahelyett, hogy egyetlen hosszú "SCOOVER · SCOOVER.HU" sztringet
+ * ismételnénk. Ennek geometriai oka van: a megadott 6-8%-os betűméretnél a
+ * 20 karakteres sztring 45°-ban elforgatva SZÉLESEBB, mint a kép negyede,
+ * tehát egy negyed-kivágásba sosem férne bele egy teljes példány – pont az
+ * a védelem veszne el, amiért az egész réteg készült. Két rövid sztringgel
+ * viszont a kép bármely negyedében ott van mindkettő, hiánytalanul: a
+ * márkanév és a domain is.
+ *
+ * A sorok fél lépésköznyit el vannak csúsztatva egymáshoz képest
+ * (tégla-kötés), így nem alakulnak ki üres, függőleges "folyosók".
+ */
+function drawDiagonalWatermark(ctx, w, h) {
+  const lines = ['SCOOVER', 'SCOOVER.HU'];
+  // a megadott 6-8%-os sáv alja: így fér el biztosan egy teljes példány
+  // mindkét sztringből a kép bármelyik negyedében
+  const fontSize = Math.round(w * 0.06);
+  ctx.save();
+  // csak a jelenetre – az alsó infósávba ne lógjon bele
+  ctx.beginPath();
+  ctx.rect(0, 0, w, h);
+  ctx.clip();
+
+  ctx.globalAlpha = 0.11;
+  ctx.font = `800 ${fontSize}px Rajdhani, Arial, sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+  ctx.lineWidth = Math.max(1, fontSize * 0.055);
+  ctx.lineJoin = 'round';
+
+  ctx.translate(w / 2, h / 2);
+  ctx.rotate(-Math.PI / 4);
+
+  // a lépésköz a HOSSZABB sorhoz igazodik, hogy egyik sor se érjen össze
+  const stepX = Math.max(...lines.map((t) => ctx.measureText(t).width)) * 1.2;
+  const stepY = fontSize * 1.8;
+  // a 45°-os elforgatás miatt a lefedendő terület az átló mentén nagyobb,
+  // mint maga a kép – mindkét irányban túlfuttatjuk
+  const reach = Math.hypot(w, h) / 2 + stepX;
+  let row = 0;
+  for (let y = -reach; y <= reach; y += stepY, row++) {
+    const text = lines[row % lines.length];
+    const offset = (row % 2) * (stepX / 2);
+    for (let x = -reach + offset; x <= reach; x += stepX) {
+      ctx.strokeText(text, x, y);
+      ctx.fillText(text, x, y);
+    }
+  }
+  ctx.restore();
+}
+
+/**
  * @param {SVGSVGElement} svgEl - a jelenleg megjelenített ScooterCanvas/PhotoCanvas <svg> gyökere
  * @param {{modelName:string, tierLabel:string, patternName?:string, priceText:string}} info
  * @returns {Promise<Blob>} a kész PNG kép Blob-ként
@@ -195,19 +257,27 @@ export async function renderConfigToPng(svgEl, info) {
   ctx.fillRect(0, 0, sceneW, sceneH);
   ctx.drawImage(sceneImg, 0, 0, sceneW, sceneH);
 
-  // --- vízjel: a valódi Scoover logó + CTA-szöveg, finom, félig átlátszó
-  // "pill" hátérrel a jelenet jobb alsó sarkában, hogy világos képrészlet
-  // fölött is jól olvasható maradjon ---
   const u = EXPORT_SCALE / 2;
+
+  // --- 1. vízjelréteg: átlós, ismétlődő felirat az egész jeleneten ---
+  drawDiagonalWatermark(ctx, sceneW, sceneH);
+
+  // --- 2. vízjelréteg: a valódi Scoover logó + CTA-szöveg, félig átlátszó
+  // "pill" háttérrel a jelenet jobb alsó sarkában. Ez a réteg teljesen
+  // átlátszatlan és jól olvasható: ez hordozza a kattintható információt.
+  // A `c` (= u × CORNER_SCALE) miatt a sarokjelölés 1,5-szer nagyobb, mint
+  // korábban – mobilon nézve az eredeti mérete túl apró volt. ---
+  const CORNER_SCALE = 1.5;
+  const c = u * CORNER_SCALE;
   const pad = Math.round(18 * u);
   const wmLine2 = 'Tervezd meg a tiédet: scoover.hu';
-  const logoH = Math.round(28 * u);
+  const logoH = Math.round(28 * c);
   const logoW = logoImg ? logoH * (logoImg.naturalWidth / logoImg.naturalHeight) : 0;
-  ctx.font = `600 ${Math.round(12 * u)}px Rajdhani, Arial, sans-serif`;
+  ctx.font = `600 ${Math.round(12 * c)}px Rajdhani, Arial, sans-serif`;
   const w2 = ctx.measureText(wmLine2).width;
   const innerW = Math.max(logoW, w2);
-  const pillW = innerW + Math.round(28 * u);
-  const pillH = logoImg ? Math.round(62 * u) : Math.round(52 * u);
+  const pillW = innerW + Math.round(28 * c);
+  const pillH = logoImg ? Math.round(62 * c) : Math.round(52 * c);
   const pillX = sceneW - pad - pillW;
   const pillY = sceneH - pad - pillH;
 
@@ -215,33 +285,33 @@ export async function renderConfigToPng(svgEl, info) {
   // se olvadjon bele a fehéres pill háttér
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,0.35)';
-  ctx.shadowBlur = Math.round(10 * u);
+  ctx.shadowBlur = Math.round(10 * c);
   ctx.fillStyle = 'rgba(255,255,255,0.92)';
-  roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * u));
+  roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * c));
   ctx.fill();
   ctx.restore();
   ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-  ctx.lineWidth = Math.max(1, u * 0.6);
-  roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * u));
+  ctx.lineWidth = Math.max(1, c * 0.6);
+  roundRect(ctx, pillX, pillY, pillW, pillH, Math.round(10 * c));
   ctx.stroke();
 
-  const contentRight = sceneW - pad - Math.round(14 * u);
-  const contentLeft = pillX + Math.round(14 * u);
+  const contentRight = pillX + pillW - Math.round(14 * c);
+  const contentLeft = pillX + Math.round(14 * c);
   if (logoImg) {
-    ctx.drawImage(logoImg, contentRight - logoW, pillY + Math.round(10 * u), logoW, logoH);
+    ctx.drawImage(logoImg, contentRight - logoW, pillY + Math.round(10 * c), logoW, logoH);
   } else {
     // tartalék, ha a logó valamiért nem tölt be – legalább a márkanév olvasható maradjon
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'right';
     ctx.fillStyle = '#16110b';
-    ctx.font = `700 ${Math.round(15 * u)}px Rajdhani, Arial, sans-serif`;
-    ctx.fillText('SCOOVER', contentRight, pillY + Math.round(24 * u));
+    ctx.font = `700 ${Math.round(15 * c)}px Rajdhani, Arial, sans-serif`;
+    ctx.fillText('SCOOVER', contentRight, pillY + Math.round(24 * c));
   }
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
   ctx.fillStyle = '#3a3040';
-  ctx.font = `600 ${Math.round(12 * u)}px Rajdhani, Arial, sans-serif`;
-  ctx.fillText(wmLine2, contentLeft, pillY + pillH - Math.round(14 * u));
+  ctx.font = `600 ${Math.round(12 * c)}px Rajdhani, Arial, sans-serif`;
+  ctx.fillText(wmLine2, contentLeft, pillY + pillH - Math.round(14 * c));
 
   // --- alsó infósáv: modell, szint(+minta), ár ---
   ctx.fillStyle = BRAND.bg;
