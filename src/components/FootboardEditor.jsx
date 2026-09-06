@@ -20,7 +20,7 @@ import { getFootboardFlat } from '../data/footboardFlat.js';
 import { formatHuf } from '../utils/format.js';
 
 export default function FootboardEditor({
-  model, piece, pattern, transform, label, onLabelDrag, price, includeFootboard, onIncludeFootboardChange, onBack,
+  model, piece, pattern, transform, label, onLabelDrag, price, onBack,
 }) {
   const uid = useId();
   const defId = `fbfill${uid}`;
@@ -50,7 +50,6 @@ export default function FootboardEditor({
           <strong>Taposófelület tervezése</strong>
           <p className="muted small">Külön, kültéri csúszásgátló anyagból – saját minta, kép és felirat, a roller többi részétől függetlenül.</p>
         </div>
-        <button type="button" className="btn" onClick={onBack}>← Vissza a teljes rollerhez</button>
       </div>
 
       <p className="footboard-viewnote small">
@@ -84,11 +83,8 @@ export default function FootboardEditor({
       </svg>
 
       <div className="footboard-editor-foot">
-        <label className="check">
-          <input type="checkbox" checked={includeFootboard} onChange={(e) => onIncludeFootboardChange(e.target.checked)} />
-          Taposófelület extra hozzáadása a rendeléshez
-        </label>
-        <strong className="footboard-price">+{formatHuf(price)}</strong>
+        <span className="muted small">Ez a felület a rendelésed része: <strong className="footboard-price">+{formatHuf(price)}</strong></span>
+        <button type="button" className="btn" onClick={onBack}>← Vissza a teljes rollerhez</button>
       </div>
     </div>
   );

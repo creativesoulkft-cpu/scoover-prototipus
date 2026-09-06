@@ -25,6 +25,11 @@ const DECOR_COLORS = {
   spring: '#53585f',
 };
 
+/* Fólia NÉLKÜL hagyott darab: a roller csupasz, fekete műanyaga/fémje –
+   nem sraffozás, nem "hiányzó" jelölés, hanem az, ami a valóságban látszik,
+   ha ott nincs fólia. Így a vevő azonnal látja, mit rendel és mit nem. */
+const BARE_FILL = '#111418';
+
 const SIZE_CLASSES = ['large', 'medium', 'small'];
 
 function Decor({ items }) {
@@ -65,7 +70,6 @@ export default function ScooterCanvas({
   onLabelDrag,         // (id, { dx, dy }) => void
 }) {
   const uid = useId();
-  const hatchId = `hatch${uid}`;
   const { width, height } = model.viewBox;
 
   // Csak akkor kell méretosztályonként külön def, ha a minta csempézett és a
@@ -94,11 +98,6 @@ export default function ScooterCanvas({
             scale={sizeAwareTiling ? (patternScale?.[size] ?? 1) : 1}
           />
         ))}
-        {/* sraffozás a fólia nélkül hagyott darabokhoz */}
-        <pattern id={hatchId} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-          <rect width="8" height="8" fill="#2b2e33" />
-          <line x1="0" y1="0" x2="0" y2="8" stroke="#4a4e55" strokeWidth="2" />
-        </pattern>
       </defs>
 
       <g className="decor"><Decor items={model.decor.filter((d) => !d.over)} /></g>
@@ -119,7 +118,7 @@ export default function ScooterCanvas({
             >
               <path
                 d={piece.d}
-                fill={disabled ? `url(#${hatchId})` : fillFor(pattern, defIdFor(piece.size))}
+                fill={disabled ? BARE_FILL : fillFor(pattern, defIdFor(piece.size))}
                 stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
                 strokeWidth={hovered ? 2.5 : 1}
                 strokeLinejoin="round"

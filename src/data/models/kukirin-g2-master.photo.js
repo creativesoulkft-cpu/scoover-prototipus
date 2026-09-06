@@ -29,7 +29,7 @@ export default {
       d: 'M 196 783 L 197 788 L 213 792 L 213 802 L 225 821 L 225 833 L 218 835 L 217 840 L 207 841 L 208 846 L 218 847 L 218 854 L 225 856 L 226 858 L 240 865 L 271 860 L 300 845 L 300 815 L 298 813 L 244 788 L 204 781 Z M 253 847 L 256 843 L 264 843 L 266 846 L 266 851 L 261 854 L 257 854 L 253 851 Z' },
     { id: 'rear-fender', name: 'Hátsó sárvédő', group: 'rear', size: 'small', priceGroup: 'rear-fender',
       d: 'M 76 835 L 96 834 L 133 837 L 184 850 L 186 847 L 186 843 L 177 839 L 176 844 L 163 844 L 152 839 L 138 836 L 137 831 L 141 828 L 141 826 L 136 825 L 135 823 L 104 825 Z' },
-    { id: 'front-fender', name: 'Első sárvédő', group: 'front', size: 'small',
+    { id: 'front-fender', name: 'Első sárvédő', group: 'front', size: 'small', priceGroup: 'front-fender',
       d: 'M 837 808 L 915 820 L 909 811 L 906 802 L 895 799 L 863 800 Z' },
   ],
 };

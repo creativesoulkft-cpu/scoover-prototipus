@@ -114,9 +114,9 @@ export default {
       group: "deck",
       explode: [3.7,54.9],
       size: "medium",
-      /** Ideiglenesen a "Dekk oldala" árcsoportba sorolva (a dekk alsó
-       *  fóliázott felülete) – a valódi vágófájl megérkeztével pontosítható. */
-      priceGroup: "deck-side",
+      /** Saját darab-csoport: az "Akkuház / oldalpanelek" zónába tartozik
+       *  (lásd src/data/zones.js) – a valódi vágófájl megérkeztével pontosítható. */
+      priceGroup: "battery",
       d: "M 374 690 L 660 690 L 648 709 L 386 709 Z",
     },
     {

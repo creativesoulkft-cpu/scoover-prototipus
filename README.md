@@ -15,7 +15,18 @@ npm run build    # dist/ – statikusan hosztolható
 
 ## Mit tud
 
-- 2 rollermodell (Kukirin G2, G2 Master), 11 ill. 12 fóliázható darabbal, legördülőből váltható
+- 2 rollermodell (Kukirin G2, G2 Master) évjárattal, legördülőből váltható; a
+  fóliázható darabok **6 zónába** vannak sorolva (dekk oldala, akkuház/oldalpanelek,
+  kormányoszlop, első sárvédő+villa, hátsó sárvédő+lengőkar, + taposófelület)
+- **szekciótagolt konfigurátor** (`Section`): öt jól elkülönülő kártya – A rollered /
+  Stílus / Mit fóliázunk / Taposófelület / Felrakás vagy postázás –, egyszerre egy
+  nyitva, a nyitott fejléce görgetés közben a panel tetejére tapad; minden
+  fejléc alatt egysoros magyarázat és ⓘ ikon 2–3 mondatos súgóval
+- **zónás választás** (`ZoneSelector`): alapból minden zóna kiválasztva, felül a
+  bepipált "Teljes fólia szett" sor (szettár / külön-ár / megtakarítás); egy zóna
+  kivétele kikapcsolja a szettet, a zónák saját árral jelennek meg, és a helyére
+  a "Kérem egyben — spórolj X Ft-ot" sor csúszik; "Törlés mind"; minimális
+  rendelési érték 9 900 Ft (üzenettel)
 - két termékvonal: SOLID (egyszínű vinyl) és PRINT (nyomtatott minta), külön füleken
 - 9 nyomtatott textúra két stíluskategóriában (Cyber, Motocross), színvariáns és
   sűrűség (ritka/sűrű) szerint szűrhetően; jövőbeli kategóriák (Organic, Y2K, Urban camo)
@@ -33,20 +44,27 @@ npm run build    # dist/ – statikusan hosztolható
 - saját kép feltöltése (JPG/PNG/WebP, kliens oldali kicsinyítés)
 - minta-illesztés: méret, forgatás, eltolás – minden darabra egyszerre
 - "darabok szétnyitása" nézet: a kivágott darabok szétcsúsznak, a minta velük mozog
-- vágóvonalak ki/be, darab ki/bekapcsolása kattintással/koppintással (sraffozott = fólia nélkül)
-- **állandóan látható ársáv** (`PriceBar`): élőben frissülő végösszeg, kinyitható
-  bontással (alapár + taposófelület + felrakás); asztali nézetben a jobb oszlop
-  tetejére tapad, mobilon a képernyő aljára rögzül és felfelé nyílik
-- **taposófelület** (dekk állófelülete): külön, kültéri csúszásgátló anyag, ezért a
-  darablistában kiemelve ("Prémium csúszásgátló"), alapból kikapcsolva, és a
-  ki/bekapcsolása egyben a +6 900 Ft-os extra kapcsolója is
-- **taposó-szerkesztő** (`FootboardEditor`): a "Taposó" gombra a fő előnézet
-  helyén a taposófelület nagyított, önálló nézete jelenik meg, teljesen saját
-  mintával/feltöltött képpel/felirattal (a roller fő mintájától függetlenül) –
-  "Vissza a teljes rollerhez" gombbal léphetsz ki belőle
-- **gyorsnavigáció** (`QuickNav`): rögzített gombsor (Minta / Feliratok /
-  Darabok / Taposó) a konfigurátor tetején, sima görgetéssel az adott
-  szekcióhoz; a látott/aktív szekció gombja görgetés közben kiemelődik
+- vágóvonalak ki/be; a képen egy darabra kattintva/koppintva az egész **zónája**
+  kapcsol – a fólia nélkül maradó rész a roller csupasz feketéjét mutatja
+  (vázlaton és fotón is), nem sraffozást
+- **állandóan látható ársáv** (`PriceBar`): mindig két szám –
+  "Kiválasztva: 26 800 Ft · Egyben: 39 900 Ft (−18 200)" –, a második eltűnik,
+  ha minden zóna ki van választva; kinyitható tételes bontás (zónák vagy szett,
+  taposó, felrakás, végösszeg); asztalin a jobb oszlop tetejére tapad, mobilon a
+  képernyő aljára rögzül és felfelé nyílik
+- **taposófelület** (`FootboardSection`): NEM része a szettnek, alapból nincs
+  kiválasztva, saját sor saját árral ("Kültéri csúszásgátló anyagból készül,
+  ezért külön tétel."); bekapcsolva megjelenik a "Taposófelület tervezése" gomb
+- **taposó-tervező** (`FootboardEditor`): a gombra a fő előnézet helyén a
+  taposófelület felülnézete jelenik meg a rendelkezésre álló területet
+  kitöltve, ugyanazokkal az eszközökkel (minta/saját kép, nagyítás, forgatás,
+  eltolás, felirat), de csak erre a felületre; a panel tetején tapadó
+  "← Vissza a teljes rollerhez" gomb mindig látható
+- **gyorsnavigáció** (`QuickNav`): rögzített gombsor az öt szekcióhoz; a gomb
+  megnyitja a szekciót és odagörget
+- **segítség**: "Nem tudod, melyik évjárat?" lenyíló az évjárat mellett (hely a
+  későbbi fotónak), ⓘ ikonok szekciónként, és mindig alul: "Nem boldogulsz?
+  Hívj: [TELEFONSZÁM] — vagy gyere be hozzánk Veszprémbe." (`src/data/contact.js`)
 - **felrakás** mint szolgáltatás (normál / komplex), csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
@@ -68,8 +86,10 @@ src/
   data/
     models/           # rollermodellek – EGY FÁJL = EGY MODELL
       index.js        #   regiszter: metaadat + lazy import (csak a kiválasztott töltődik)
-      kukirin-g2.js   #   darabok SVG path-ként (d), csoport, explode-irány
+      kukirin-g2.js   #   darabok SVG path-ként (d), priceGroup (→ zóna), explode-irány
       kukirin-g2-master.js
+    zones.js          # ZÓNANEVEK ÉS -LEÍRÁSOK egy helyen (munkacímek) + priceGroup → zóna leképezés
+    contact.js        # telefonszám / üzlet a "Nem boldogulsz?" sorhoz
     patterns/         # minták – EGY FÁJL = EGY MINTA
       index.js        #   regiszter
       categories.js   #   termékvonalak, stíluskategóriák (+ betűtípus, csempe-lépték), színek, sűrűség
@@ -87,19 +107,23 @@ src/
     PatternGallery.jsx  # mintaválasztó galéria
     PatternThumb.jsx    # bélyegkép (ugyanazzal a renderelővel, mint a vászon)
     UploadPanel.jsx     # saját kép feltöltése (drag&drop + fájlválasztó)
-    ModelSelector.jsx   # modellválasztó legördülő
+    Section.jsx         # akkordeon-kártya (fejléc + blurb + ⓘ súgó + tapadó fejléc)
+    ModelSection.jsx    # "A rollered": modell + évjárat + "Nem tudod, melyik évjárat?"
+    ZoneSelector.jsx    # "Mit fóliázunk": zónák, teljes szett / "Kérem egyben" sor, Törlés mind
+    FootboardSection.jsx # "Taposófelület": külön tétel + "Taposófelület tervezése" gomb
+    DeliverySection.jsx # "Felrakás vagy postázás": postázás / felrakás nálunk (normál, komplex)
+    HelpLine.jsx        # "Nem boldogulsz? Hívj: …" sor
     PatternControls.jsx # méret/forgatás/eltolás + nézeti kapcsolók
-    PieceList.jsx       # darablista, hover-kiemelés, ki/bekapcsolás
-    QuickNav.jsx        # rögzített gyorsnavigáció (Minta/Feliratok/Darabok/Taposó), aktív-szekció kiemeléssel
+    QuickNav.jsx        # rögzített gyorsnavigáció az 5 szekcióhoz (a SECTIONS lista itt van)
     FootboardEditor.jsx # taposófelület önálló, FELÜLNÉZETI tervezője (valós arány)
     CartPanel.jsx       # "Kosárba teszem" gomb + visszajelzések
-    PriceBar.jsx        # állandóan látható ársáv, árbontással és megtakarítás-sávval
+    PriceBar.jsx        # állandóan látható ársáv: "Kiválasztva · Egyben (−megtakarítás)" + tételes bontás
     ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
     FullscreenPreview.jsx # teljes képernyős, csippentéssel nagyítható előnézet
     SplitHandle.jsx     # húzható elválasztó a kép/vezérlők felosztásához (osztott nézet)
   hooks/useScooterModel.js  # lazy modellbetöltés + cache
   hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
-  hooks/useScrollSpy.js     # QuickNav aktív-szekció figyelése görgetés közben
+  hooks/useReportHeight.js  # elem magasságát CSS-változóba írja (egymás alá tapadó sávokhoz)
   hooks/useMediaQuery.js    # keskeny (osztott) elrendezés? – DOM-átrendezéshez, nem csak stílushoz
   utils/image.js            # feltöltés-validálás, kicsinyítés, világosság-mérés
   utils/color.js            # világosság → felirat-szín
@@ -126,19 +150,42 @@ tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, 
 újraszámolás) is, ezért egy szám átírása mindkét helyen azonnal érvényesül.
 
 ```js
-MODEL_PRICES          // modellenként, szintenként (SOLID / PRINT / FULL CUSTOM)
-FOOTBOARD_EXTRA_HUF   // taposófelület extra (jelenleg 6 900 Ft)
-INSTALLATION_OPTIONS  // felrakás: normál / komplex (17 000 / 25 500 Ft)
+ZONE_PRICES_HUF        // zónánkénti KÜLÖN árak (Kukirin G2, PRINT szint – ebből skálázódik a többi)
+                       //   deck-side 17 900 · panels 12 900 · stem 9 900 · front 8 900 · rear 8 500
+CANONICAL_KIT_BASE_HUF // 39 900 – a zónaárak ehhez a szettárhoz vannak belőve
+MODEL_PRICES           // TELJES SZETT ára modellenként, szintenként (SOLID / PRINT / FULL CUSTOM)
+FOOTBOARD_EXTRA_HUF    // taposófelület, külön tétel (9 900 Ft) – nincs a szettben
+MIN_ORDER_HUF          // minimális rendelési érték (9 900 Ft) részleges rendelésnél
+INSTALLATION_OPTIONS   // felrakás: normál / komplex
 ```
 
-**Ár módosítása:** írd át a számot a fenti tömbökben/objektumokban. Kész.
+**Hogyan számol:** a zóna ára = `ZONE_PRICES_HUF[zóna] × MODEL_PRICES[modell][szint] / 39 900`
+(50 Ft-ra kerekítve). A szett ára = `MODEL_PRICES[modell][szint]`. A
+megtakarítás = a modellen létező zónák külön-árának összege − szettár; ez
+automatikusan jelenik meg a "Teljes fólia szett" és a "Kérem egyben" sorban.
+Példa: a G2 PRINT öt zónája külön 58 100 Ft, a szett 39 900 Ft → 18 200 Ft.
+Ha más megtakarítást akarsz látni, a `ZONE_PRICES_HUF` (vagy a `MODEL_PRICES`)
+számait írd át – kód nem változik.
 
-**Új modell felvétele:** egy új sor a `MODEL_PRICES`-ba, ahol a kulcs a modell
-id-ja a `src/data/models/index.js` regiszterből, és mind a három szintnek van ára:
+**Zónanevek és leírások:** `src/data/zones.js` – EGY helyen, munkacímek.
+Ugyanitt a `groups` lista mondja meg, melyik darab-csoport (`priceGroup` a
+modellfájlokban) melyik zónába tartozik. A taposófelület nem zóna, hanem külön
+tétel (`priceGroup: 'footboard'`).
+
+**Telefonszám / üzlet** a "Nem boldogulsz?" sorhoz: `src/data/contact.js`.
+
+**Új modell felvétele:** (1) modellfájl a `src/data/models/` mappában, ahol
+minden darab `priceGroup`-ja a `zones.js` valamelyik csoportja (vagy
+`footboard`); (2) egy sor a `MODEL_REGISTRY`-be az `index.js`-ben, benne a
+`years` tömbbel; (3) egy sor a `MODEL_PRICES`-ba mind a három szint árával:
 
 ```js
 'ninebot-max-g2': { name: 'Segway Ninebot Max G2', solid: 26900, print: 42900, custom: 62900 },
 ```
+
+**Új évjárat:** a modell `years` tömbjébe egy új szám a `src/data/models/index.js`
+regiszterben. (Ha egy évjárat más geometriát kap, az külön modellfájl és
+külön regiszter-sor.)
 
 **Új szint felvétele:** egy új bejegyzés a `TIERS` tömbbe (`{ id, name, description }`),
 és minden `MODEL_PRICES`-sorba az új szint ára. A validáció, az ársáv és a
@@ -214,8 +261,9 @@ elem koordináta-rendszerét követi, a "rányomtatott" részlet együtt mozog a
 ## Új modell / új minta hozzáadása (kódmódosítás nélkül)
 
 **Modell:** új fájl a `src/data/models/` mappába a meglévők szerkezetével
-(`id, name, brand, viewBox, decor[], pieces[]`; minden darab `id, name, group, explode, d`),
-majd egy sor a `MODEL_REGISTRY` tömbbe. A build automatikusan külön chunkot készít belőle.
+(`id, name, brand, viewBox, decor[], pieces[]`; minden darab `id, name, group, priceGroup, explode, d`
+– a `priceGroup` sorolja zónába, lásd `src/data/zones.js`), majd egy sor a
+`MODEL_REGISTRY` tömbbe (`years` évjáratlistával) és egy a `MODEL_PRICES`-ba. A build automatikusan külön chunkot készít belőle.
 
 **Nyomtatott textúra:** WebP a `public/patterns/` mappába (+ `.thumb.webp`), és egy sor a
 `print-textures.js` listájába (`category`, `colorway`, `density`, `luminance`, opcionálisan
@@ -254,7 +302,9 @@ fejlesztés közben látszik, mi mérődne, de adat sehova nem megy.
 | `tier_selected` | szintváltás (a mintaválasztásból adódik) | `tier` |
 | `pattern_selected` | konkrét minta választása | `pattern_name`, `pattern_id` |
 | `image_uploaded` | saját kép feltöltése | `image_width/height`, `focus_piece` |
-| `footboard_toggled` | taposó-extra be/ki (ársávból ÉS darablistából is) | `included` |
+| `zone_toggled` | egy zóna be/ki (listából vagy a képre koppintva) | `zone`, `included` |
+| `kit_toggled` | teljes szett vissza ("Kérem egyben") / Törlés mind | `full_kit` |
+| `footboard_toggled` | taposó-extra be/ki (szekcióból vagy a képre koppintva) | `included` |
 | `design_saved` | terv mentése képként | `model`, `tier`, `method` |
 | `add_to_cart` | sikeres kosárba helyezés | `value`, `currency`, `full_kit`, `piece_count` |
 

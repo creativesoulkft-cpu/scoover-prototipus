@@ -109,14 +109,16 @@ export default function PhotoCanvas({
           clipPath={`url(#${clipId})`} filter={`url(#${filterId})`} />
       </g>
 
-      {/* interakció + vágóvonal/kiemelés: átlátszó path-ok legfelül */}
+      {/* interakció + vágóvonal/kiemelés: átlátszó path-ok legfelül. A fólia
+          nélkül hagyott darabon NINCS sötétítés: a fotó eredeti, csupasz
+          (fekete) felülete látszik – pont az, amit a vevő a valóságban kapna. */}
       <g className="hit">
         {view.pieces.map((piece) => {
           const disabled = disabledPieces?.has(piece.id);
           const hovered = hoveredId === piece.id;
           return (
             <path key={piece.id} d={piece.d} fillRule="evenodd"
-              fill={disabled ? 'rgba(0,0,0,0.35)' : 'transparent'}
+              fill="transparent"
               stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
               strokeWidth={hovered ? 2.5 : 1} vectorEffect="non-scaling-stroke"
               style={{ cursor: 'pointer' }}

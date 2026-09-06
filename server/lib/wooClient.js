@@ -45,9 +45,10 @@ function buildScooverPayload(cartConfig, unitPriceHuf) {
     // csak ha az extra be van kapcsolva – lásd src/components/FootboardEditor.jsx
     footboard: cartConfig.footboard ?? null,
     installation: cartConfig.installation ?? 'none',
-    // hiányzó/undefined = teljes kit (minden darabcsoport); egyébként a
-    // ténylegesen kiválasztott (à la carte) darabcsoport-id-k listája.
-    selectedGroupIds: cartConfig.selectedGroupIds ?? null,
+    // hiányzó/undefined = teljes fólia szett (minden zóna); egyébként a
+    // ténylegesen kiválasztott zónák id-listája (src/data/zones.js).
+    selectedZoneIds: cartConfig.selectedZoneIds ?? null,
+    year: cartConfig.year ?? null,
     unitPriceHuf,
     currency: 'HUF',
     requiresApproval: cartConfig.tier === 'custom',

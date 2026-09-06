@@ -6,16 +6,22 @@
  * Az árazási logika sehol máshol nem duplikálódik: egy szám átírása itt
  * mindenhol azonnal érvényesül.
  *
- * ÁRVÁLTOZTATÁS:  MODEL_PRICES / FOOTBOARD_EXTRA_HUF / INSTALLATION_OPTIONS.
- * ÚJ MODELL:      egy új bejegyzés a MODEL_PRICES-ba (kulcs = a modell id-ja
- *                 a src/data/models/index.js regiszterben), mind a három
- *                 szint árával. Kódot nem kell módosítani.
- * ÚJ SZINT:       egy új bejegyzés a TIERS tömbbe, és minden MODEL_PRICES
- *                 sorba az új szint ára. A validáció és az ársáv adatból
- *                 dolgozik, ezért magától felveszi.
+ * ┌────────────────────────────────────────────────────────────────────────┐
+ * │ ÁRVÁLTOZTATÁS – hol?                                                    │
+ * │   MODEL_PRICES          teljes fólia szett ára modellenként, szintenként │
+ * │   ZONE_PRICES_HUF       zónánkénti ár (a "Mit fóliázunk" sorai)          │
+ * │   FOOTBOARD_EXTRA_HUF   taposófelület (külön tétel)                      │
+ * │   INSTALLATION_OPTIONS  felrakás (normál / komplex)                      │
+ * │   MIN_ORDER_HUF         minimális rendelési érték                        │
+ * │ ZÓNANEVEK: src/data/zones.js (ott, és csak ott).                        │
+ * │ ÚJ MODELL: egy sor a MODEL_PRICES-ba (kulcs = a modell id-ja a           │
+ * │   src/data/models/index.js regiszterben) – a zónaárak a szett árából     │
+ * │   arányosan levezetődnek, külön nem kell megadni őket.                   │
+ * └────────────────────────────────────────────────────────────────────────┘
  *
  * Minden összeg forintban, bruttó, egész szám.
  */
+import { ZONES, ZONE_IDS, zoneOfGroup } from './data/zones.js';
 
 export const CURRENCY = 'HUF';
 
@@ -30,7 +36,7 @@ export const TIERS = [
 export const TIER_IDS = TIERS.map((t) => t.id);
 
 /**
- * Modellenkénti, szintenkénti bruttó ár (Ft).
+ * A TELJES FÓLIA SZETT bruttó ára modellenként, szintenként (Ft).
  *
  * A kulcs a rollermodell id-ja. A `name` csak kiíráshoz kell ott, ahol a
  * modellregiszter nem érhető el (pl. szerver oldali rendelés-export).
@@ -48,137 +54,36 @@ export const MODEL_PRICES = {
 };
 
 /**
- * Darabonkénti (à la carte) árazás.
+ * ZÓNÁNKÉNTI ÁRAK – a Kukirin G2 / PRINT szint tényleges árai (Ft).
  *
- * A `PRICE_GROUPS` a G2 PRINT szint tényleges, Szilárd által megadott
- * darabáraiból származik – ez a KANONIKUS árlista, minden más modell/szint
- * darabára ebből egyetlen szorzóval (`egyedárszorzó`) van levezetve:
+ * Ez a KANONIKUS árlista: minden más modell/szint zónaára ebből, egyetlen
+ * szorzóval van levezetve, hogy az arányok minden modellen ugyanazok
+ * maradjanak és csak egy helyen kelljen árat karbantartani:
  *
- *   darabár(modell, szint, csoport) = kerekítve50(
- *     csoport.canonicalPriceHuf / CANONICAL_KIT_BASE_HUF × MODEL_PRICES[modell][szint]
- *   )
+ *   zónaár(modell, szint) = kerekítve50( ár_itt / CANONICAL_KIT_BASE_HUF × MODEL_PRICES[modell][szint] )
  *
- * A csoport `id`-ja egyben a fizikai darab-azonosító (piece id) is a
- * modell-adatfájlokban ott, ahol egy csoporthoz csak egyetlen fizikai darab
- * tartozik. Ahol egy néven TÖBB fizikai darab van (pl. "Dekk oldala" = a
- * dekk oldala + az akkudoboz alja), azt a modell-adatfájlban a darabok saját
- * `priceGroup` mezője köti ehhez a csoport-id-hoz – lásd
- * src/data/models/kukirin-g2.js. EZ AZ IDEIGLENES, BECSÜLT FELOSZTÁS: a
- * tényleges vágófájlban ~24 fizikai darab lesz, ezeknek a pontos
- * hozzárendelése később, csak az adatfájlok (itt a `PRICE_GROUPS` lista és
- * a modellek `priceGroup` mezői) bővítésével történik – ez a fájl, a
- * kedvezmény-logika nem változik.
+ * A kulcsok a src/data/zones.js zóna-id-jai. Ha egy zónát máshogy akarsz
+ * árazni egy adott modellen, itt nem tudod – ez szándékos: az árazás egy
+ * arányrendszer, nem modellenkénti kézi lista.
  */
-export const PRICE_GROUPS = [
-  { id: 'deck-side', name: 'Dekk oldala', canonicalPriceHuf: 27900 },
-  { id: 'stem', name: 'Kormányoszlop', canonicalPriceHuf: 11900 },
-  { id: 'rear-fender', name: 'Hátsó sárvédő', canonicalPriceHuf: 9900 },
-  { id: 'joint', name: 'Csuklóborítás (hajtás)', canonicalPriceHuf: 7900 },
-  { id: 'fork', name: 'Első lengőkar-borítás', canonicalPriceHuf: 7900 },
-  { id: 'neck', name: 'Dekk-nyak / első lengőkar-borítás', canonicalPriceHuf: 7900 },
-  { id: 'rear-swingarm', name: 'Hátsó lengőkar-borítás', canonicalPriceHuf: 7900 },
-  { id: 'display', name: 'Kormány-középrész (kijelzőborítás)', canonicalPriceHuf: 4900 },
-];
+export const ZONE_PRICES_HUF = {
+  'deck-side': 17900,
+  panels: 12900,
+  stem: 9900,
+  front: 8900,
+  rear: 8500,
+};
 
-/** A kanonikus árlista alapja: a G2 PRINT "teljes kit" ára (MODEL_PRICES['kukirin-g2'].print). */
+/** A kanonikus zónaárlista alapja: a G2 PRINT teljes szett ára (MODEL_PRICES['kukirin-g2'].print). */
 export const CANONICAL_KIT_BASE_HUF = 39900;
 
-/** Minimális rendelési érték darabonkénti vásárlásnál. */
+/** Minimális rendelési érték, ha nem a teljes szettet veszi. */
 export const MIN_ORDER_HUF = 9900;
 
-export const PRICE_GROUP_IDS = PRICE_GROUPS.map((g) => g.id);
-
-function round50(n) {
-  return Math.round(n / 50) * 50;
-}
-
-export function getPriceGroup(id) {
-  return PRICE_GROUPS.find((g) => g.id === id) ?? null;
-}
-
-/** Egy darabcsoport ára egy adott modell/szint kombinációra – a kanonikus arányból levezetve ("egyedárszorzó"). */
-export function getGroupPrice(model, tier, groupId) {
-  const group = getPriceGroup(groupId);
-  const kitBase = MODEL_PRICES[model]?.[tier];
-  if (!group || typeof kitBase !== 'number') return null;
-  return round50((group.canonicalPriceHuf / CANONICAL_KIT_BASE_HUF) * kitBase);
-}
-
-/** Az összes darabcsoport ára egy adott modell/szint kombinációra, kiíráshoz/ellenőrzéshez. */
-export function getGroupPrices(model, tier) {
-  return PRICE_GROUPS.map((g) => ({ id: g.id, name: g.name, price: getGroupPrice(model, tier, g.id) }));
-}
-
-/**
- * Darabonkénti (à la carte) végösszeg folytonos, darabszám-arányos
- * kedvezménnyel: 1 darabnál nincs kedvezmény (listaár), és a kedvezmény
- * lineárisan nő a kiválasztott darabok számával, amíg az ÖSSZES csoport
- * kiválasztásánál pontosan a "teljes kit" árat nem adja (nincs kemény
- * sávhatár, nincs kitalált százalék – a két végpontból, a listaár-összegből
- * és a kit árból következik).
- *
- * @param {string} model
- * @param {string} tier
- * @param {string[]} selectedGroupIds
- * @returns {number}
- */
-export function calculatePartialTotal(model, tier, selectedGroupIds) {
-  const all = getGroupPrices(model, tier);
-  const listSum = all.reduce((s, g) => s + g.price, 0);
-  const kitBase = MODEL_PRICES[model]?.[tier] ?? 0;
-  const n = all.length;
-  const k = selectedGroupIds.length;
-  if (k === 0) return 0;
-  if (k >= n) return kitBase; // mind kiválasztva → pontosan a teljes kit ára
-
-  const selectedSum = all
-    .filter((g) => selectedGroupIds.includes(g.id))
-    .reduce((s, g) => s + g.price, 0);
-  const maxDiscount = listSum > 0 ? 1 - kitBase / listSum : 0;
-  const t = n > 1 ? (k - 1) / (n - 1) : 1; // 0 (1 darab) .. 1 (mind, de azt a fenti ág már lekezelte)
-  const discount = maxDiscount * t;
-  return Math.round(selectedSum * (1 - discount));
-}
-
-/**
- * Átláthatósági infó a Darabok listához és az ársávhoz: mennyi a JELENLEGI
- * kedvezmény a kiválasztott darabok listaár-összegéhez képest, és mekkora a
- * teljes kit ára/kedvezménye végpontként – hogy világos legyen, miért éri meg
- * több darabot bepipálni (lásd `calculatePartialTotal` fejléce).
- * @returns {{count:number, totalGroups:number, total:number, listSum:number,
- *            selectedListSum:number, kitPrice:number|null, discountPct:number,
- *            maxDiscountPct:number, isFullKit:boolean}}
- */
-export function getPartialPricingInfo(model, tier, selectedGroupIds) {
-  const all = getGroupPrices(model, tier);
-  const n = all.length;
-  const k = selectedGroupIds.length;
-  const kitPrice = MODEL_PRICES[model]?.[tier] ?? null;
-  const listSum = all.reduce((s, g) => s + g.price, 0);
-  const selectedListSum = all
-    .filter((g) => selectedGroupIds.includes(g.id))
-    .reduce((s, g) => s + g.price, 0);
-  const total = calculatePartialTotal(model, tier, selectedGroupIds);
-  const discountPct = selectedListSum > 0 ? Math.round((1 - total / selectedListSum) * 100) : 0;
-  const maxDiscountPct = listSum > 0 && kitPrice != null ? Math.round((1 - kitPrice / listSum) * 100) : 0;
-  return { count: k, totalGroups: n, total, listSum, selectedListSum, kitPrice, discountPct, maxDiscountPct, isFullKit: k >= n };
-}
-
-/**
- * Minimumrendelés-ellenőrzés darabonkénti vásárlásnál. A taposófelület
- * extrája is beleszámít (a vevő azzal is elérheti a minimumot).
- * @returns {{ok:boolean, message?:string}}
- */
-export function checkMinimumOrder(total) {
-  if (total <= 0 || total >= MIN_ORDER_HUF) return { ok: true };
-  return {
-    ok: false,
-    message: `A minimális rendelési érték ${MIN_ORDER_HUF.toLocaleString('hu-HU')} Ft – válassz még egy darabot, vagy add hozzá a taposófelületet.`,
-  };
-}
-
-/** Taposófelület (dekk állófelülete) kültéri csúszásgátló anyagból – opcionális, alapból KI. */
-export const FOOTBOARD_EXTRA_HUF = 6900;
+/** Taposófelület (dekk állófelülete) kültéri csúszásgátló anyagból – külön
+ *  tétel, a teljes szett SEM tartalmazza, alapból KI. Fix ár, szinttől független
+ *  (más anyag, más gyártás). */
+export const FOOTBOARD_EXTRA_HUF = 9900;
 
 /** Felrakás mint szolgáltatás – csak személyes átvétellel. */
 export const INSTALLATION_OPTIONS = [
@@ -193,6 +98,10 @@ export const INSTALLATION_IDS = INSTALLATION_OPTIONS.map((o) => o.id);
 
 /** Egyedi (CUSTOM) feltöltéshez elvárt minimum pixelméret, nyomtatási minőség miatt. */
 export const MIN_CUSTOM_IMAGE_PX = { width: 2000, height: 2000 };
+
+function round50(n) {
+  return Math.round(n / 50) * 50;
+}
 
 export class PricingError extends Error {
   constructor(message, errors = [message]) {
@@ -215,11 +124,80 @@ export function hasPrice(modelId) {
   return Object.prototype.hasOwnProperty.call(MODEL_PRICES, modelId);
 }
 
+/** Egy zóna ára egy adott modell/szint kombinációra – a kanonikus arányból levezetve. */
+export function getZonePrice(model, tier, zoneId) {
+  const canonical = ZONE_PRICES_HUF[zoneId];
+  const kitBase = MODEL_PRICES[model]?.[tier];
+  if (typeof canonical !== 'number' || typeof kitBase !== 'number') return null;
+  return round50((canonical / CANONICAL_KIT_BASE_HUF) * kitBase);
+}
+
+/**
+ * Az összes (vagy a megadott) zóna ára egy modell/szint kombinációra.
+ * @param {string} model
+ * @param {string} tier
+ * @param {string[]} [zoneIds] alapból az összes zóna
+ */
+export function getZonePrices(model, tier, zoneIds = ZONE_IDS) {
+  return ZONES
+    .filter((z) => zoneIds.includes(z.id))
+    .map((z) => ({ id: z.id, name: z.name, price: getZonePrice(model, tier, z.id) }));
+}
+
+/**
+ * A teljes szett és a zónák viszonya egy modell/szint kombinációra:
+ *   listSum   – az elérhető zónák külön-külön összege ("külön darabonként")
+ *   kitPrice  – a teljes fólia szett ára
+ *   savings   – mennyit spórol a vevő a szettel a külön-külön árhoz képest
+ * Ez a szám jelenik meg a "Teljes fólia szett" sorban és az ársáv "(−X)"
+ * részében – MINDIG ugyanez a két végpont, ezért soha nem tér el a két helyen.
+ * @param {string} model
+ * @param {string} tier
+ * @param {string[]} [availableZoneIds] a modellen ténylegesen létező zónák
+ */
+export function getKitInfo(model, tier, availableZoneIds = ZONE_IDS) {
+  const zones = getZonePrices(model, tier, availableZoneIds);
+  const listSum = zones.reduce((s, z) => s + (z.price ?? 0), 0);
+  const kitPrice = MODEL_PRICES[model]?.[tier] ?? null;
+  return {
+    zones,
+    listSum,
+    kitPrice,
+    savings: kitPrice != null ? Math.max(0, listSum - kitPrice) : 0,
+  };
+}
+
+/**
+ * Minimumrendelés-ellenőrzés részleges (nem teljes szettes) vásárlásnál. A
+ * taposófelület és a felrakás is beleszámít a végösszegbe.
+ * @returns {{ok:boolean, message?:string}}
+ */
+export function checkMinimumOrder(total) {
+  if (total <= 0 || total >= MIN_ORDER_HUF) return { ok: true };
+  return { ok: false, message: `A minimális rendelési érték ${MIN_ORDER_HUF.toLocaleString('hu-HU')} Ft.` };
+}
+
+/**
+ * A rendelés-konfiguráció zónalistája. Két forma elfogadott:
+ *   selectedZoneIds  – a kiválasztott zónák id-i (ezt küldi a konfigurátor);
+ *   selectedGroupIds – RÉGI forma: darab-csoport id-k (visszafelé kompatibilitás:
+ *                      a csoportokat a zónájukra képezzük).
+ * `undefined` = teljes szett (minden zóna).
+ * @returns {string[]|undefined}
+ */
+function resolveZoneIds(config) {
+  if (Array.isArray(config.selectedZoneIds)) return config.selectedZoneIds;
+  if (Array.isArray(config.selectedGroupIds)) {
+    return [...new Set(config.selectedGroupIds.map((g) => zoneOfGroup(g)?.id).filter(Boolean))];
+  }
+  return undefined;
+}
+
 /**
  * Csak azt ellenőrzi, ami az árat ténylegesen befolyásolja (modell, szint,
- * felrakás). Így `calculatePrice` már akkor is hívható, amikor a felhasználó
- * még nem választott színt/kategóriát/képet – a teljes, beküldéshez kötelező
- * mezőkészletet a `validateConfigShape` ellenőrzi.
+ * felrakás, zónák). Így `calculatePrice` már akkor is hívható, amikor a
+ * felhasználó még nem választott színt/kategóriát/képet – a teljes,
+ * beküldéshez kötelező mezőkészletet a `validateConfigShape` ellenőrzi.
  * @returns {string[]}
  */
 function validatePriceInputs(config) {
@@ -241,9 +219,10 @@ function validatePriceInputs(config) {
       && !INSTALLATION_IDS.includes(config.installation)) {
     errors.push(`Ismeretlen felrakás-opció: "${config.installation}".`);
   }
-  if (config.selectedGroupIds !== undefined) {
-    const unknown = config.selectedGroupIds.filter((id) => !PRICE_GROUP_IDS.includes(id));
-    if (unknown.length) errors.push(`Ismeretlen darab-csoport: ${unknown.join(', ')}.`);
+  const zoneIds = resolveZoneIds(config);
+  if (zoneIds !== undefined) {
+    const unknown = zoneIds.filter((id) => !ZONE_IDS.includes(id));
+    if (unknown.length) errors.push(`Ismeretlen zóna: ${unknown.join(', ')}.`);
   }
   return errors;
 }
@@ -283,25 +262,34 @@ export function meetsMinResolution(width, height, min = MIN_CUSTOM_IMAGE_PX) {
  * EZ A FÜGGVÉNY SOHA nem olvassa be – az csak megjelenítési előnézet, a
  * tényleges ár mindig itt, ebből az adatból számolódik újra.
  *
- * Ha `selectedGroupIds` nincs megadva (vagy az összes csoportot tartalmazza),
- * a teljes kit ára számít (mint korábban). Ha részleges (nem mind a 8
- * csoport van kiválasztva), az ár a darabonkénti, folytonos kedvezményű
- * összeg (`calculatePartialTotal`) – ekkor a végösszegre a minimumrendelés-
- * szabály is vonatkozik (lásd `minimumOrder` a válaszban).
+ * Zónák: ha `selectedZoneIds` hiányzik, vagy az összes elérhető zónát
+ * tartalmazza (`availableZoneIds`, alapból mind), a TELJES SZETT ára számít.
+ * Egyébként a kiválasztott zónák árának egyszerű összege – ekkor a
+ * végösszegre a minimumrendelés-szabály is vonatkozik.
  *
- * @param {{model:string, tier:string, includeFootboard?:boolean, installation?:string, selectedGroupIds?:string[]}} config
- * @returns {{currency:string, base:number, footboard:number, installation:number,
- *            installationId:string, total:number, isFullKit:boolean,
+ * A taposófelület a szettnek SEM része: mindig külön tétel.
+ *
+ * @param {{model:string, tier:string, includeFootboard?:boolean, installation?:string,
+ *          selectedZoneIds?:string[], availableZoneIds?:string[]}} config
+ * @returns {{currency:string, base:number, zones:Array<{id:string,name:string,price:number}>,
+ *            footboard:number, installation:number, installationId:string, total:number,
+ *            isFullKit:boolean, kit:{listSum:number, kitPrice:number|null, savings:number},
  *            minimumOrder:{ok:boolean,message?:string}}}
  */
 export function calculatePrice(config) {
   const errors = validatePriceInputs(config);
   if (errors.length) throw new PricingError(errors[0], errors);
 
-  const isFullKit = config.selectedGroupIds === undefined || config.selectedGroupIds.length >= PRICE_GROUP_IDS.length;
+  const available = Array.isArray(config.availableZoneIds) ? config.availableZoneIds : ZONE_IDS;
+  const requested = resolveZoneIds(config);
+  const selected = requested === undefined ? available : requested.filter((id) => available.includes(id));
+  const isFullKit = available.every((id) => selected.includes(id));
+  const kit = getKitInfo(config.model, config.tier, available);
+  const zones = getZonePrices(config.model, config.tier, selected);
+
   const base = isFullKit
     ? MODEL_PRICES[config.model][config.tier]
-    : calculatePartialTotal(config.model, config.tier, config.selectedGroupIds);
+    : zones.reduce((s, z) => s + (z.price ?? 0), 0);
   const footboard = config.includeFootboard ? FOOTBOARD_EXTRA_HUF : 0;
   const installationId = config.installation ?? 'none';
   const installation = getInstallation(installationId).price;
@@ -310,11 +298,13 @@ export function calculatePrice(config) {
   return {
     currency: CURRENCY,
     base,
+    zones,
     footboard,
     installation,
     installationId,
     total,
     isFullKit,
+    kit: { listSum: kit.listSum, kitPrice: kit.kitPrice, savings: kit.savings },
     minimumOrder: isFullKit ? { ok: true } : checkMinimumOrder(total),
   };
 }

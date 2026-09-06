@@ -16,7 +16,7 @@ import { trackAddToCart } from '../utils/analytics.js';
 
 export default function CartPanel({
   modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
-  selectedGroupIds, footboardDesign,
+  selectedZoneIds, availableZoneIds, year, footboardDesign,
 }) {
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [message, setMessage] = useState(null);
@@ -26,7 +26,7 @@ export default function CartPanel({
   let price = null;
   let priceError = null;
   try {
-    price = calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedGroupIds });
+    price = calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds });
   } catch (e) {
     priceError = e.message;
   }
@@ -45,13 +45,13 @@ export default function CartPanel({
     setErrors([]);
     try {
       const config = buildCartConfig({
-        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage, selectedGroupIds,
-        footboardDesign,
+        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+        selectedZoneIds, availableZoneIds, year, footboardDesign,
       });
       const res = await addToCart(config);
       trackAddToCart({
         modelName, tier, total: price?.total,
-        isFullKit: price?.isFullKit, pieceCount: selectedGroupIds?.length,
+        isFullKit: price?.isFullKit, pieceCount: selectedZoneIds?.length,
       });
       setResult(res);
       setStatus('success');

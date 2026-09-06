@@ -1,50 +1,38 @@
 /**
- * Rögzített gyorsnavigációs sáv: Minta / Darabok / Feliratok a megfelelő
- * oldalsáv-szekcióhoz görget (smooth scroll, nyitja is, ha zárva volt); a
- * Taposó gomb ehelyett a taposó-szerkesztő nézetet kapcsolja be/ki – lásd
- * FootboardEditor.jsx. A görgetéssel elért szekció gombja automatikusan
- * kiemelődik (useScrollSpy).
+ * Rögzített gyorsnavigációs sáv az 5 főszekcióhoz. Egy gomb megnyitja az
+ * adott szekciót (egyszerre csak egy lehet nyitva – a szülő intézi), és
+ * odagörget. A nyitott szekció gombja kiemelt.
+ *
+ * A szekciók listája és sorrendje EGY helyen, itt – az App.jsx ugyanezeket az
+ * id-kat használja a kártyáknál.
  */
-import { useScrollSpy } from '../hooks/useScrollSpy.js';
+import { useRef } from 'react';
+import { useReportHeight } from '../hooks/useReportHeight.js';
 
-const SECTIONS = [
-  { id: 'section-minta', label: 'Minta' },
-  { id: 'section-darabok', label: 'Darabok' },
-  { id: 'section-feliratok', label: 'Feliratok' },
+export const SECTIONS = [
+  { id: 'section-model', label: 'A rollered' },
+  { id: 'section-style', label: 'Stílus' },
+  { id: 'section-zones', label: 'Mit fóliázunk' },
+  { id: 'section-footboard', label: 'Taposó' },
+  { id: 'section-delivery', label: 'Felrakás' },
 ];
 
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (el.tagName === 'DETAILS') el.open = true;
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-export default function QuickNav({ footboardActive, onToggleFootboard, footboardAvailable }) {
-  const activeId = useScrollSpy(SECTIONS.map((s) => s.id));
-
+export default function QuickNav({ activeId, onSelect }) {
+  const ref = useRef(null);
+  useReportHeight(ref, '--quick-nav-h');
   return (
-    <nav className="quick-nav" aria-label="Gyorsnavigáció">
+    <nav className="quick-nav" aria-label="Gyorsnavigáció" ref={ref}>
       {SECTIONS.map((s) => (
         <button
           key={s.id}
           type="button"
-          className={`quick-nav-btn${activeId === s.id && !footboardActive ? ' active' : ''}`}
-          onClick={() => scrollToSection(s.id)}
+          className={`quick-nav-btn${activeId === s.id ? ' active' : ''}`}
+          aria-current={activeId === s.id ? 'true' : undefined}
+          onClick={() => onSelect(s.id)}
         >
           {s.label}
         </button>
       ))}
-      {footboardAvailable && (
-        <button
-          type="button"
-          className={`quick-nav-btn footboard${footboardActive ? ' active' : ''}`}
-          title="Taposófelület tervezése"
-          onClick={onToggleFootboard}
-        >
-          Taposó
-        </button>
-      )}
     </nav>
   );
 }

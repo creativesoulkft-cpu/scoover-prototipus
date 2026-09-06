@@ -29,17 +29,21 @@ function serializeLabel(l) {
  * @param {boolean} p.includeFootboard - taposófelület extra (a deck-top darab állapota)
  * @param {'none'|'normal'|'complex'} p.installation - felrakás mint szolgáltatás
  * @param {{url:string, width:number, height:number}|null} p.remoteImage - a szerverre már feltöltött CUSTOM kép
- * @param {string[]} [p.selectedGroupIds] - bekapcsolt darabár-csoportok; hiányzó/teljes esetén a teljes kit ára számít
+ * @param {string[]} [p.selectedZoneIds] - bekapcsolt zónák (src/data/zones.js); hiányzó/teljes esetén a teljes szett ára számít
+ * @param {string[]} [p.availableZoneIds] - az ezen a modellen létező zónák (a "teljes szett" viszonyítási alapja)
+ * @param {number|null} [p.year] - a roller évjárata (csak a rendelésbe kerül, árat nem befolyásol)
  * @param {{pattern:object|null, uploadedImageUrl:string|null, transform:object, label:object}} [p.footboardDesign] -
  *   a taposófelület SAJÁT (a roller mintájától független) minta/kép/transzformáció/felirat állapota – lásd FootboardEditor.jsx
  * @returns {object} a kosárnak küldendő konfiguráció, calculatedPrice-szal együtt
  */
 export function buildCartConfig({
-  modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage, selectedGroupIds,
-  footboardDesign,
+  modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
+  selectedZoneIds, availableZoneIds, year, footboardDesign,
 }) {
   const config = { model: modelId, tier };
-  if (selectedGroupIds) config.selectedGroupIds = selectedGroupIds;
+  if (year != null) config.year = year;
+  if (selectedZoneIds) config.selectedZoneIds = selectedZoneIds;
+  if (availableZoneIds) config.availableZoneIds = availableZoneIds;
 
   if (tier === 'print') {
     config.category = pattern?.category ?? null;

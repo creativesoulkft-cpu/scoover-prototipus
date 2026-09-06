@@ -125,7 +125,7 @@ export default {
       explode: [-22.3,50.3],
       size: "large",
       /** Ideiglenesen a "Dekk oldala" árcsoportba sorolva – lásd kukirin-g2.js. */
-      priceGroup: "deck-side",
+      priceGroup: "battery",
       d: "M 248 423 L 652 423 L 640 442 L 260 442 Z",
     },
     {
@@ -150,11 +150,11 @@ export default {
       id: "front-fender",
       name: "Első sárvédő",
       group: "front",
-      // Nincs saját sora Szilárd G2 PRINT táblázatában – egyelőre árazatlan
-      // (a fóliázása vizuálisan ki/bekapcsolható, de nem része az à la carte
-      // darab-választásnak), amíg a pontos darab-hozzárendelés meg nem érkezik.
+      // Az "Első sárvédő + villa" zóna része (lásd src/data/zones.js) – a
+      // G2-n nincs első sárvédő, a Masteren van, a zóna ára közös.
       explode: [54.6,6.8],
       size: "small",
+      priceGroup: "front-fender",
       d: "M 844.6 336.1 A 96 96 0 0 1 943.1 445.4 L 931.2 443.7 A 84 84 0 0 0 845.1 348.1 Z",
     },
   ],

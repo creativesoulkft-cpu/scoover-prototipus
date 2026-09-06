@@ -64,6 +64,12 @@ export const trackPatternSelected = (pattern) => track('pattern_selected', {
 export const trackImageUploaded = ({ width, height, focusPieceId } = {}) =>
   track('image_uploaded', { image_width: width ?? null, image_height: height ?? null, focus_piece: focusPieceId ?? null });
 
+/** Egy zóna be/ki ("Mit fóliázunk"). */
+export const trackZoneToggled = (zoneId, included) => track('zone_toggled', { zone: zoneId, included: Boolean(included) });
+
+/** Teljes fólia szett vissza egyben ("Kérem egyben") vagy minden törlése. */
+export const trackKitToggled = (fullKit) => track('kit_toggled', { full_kit: Boolean(fullKit) });
+
 /** Taposófelület-extra be/ki. */
 export const trackFootboardToggled = (included) => track('footboard_toggled', { included: Boolean(included) });
 

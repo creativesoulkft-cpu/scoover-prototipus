@@ -93,16 +93,17 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 .slider.active em { color: var(--accent); }
 
 /* --- gyorsnavigáció: mindig látható marad görgetés közben --- */
-.quick-nav { position: sticky; top: 0; z-index: 7; display: flex; gap: 6px; flex-wrap: wrap;
-  background: var(--bg); padding: 4px 0 2px; }
+/* Asztalin az ársáv ALÁ tapad (a --price-bar-h-t az ársáv írja), mobilon a
+   panel legtetejére (az ársáv ott a képernyő alján fix). A negatív oldalmargó
+   a panel paddingját nyújtja ki, hogy a mögötte görgő tartalom ne lásson ki. */
+.quick-nav { position: sticky; top: var(--price-bar-h, 0px); z-index: 7; display: flex; gap: 6px; flex-wrap: wrap;
+  background: var(--panel); margin: 0 -16px 4px; padding: 6px 16px 8px;
+  box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .8); }
 .quick-nav-btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
   font: inherit; font-weight: 700; font-size: 12px; letter-spacing: .03em; padding: 7px 14px;
   border-radius: 999px; cursor: pointer; }
 .quick-nav-btn:hover { border-color: var(--accent); color: var(--text); }
 .quick-nav-btn.active { background: var(--accent); border-color: var(--accent); color: #16110b; }
-.quick-nav-btn.footboard { margin-left: auto; }
-.quick-nav-btn.footboard.active { background: var(--accent-2); border-color: var(--accent-2); }
-@media (max-width: 1023px) { .quick-nav-btn.footboard { margin-left: 0; } }
 
 /* --- taposó-szerkesztő: a fő roller-előnézet helyén, önálló nagyított nézet --- */
 .footboard-editor { display: flex; flex-direction: column; gap: 12px; }
@@ -113,8 +114,10 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 .footboard-price { color: var(--accent); font-size: 17px; }
 /* "Felülnézet — így fogod látni, amikor ráállsz." – a szerkesztő nézetének magyarázata */
 .footboard-viewnote { margin: 0; color: var(--text); font-weight: 600; }
-/* a felülnézeti dekk fekvő, ~4:1 – ne nyúljon a magasságával teljes vászonra */
-.footboard-canvas { max-height: 46vh; }
+/* a felülnézeti dekk a stage teljes szabad területét kitölti (a 4:1 arány
+   miatt a magassága a szélességből adódik – "meet" illesztés) */
+.footboard-editor { flex: 1; min-height: 0; }
+.footboard-canvas { flex: 1; min-height: 0; width: 100%; height: 100%; }
 
 /* fő darab (a feltöltött kép lényege ide kerül) */
 .focus-piece { margin-top: 10px; }
@@ -180,8 +183,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   /* A gyorsnavigáció a görgethető panel tetején marad. A negatív oldalmargó a
      panel paddingját nyújtja ki, hogy a sáv széltől szélig fedjen – enélkül a
      mögötte görgő tartalom kilátszana a gombok mellett. */
-  .sidebar > .quick-nav { top: 0; background: var(--panel); margin: 0 -16px 4px; padding: 8px 16px 6px;
-    box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .8); }
+  .sidebar > .quick-nav { top: 0; padding: 8px 16px 6px; }
 
   /* a képaláírás és a súgó külön sorban, teljes szélességben – így nem szorul
      4 sorba tördelt, kilógó buborékba */
@@ -215,7 +217,9 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 /* A panel a saját rács-cellájában görög (a magasságot a .layout adja) – a
    korábbi max-height: calc(100vh - 61px) a fejléc becsült magasságára épült,
    ami törékeny volt; most a grid + a .app 100dvh magassága határozza meg. */
-.sidebar { border-left: 1px solid var(--border); background: var(--panel); padding: 8px 16px 24px;
+/* padding-top: 0 – a tapadó ársáv így pontosan a görgethető terület tetejére
+   ül (8px felső paddinggal a mögötte görgő kártyák kilátszottak fölötte) */
+.sidebar { border-left: 1px solid var(--border); background: var(--panel); padding: 0 16px 24px;
   overflow-y: auto; min-height: 0; }
 @media (max-width: 1023px) { .sidebar { border-left: none; border-top: none; } }
 details { border-bottom: 1px solid var(--border); padding: 6px 0 12px; }
@@ -258,46 +262,6 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
 .check input { accent-color: var(--accent); }
 .control-row { display: flex; justify-content: flex-end; }
-
-.piece-list ul { list-style: none; margin: 0; padding: 0; }
-.piece-list li { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-.piece-list li:hover, .piece-list li.hovered { background: var(--panel-2); }
-.piece-list li .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); flex: none; }
-.piece-list li.off { color: var(--muted); text-decoration: line-through; }
-.piece-list li.off .dot { background: var(--border); }
-.piece-list li .piece-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.piece-list li .piece-price { margin-left: auto; flex: none; color: var(--muted); font-size: 12px; }
-.piece-list li.off .piece-price { text-decoration: line-through; }
-/* taposófelület: más anyag (kültéri csúszásgátló), külön árazott extra */
-.piece-list li.footboard { border: 1px dashed var(--accent); background: rgba(255, 106, 26, .07); }
-.piece-list li.footboard .dot { background: var(--accent); }
-.premium-pill { margin-left: auto; flex: none; background: var(--accent); color: #16110b; font-size: 10px;
-  font-weight: 700; letter-spacing: .04em; border-radius: 999px; padding: 1px 7px; text-decoration: none; }
-.piece-list li.off .premium-pill { background: var(--border); color: var(--muted); }
-
-/* --- kit / darab választó: két nagy, egyértelmű gomb a Darabok tetején --- */
-.kit-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.kit-btn { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left;
-  background: var(--panel-2); border: 2px solid var(--border); border-radius: 10px; padding: 10px;
-  color: var(--muted); font: inherit; cursor: pointer; }
-.kit-btn:hover { border-color: var(--muted); }
-.kit-btn strong { color: var(--text); font-size: 13px; }
-.kit-btn.active { border-color: var(--accent); background: rgba(255, 106, 26, .1); color: var(--text); }
-.kit-btn .kit-price { font-size: 15px; font-weight: 700; color: var(--text); }
-.kit-btn .kit-savings { font-size: 11px; font-weight: 700; color: var(--accent-2);
-  background: rgba(25, 230, 193, .12); border-radius: 999px; padding: 1px 7px; margin-top: 2px; }
-@media (max-width: 380px) { .kit-choice { grid-template-columns: 1fr; } }
-
-/* --- darabonkénti kedvezmény átláthatósága: minél többet választasz, annál
-   olcsóbb – ez itt, a döntés helyén (Darabok lista) élőben látszik, nem csak
-   az ársáv elrejtett bontásában --- */
-.piece-discount-info { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;
-  padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; }
-.pdi-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; }
-.pdi-bar { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
-.pdi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px;
-  transition: width .2s ease; }
-.piece-discount-info p { margin: 0; }
 
 /* --- galéria: fülek, szűrők, kategória-jelzések --- */
 .tabs { display: flex; gap: 4px; background: var(--panel-2); padding: 4px; border-radius: 10px; margin: 4px 0 8px; }
@@ -356,13 +320,21 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 
 /* --- ársáv: asztali nézetben a konfigurátor-oszlop tetejére tapad, mobilon
    a képernyő aljára rögzül és a bontás felfelé nyílik --- */
-.price-bar { position: sticky; top: 0; z-index: 6; margin: -8px -16px 10px; padding: 10px 16px;
+.price-bar { position: sticky; top: 0; z-index: 6; margin: 0 -16px 10px; padding: 10px 16px;
   background: var(--panel); border-bottom: 1px solid var(--border); }
 .pb-main { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.pb-total { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* "Kiválasztva: X · Egyben: Y (−Z)" – mindig pontosan két szám, egy gombként
+   koppintható, alatta/fölötte nyílik a tételes bontás */
+.pb-numbers { flex: 1; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
+  background: none; border: none; color: var(--text); font: inherit; text-align: left; padding: 0; cursor: pointer; }
+.pb-num { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.pb-label { color: var(--muted); font-size: 12.5px; }
 .pb-amount { font-size: 22px; line-height: 1.1; }
-.pb-discount-badge { margin-left: 8px; font-size: 12px; font-weight: 700; color: var(--accent-2);
-  background: rgba(25, 230, 193, .12); border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+.pb-kit strong { font-size: 15px; }
+.pb-sep { color: var(--border); margin-right: 2px; }
+.pb-savings-tag { color: var(--accent-2); font-weight: 700; font-size: 13px; }
+.pb-chevron { margin-left: auto; color: var(--muted); font-size: 12px; align-self: center; }
+.pb-context { margin: 0 0 4px; }
 
 /* Darab ki-/bekapcsolásakor felugró változás-jelzés: a vevő rögtön érzi a
    döntése hatását ("−4 200 Ft"), nem kell az összeget fejben követnie. */
@@ -377,15 +349,6 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
   100% { opacity: 0; transform: translateY(-8px); }
 }
 
-/* Állandó, jól látható sáv: mennyivel jár jobban a teljes kittel. */
-.pb-savings { margin-top: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12.5px;
-  background: rgba(255, 106, 26, .12); border: 1px solid rgba(255, 106, 26, .35); color: var(--text); }
-.pb-savings.earned { background: rgba(25, 230, 193, .12); border-color: rgba(25, 230, 193, .35); }
-.pb-savings strong { color: var(--accent); }
-.pb-savings.earned strong { color: var(--accent-2); }
-.pb-toggle { background: none; border: 1px solid var(--border); color: var(--text); font: inherit; font-size: 12px;
-  padding: 6px 10px; border-radius: 999px; cursor: pointer; flex: none; }
-.pb-toggle:hover { border-color: var(--accent); }
 .pb-details { display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
   border-top: 1px solid var(--border); padding-top: 10px; }
 .pb-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
@@ -410,6 +373,123 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
      +24px levegő. A fix 104px azért volt hibás, mert az ársáv magassága a
      nyitott bontástól és a figyelmeztetésektől függően változik. */
   .sidebar { padding-bottom: calc(var(--price-bar-h, 104px) + 24px); }
+}
+
+/* =========================================================================
+   SZEKCIÓ-KÁRTYÁK (akkordeon): jól elkülönülő kártyák, egyszerre egy nyitva,
+   a nyitott fejléce a görgetés közben a panel tetejére tapad. A --section-top
+   mondja meg, mi van fölötte: asztalin az ársáv, mobilon a gyorsnavigáció.
+   ========================================================================= */
+.cards { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+@media (max-width: 1023px) { .cards { gap: 24px; } }
+.sidebar { --section-top: calc(var(--price-bar-h, 0px) + var(--quick-nav-h, 0px)); }
+@media (max-width: 1023px) { .sidebar { --section-top: var(--quick-nav-h, 0px); } }
+
+.card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 14px;
+  /* odagörgetéskor a tapadó sávok (ársáv, gyorsnav) ALÁ kerüljön a kártya teteje */
+  scroll-margin-top: calc(var(--section-top) + 6px); }
+.card.open { border-color: rgba(255, 106, 26, .45); box-shadow: 0 0 0 1px rgba(255, 106, 26, .15); }
+.card-head { display: flex; align-items: flex-start; gap: 4px; padding: 10px 10px 10px 12px;
+  border-radius: 14px; background: var(--panel-2); }
+.card.open > .card-head { position: sticky; top: var(--section-top); z-index: 5;
+  border-radius: 14px 14px 0 0; border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 12px -10px rgba(0, 0, 0, .9); }
+.card-head.static { padding: 12px; }
+.card-toggle { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 8px; background: none; border: none;
+  color: var(--text); font: inherit; text-align: left; padding: 0; cursor: pointer; }
+.card-chevron { color: var(--muted); transition: transform .15s; margin-top: 2px; }
+.card.open .card-chevron { transform: rotate(90deg); }
+.card-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.card-title { font-weight: 700; font-size: 15px; }
+.card-blurb { color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.card-summary { flex: none; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12px; font-weight: 700; color: var(--accent-2); background: rgba(25, 230, 193, .1);
+  border-radius: 999px; padding: 3px 9px; margin-top: 1px; }
+.card-info { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--panel); color: var(--muted); font-weight: 700; font-size: 14px; cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif; font-style: italic; }
+.card-info:hover, .card-info.active { border-color: var(--accent); color: var(--text); }
+.card-infobox { margin: 0 12px 4px; padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45;
+  background: rgba(25, 230, 193, .08); border: 1px solid rgba(25, 230, 193, .3); }
+.card-body { padding: 8px 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.card-footer { display: flex; justify-content: flex-end; padding-top: 4px; }
+.btn-next { font-size: 13px; }
+/* al-részletek a Stílus kártyán belül (minta-illesztés, feliratok) */
+details.sub { border: 1px solid var(--border); border-radius: 10px; padding: 4px 10px 10px; background: var(--panel); }
+details.sub > summary { padding: 6px 0; }
+.topbar-model { white-space: nowrap; }
+
+/* --- "Mit fóliázunk": zónák --- */
+.zone-selector { display: flex; flex-direction: column; gap: 10px; }
+.zone-kit-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--panel); color: var(--text); font: inherit; text-align: left;
+  cursor: pointer; width: 100%; }
+.zone-kit-row input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+.zone-kit-row.active { border-color: var(--accent); background: rgba(255, 106, 26, .1); }
+.zone-kit-row.rejoin { border-color: var(--accent-2); background: rgba(25, 230, 193, .08); animation: csh-in .18s ease; }
+.zone-kit-row.rejoin:hover { background: rgba(25, 230, 193, .14); }
+.zone-kit-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.zone-kit-text strong { font-size: 15px; }
+.zone-savings { font-style: normal; color: var(--accent-2); font-weight: 700; }
+.zone-kit-arrow { font-size: 20px; color: var(--accent-2); flex: none; }
+.zone-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px;
+  transition: opacity .2s ease; }
+.zone-list.dimmed { opacity: .5; }
+.zone-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px;
+  border: 1px solid transparent; background: var(--panel); }
+.zone-row.hovered { border-color: var(--border); }
+.zone-row.off { opacity: .6; }
+.zone-row.off .zone-name > span:first-child { text-decoration: line-through; color: var(--muted); }
+.zone-label { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+.zone-label input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.zone-name { display: flex; flex-direction: column; gap: 1px; min-width: 0; font-size: 13.5px; }
+.zone-price { flex: none; font-weight: 700; white-space: nowrap; }
+.zone-foot { display: flex; justify-content: flex-end; }
+.zone-clear { color: var(--muted); font-size: 12px; }
+.zone-clear:disabled { opacity: .4; cursor: default; text-decoration: none; }
+.zone-min { margin: 0; }
+
+/* --- taposó szekció --- */
+.footboard-row.active { border-color: var(--accent-2); background: rgba(25, 230, 193, .08); }
+.btn-design { width: 100%; padding: 11px 14px; font-size: 14px; border-color: var(--accent-2); }
+.btn-design.active { background: rgba(25, 230, 193, .14); }
+.footboard-tools { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.footboard-backbar { position: sticky; top: 0; z-index: 6; display: flex; flex-direction: column; gap: 6px;
+  background: var(--panel); margin: 0 -16px; padding: 10px 16px; border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 12px -10px rgba(0, 0, 0, .9); }
+.footboard-backbar .btn-primary { width: 100%; }
+
+/* --- felrakás vagy postázás --- */
+.choice-list { display: flex; flex-direction: column; gap: 8px; }
+.choice { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--panel); cursor: pointer; }
+.choice.active { border-color: var(--accent); background: rgba(255, 106, 26, .08); }
+.choice input { margin-top: 3px; accent-color: var(--accent); }
+.choice-text { display: flex; flex-direction: column; gap: 2px; }
+.install-options { padding-left: 4px; }
+
+/* --- évjárat-segítség --- */
+.year-help-toggle { align-self: flex-start; font-size: 13px; }
+.year-help { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--border); font-size: 13px; line-height: 1.45; }
+.year-help p { margin: 0; }
+/* helyfoglaló a későbbi fotónak: hol keresd a sorozatszám-matricát */
+.year-help-photo { display: grid; place-items: center; min-height: 96px; border-radius: 8px;
+  border: 1.5px dashed var(--border); background: var(--panel-2); }
+
+/* --- "Nem boldogulsz?" – minden képernyő alján --- */
+.help-line { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.help-line strong { color: var(--text); }
+.help-line a { color: var(--accent-2); text-decoration: none; }
+.help-line-wrap { position: sticky; bottom: -24px; margin: 16px -16px -24px; padding: 10px 16px 12px;
+  background: var(--panel); border-top: 1px solid var(--border); z-index: 4; }
+/* mobilon a görgethető tartalom legalján (a rögzített ársáv fölött), nem tapad */
+@media (max-width: 1023px) {
+  .help-line-wrap { position: static; margin: 20px 0 0; padding: 12px 0 0; }
+  /* a taposó-szerkesztő mobilon: a leírás és a második "vissza" gomb helyet
+     foglalna – a tapadó visszalépő sáv úgyis közvetlenül a kép alatt van */
+  .footboard-editor-head p, .footboard-editor-foot .btn { display: none; }
+  .footboard-editor { gap: 6px; }
 }
 
 /* kiemelt tájékoztató doboz (pl. "a felirat minden szinten ingyenes") */
