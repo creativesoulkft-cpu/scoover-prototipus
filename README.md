@@ -47,11 +47,13 @@ npm run build    # dist/ – statikusan hosztolható
 - vágóvonalak ki/be; a képen egy darabra kattintva/koppintva az egész **zónája**
   kapcsol – a fólia nélkül maradó rész a roller csupasz feketéjét mutatja
   (vázlaton és fotón is), nem sraffozást
-- **állandóan látható ársáv** (`PriceBar`): mindig két szám –
-  "Kiválasztva: 26 800 Ft · Egyben: 39 900 Ft (−18 200)" –, a második eltűnik,
-  ha minden zóna ki van választva; kinyitható tételes bontás (zónák vagy szett,
-  taposó, felrakás, végösszeg); asztalin a jobb oszlop tetejére tapad, mobilon a
-  képernyő aljára rögzül és felfelé nyílik
+- **állandóan látható ársáv** (`PriceBar`): legfeljebb két szám –
+  "Kiválasztva: 26 800 Ft · Egyben: 39 900 Ft (−18 200)" –, alatta a különbözet
+  magyarázattal ("13 100 Ft-tal kevesebb, mint egyben"); az "Egyben" eltűnik, ha
+  minden zóna ki van választva, és akkor is, ha egy sincs ("Kiválasztva: 0 Ft");
+  kinyitható tételes bontás (zónák vagy szett, taposó, felrakás/postázás,
+  végösszeg); asztalin a jobb oszlop tetejére tapad, mobilon a képernyő aljára
+  rögzül és felfelé nyílik – nyitva tolja a tartalmat, nem fedi
 - **taposófelület** (`FootboardSection`): NEM része a szettnek, alapból nincs
   kiválasztva, saját sor saját árral ("Kültéri csúszásgátló anyagból készül,
   ezért külön tétel."); bekapcsolva megjelenik a "Taposófelület tervezése" gomb
@@ -65,7 +67,9 @@ npm run build    # dist/ – statikusan hosztolható
 - **segítség**: "Nem tudod, melyik évjárat?" lenyíló az évjárat mellett (hely a
   későbbi fotónak), ⓘ ikonok szekciónként, és mindig alul: "Nem boldogulsz?
   Hívj: [TELEFONSZÁM] — vagy gyere be hozzánk Veszprémbe." (`src/data/contact.js`)
-- **felrakás** mint szolgáltatás (normál / komplex), csak személyes átvétellel
+- **felrakás vagy postázás**: az ár a címkén ("Postázás — ingyenes",
+  "Felrakás nálunk — 17 000 Ft"); a postadíj a `SHIPPING_HUF` (0 = ingyenes),
+  a felrakás normál / komplex, csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
 - **"Mentsd le a tervedet!"**: a látható konfiguráció (minta/saját kép, felirat,
@@ -157,6 +161,7 @@ MODEL_PRICES           // TELJES SZETT ára modellenként, szintenként (SOLID /
 FOOTBOARD_EXTRA_HUF    // taposófelület, külön tétel (9 900 Ft) – nincs a szettben
 MIN_ORDER_HUF          // minimális rendelési érték (9 900 Ft) részleges rendelésnél
 INSTALLATION_OPTIONS   // felrakás: normál / komplex
+SHIPPING_HUF           // postázás díja felrakás nélkül (0 = "ingyenes" a címkén)
 ```
 
 **Hogyan számol:** a zóna ára = `ZONE_PRICES_HUF[zóna] × MODEL_PRICES[modell][szint] / 39 900`
@@ -196,24 +201,31 @@ hozzájuk még nincs geometria a `src/data/models/` mappában, ezért a
 konfigurátorban még nem választhatók – amint elkészül a vázlatuk, egyetlen
 regiszter-sorral bekapcsolhatók.
 
-## Elrendezés: osztott nézet (a kép mindig látszik)
+## Elrendezés: az oldal görög, a kép tapad
 
-Az oldal **soha nem görög egyben** – az `.app` egy képernyőnyi magas
-(`100dvh`, `-webkit-fill-available` és `100vh` fallbackkel), és két, egymástól
-független régió van:
+**Az oldal egyben görög** – belső görgetősáv sehol nincs, ezért egy lenyitott
+szekció mindig teljes magasságában kirajzolódik, semmi nem vágódik félbe. Ami
+"állva marad", az mind `position: sticky` a lap görgetéséhez képest:
 
 | | asztali (≥1024px) | keskeny (<1024px) |
 |---|---|---|
-| előnézet | bal oszlop, rögzített | felső sáv, rögzített (alapból 45%) |
-| vezérlők | jobb oszlop, saját görgetéssel | alsó sáv, saját görgetéssel |
-| gyorsnavigáció | a kép fölött | az alsó panel tetején tapadva |
-| ársáv | a panel tetején, bontás nyitva | a képernyő alján rögzítve, bontás csukva |
+| fejléc | a lap tetejére tapad (`--topbar-h`) | elgörög |
+| előnézet | bal oszlop, képernyő-magas, tapad | felső sáv, a nézet `--split-pct` %-a (alapból 45), tapad |
+| vezérlők | jobb oszlop, a lappal folyik | a kép alatt, a lappal folyik |
+| ársáv | a jobb oszlop tetején tapad, bontás lefelé nyílik | a képernyő alján rögzítve, bontás felfelé nyílik |
+| gyorsnavigáció | az ársáv alá tapad | a kép + fogantyú alá tapad |
+| nyitott kártya fejléce | a gyorsnav alá tapad | a gyorsnav alá tapad |
+| "Nem boldogulsz?" | a legalján, minden szekció után | ugyanott, a rögzített ársáv fölött |
 
-Így a roller akkor is látszik, amikor a vevő lent a csúszkákat állítja – korábban
-emiatt kellett le-fel görgetni minden apró módosítás ellenőrzéséhez.
+A tapadó sávok egymás ALÁ sorakoznak, nem egymásra: minden sáv a saját mért
+magasságát CSS-változóba írja (`useReportHeight`: `--topbar-h`, `--price-bar-h`,
+`--quick-nav-h`), és a `.sidebar` ebből számolja a `--sticky-base` →
+`--nav-top` → `--section-top` láncot (styles.css). Az ársáv **tol, nem fed**:
+ha a magassága változik (bontás nyitása, "Egyben" sor megjelenése), annyival
+görgeti az oldalt, amennyivel nőtt – a sáv alatti/fölötti tartalom a helyén marad.
 
-**A felosztás** a `.layout` `--split-h` változója (a kép magassága %-ban), amit
-az `App.jsx` `splitPct` állapota ad. Háromféleképpen változik:
+**A felosztás** keskeny nézetben a `.layout` `--split-pct` változója (a kép
+magassága a NÉZET %-ában), amit az `App.jsx` `splitPct` állapota ad. Háromféleképpen változik:
 
 1. a `SplitHandle` húzásával (elengedéskor a legközelebbi rögzülő pozícióra ugrik:
    70% / 45% / 25% – lásd `SPLIT_SNAPS`), vagy fel/le nyíllal, dupla kattintásra alap;
@@ -224,9 +236,13 @@ az `App.jsx` `splitPct` állapota ad. Háromféleképpen változik:
 3. a képernyő átméretezésekor (media query váltás).
 
 **Amit a DOM-ban is át kell rendezni:** a képaláírás/súgó és a "Mentsd le a
-tervedet" gomb asztalin a kép alatt, keskeny nézetben a görgethető panel tetején
-van. Ezt CSS-sel nem lehet megoldani, ezért a `useMediaQuery` hook adja meg
+tervedet" gomb asztalin a kép alatt, keskeny nézetben a panel tetején van.
+Ezt CSS-sel nem lehet megoldani, ezért a `useMediaQuery` hook adja meg
 Reactnek, hova rendereljen (`belowCanvasEl` az `App.jsx`-ben).
+
+**Gombhierarchia:** az egyetlen tömör narancs gomb a "Kosárba teszem"
+(`btn-primary`). A "Mentsd le a tervedet!" másodlagos, körvonalas és kisebb
+(`btn-secondary`), a taposó-tervező "Vissza" gombja türkiz körvonalas (`btn-outline`).
 
 ## Fotós nézet (PhotoCanvas)
 

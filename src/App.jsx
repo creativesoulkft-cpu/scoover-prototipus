@@ -40,6 +40,7 @@ import FootboardEditor from './components/FootboardEditor.jsx';
 import FullscreenPreview from './components/FullscreenPreview.jsx';
 import SplitHandle from './components/SplitHandle.jsx';
 import { useMediaQuery, NARROW_QUERY } from './hooks/useMediaQuery.js';
+import { useReportHeight } from './hooks/useReportHeight.js';
 import { piecesCenter } from './utils/pathBox.js';
 import {
   trackConfiguratorOpened, trackTierSelected, trackPatternSelected,
@@ -163,7 +164,9 @@ export default function App() {
   const [splitPct, setSplitPct] = useState(45);
   const [splitDragging, setSplitDragging] = useState(false);
   const layoutRef = useRef(null);
-  const sidebarRef = useRef(null);
+  const topbarRef = useRef(null);
+  // asztalin a fejléc a lap tetejére tapad, alá sorakozik a kép és az ársáv
+  useReportHeight(topbarRef, '--topbar-h');
   /** Csúszka-húzás előtti felosztás, hogy elengedés után vissza tudjunk állni. */
   const splitBeforeSlider = useRef(null);
   const restoreTimer = useRef(null);
@@ -530,7 +533,7 @@ export default function App() {
   const startFootboardDesign = useCallback(() => {
     if (!includeFootboard) setFootboard(true);
     setFootboardEditMode(true);
-    if (isNarrow) sidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isNarrow) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [includeFootboard, setFootboard, isNarrow]);
 
   // Ugyanaz a vászon kell a beágyazott előnézetbe ÉS a teljes képernyős
@@ -626,24 +629,22 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="topbar">
+      <header className="topbar" ref={topbarRef}>
         <div className="brand">
           <img src={assetUrl('brand/scoover-logo.svg')} alt="Scoover" className="brand-logo" />
-          <div>
-            <h1>fólia-konfigurátor</h1>
-            <p className="muted">Prototípus · minta-a-darabokra vizuális mag</p>
-          </div>
+          <h1>Scoover fólia-konfigurátor</h1>
         </div>
         {model && <span className="topbar-model muted small">{model.name} · {year}</span>}
       </header>
 
-      {/* Osztott nézet: a --split-h a felső (kép) régió magassága. Keskeny
-          képernyőn a két régió külön görög – a kép SOSEM fut ki a képernyőről,
-          miközben a vevő lent a csúszkákat állítja. */}
+      {/* Az OLDAL görög egyben – nincs belső görgetősáv. A kép (stage) a nézet
+          tetejére tapad (sticky), a vezérlőpanel alatta folyik. Keskeny
+          képernyőn a kép magassága a nézet --split-pct százaléka, így a roller
+          SOSEM fut ki a képernyőről, miközben a vevő lent a csúszkákat állítja. */}
       <main
         className={`layout${splitDragging ? ' dragging' : ''}`}
         ref={layoutRef}
-        style={{ '--split-h': `${splitPct}%` }}
+        style={{ '--split-pct': splitPct }}
       >
         <section className="stage">
           {error && <p className="error">Hiba a modell betöltésekor: {error.message}</p>}
@@ -705,11 +706,10 @@ export default function App() {
             pct={splitPct}
             onChange={setSplitManually}
             onDragStateChange={setSplitDragging}
-            containerRef={layoutRef}
           />
         )}
 
-        <aside className="sidebar" ref={sidebarRef}>
+        <aside className="sidebar">
           {model && !footboardEditMode && (
             <PriceBar
               modelId={modelId}
@@ -732,7 +732,7 @@ export default function App() {
             <div className="footboard-tools">
               {/* Mindig látható visszalépés a teljes rollernézetre – a panel tetejére tapad. */}
               <div className="footboard-backbar">
-                <button type="button" className="btn btn-primary" onClick={() => setFootboardEditMode(false)}>
+                <button type="button" className="btn btn-outline" onClick={() => setFootboardEditMode(false)}>
                   ← Vissza a teljes rollerhez
                 </button>
                 <span className="muted small">Taposófelület tervezése · +{formatHuf(FOOTBOARD_EXTRA_HUF)}</span>
@@ -799,7 +799,7 @@ export default function App() {
                 </div>
               </section>
 
-              <button type="button" className="btn btn-primary" onClick={() => setFootboardEditMode(false)}>
+              <button type="button" className="btn btn-outline" onClick={() => setFootboardEditMode(false)}>
                 ← Vissza a teljes rollerhez
               </button>
             </div>
@@ -912,7 +912,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Asztalin a panel aljára tapad; mobilon az ársáv (képernyő alja) hordozza. */}
+          {/* A legalján, minden szekció után – nem tapad, nem szakít meg semmit. */}
           <div className="help-line-wrap"><HelpLine /></div>
         </aside>
       </main>

@@ -20,13 +20,15 @@ const MAX_PCT = 78;
 export const nearestSnap = (pct) =>
   SPLIT_SNAPS.reduce((best, s) => (Math.abs(s.pct - pct) < Math.abs(best - pct) ? s.pct : best), SPLIT_SNAPS[0].pct);
 
-export default function SplitHandle({ pct, onChange, onDragStateChange, containerRef }) {
+export default function SplitHandle({ pct, onChange, onDragStateChange }) {
   const dragging = useRef(false);
 
+  // A kép a nézet tetejére tapad és a magassága a NÉZET magasságának
+  // százaléka (--split-pct), ezért a fogantyú helyét is a nézethez mérjük.
   const pctFromY = (clientY) => {
-    const box = containerRef.current?.getBoundingClientRect();
-    if (!box || box.height === 0) return pct;
-    const raw = ((clientY - box.top) / box.height) * 100;
+    const h = window.innerHeight;
+    if (!h) return pct;
+    const raw = (clientY / h) * 100;
     return Math.min(MAX_PCT, Math.max(MIN_PCT, raw));
   };
 

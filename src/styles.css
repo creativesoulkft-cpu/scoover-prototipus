@@ -22,26 +22,28 @@ p { margin: 6px 0; }
 button.link { background: none; border: none; color: var(--accent-2); cursor: pointer; padding: 0; font: inherit; }
 button.link:hover { text-decoration: underline; }
 
-/* Az egész alkalmazás egy képernyőnyi magas, és NEM az oldal görög, hanem a
-   két régió külön (kép fent, vezérlők lent). A magasság-fallback sorrend
-   számít: a 100dvh a helyes érték (a mobilböngésző eltűnő címsorát is kezeli),
-   a -webkit-fill-available a régebbi iOS Safari, a 100vh a legvégső tartalék.
-   Minden böngésző az utolsó ÁLTALA ISMERT deklarációt használja. */
-.app { height: 100vh; height: -webkit-fill-available; height: 100dvh;
-  display: flex; flex-direction: column; overflow: hidden; }
-html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-.topbar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel); }
+/* AZ OLDAL GÖRÖG EGYBEN – nincs belső görgetősáv sehol. Ami "állva marad"
+   (fejléc, kép, ársáv, gyorsnav, nyitott kártya fejléce), az mind sticky a
+   lap görgetéséhez képest. Így egy lenyitott szekció teljes magasságában
+   kirajzolódik, semmi nem vágódik félbe. */
+.app { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+html, body { overscroll-behavior-y: none; }
+/* asztalin a fejléc a lap tetejére tapad; a magasságát --topbar-h-ba írja (App.jsx) */
+.topbar { position: sticky; top: 0; z-index: 9; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel); }
+.topbar h1 { font-size: 18px; margin: 0; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-logo { height: 34px; width: auto; display: block; }
 
-/* Asztali: két oszlop – balra a rögzített, nagy előnézet, jobbra a görgethető
-   vezérlőpanel. Keskeny nézetben ugyanez, csak egymás alatt (lásd a média-
-   blokkot lentebb): fent a fix kép, lent a saját görgetésű panel. */
-.layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 0; }
+/* Asztali: két oszlop – balra a képernyő-magas, tapadó előnézet, jobbra a
+   lappal együtt görgő vezérlőpanel. Keskeny nézetben egymás alatt (lásd a
+   média-blokkot lentebb): fent a tapadó kép, lent a folyó panel. */
+.layout { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 0; align-items: start; }
 
-.stage { padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
-  min-height: 0; overflow-y: auto; }
+.stage { position: sticky; top: var(--topbar-h, 0px); box-sizing: border-box;
+  height: calc(100vh - var(--topbar-h, 0px)); height: calc(100dvh - var(--topbar-h, 0px));
+  padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  min-height: 0; overflow: hidden; }
 .canvas-wrap { position: relative; min-width: 0; min-height: 0; flex: 1;
   display: flex; align-items: center; justify-content: center; }
 .scooter-canvas { width: 100%; height: 100%; max-height: 100%; object-fit: contain;
@@ -96,7 +98,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 /* Asztalin az ársáv ALÁ tapad (a --price-bar-h-t az ársáv írja), mobilon a
    panel legtetejére (az ársáv ott a képernyő alján fix). A negatív oldalmargó
    a panel paddingját nyújtja ki, hogy a mögötte görgő tartalom ne lásson ki. */
-.quick-nav { position: sticky; top: var(--price-bar-h, 0px); z-index: 7; display: flex; gap: 6px; flex-wrap: wrap;
+.quick-nav { position: sticky; top: var(--nav-top, 0px); z-index: 7; display: flex; gap: 6px; flex-wrap: wrap;
   background: var(--panel); margin: 0 -16px 4px; padding: 6px 16px 8px;
   box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .8); }
 .quick-nav-btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
@@ -124,7 +126,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 .focus-piece select { width: 100%; }
 
 .share-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.share-panel .btn-primary { flex: 1 1 240px; }
+.share-panel .btn-secondary { flex: 1 1 240px; }
 .share-quick-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .share-quick-row .btn { font-size: 13px; }
 @media (max-width: 1023px) {
@@ -133,57 +135,48 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
      elrendezés) – oszlop-irányú (mobil) elrendezésben ugyanez MAGASSÁGKÉNT
      értelmeződne, a flex-grow-vel együtt egy óriási, majdnem négyzet alakú
      gombot eredményezve, ami eltakarja az alatta lévő tartalmat. */
-  .share-panel .btn-primary { flex: none; }
+  .share-panel .btn-secondary { flex: none; }
 }
 
 /* =========================================================================
    OSZTOTT NÉZET (keskeny képernyő, < 1024px)
 
-   Az oldal NEM görög egyben: két, egymástól független régió van. Fent a
-   rögzített roller-előnézet (alapból a nézet 45%-a), lent a saját belső
-   görgetésű vezérlőpanel. Így a kép sosem fut ki a képernyőről, miközben a
-   vevő lent a csúszkákat állítja – korábban emiatt kellett le-fel görgetni
-   minden apró módosítás ellenőrzéséhez.
+   Az oldal egyben görög, de a roller-előnézet a nézet tetejére TAPAD, a
+   magassága a nézet --split-pct százaléka (alapból 45). Alatta a fogantyú,
+   majd a vezérlőpanel folyik – belső görgetősáv nincs, így egy lenyitott
+   szekció mindig teljes magasságában látszik. A kép közben sosem fut ki a
+   képernyőről, miközben a vevő lent a csúszkákat állítja.
 
-   A felosztást a --split-h adja (App.jsx állítja), és háromféleképpen változhat:
-   a fogantyú húzásával, a fogantyú billentyűzetes léptetésével, illetve
-   automatikusan, amikor a felhasználó megfog egy csúszkát (ilyenkor a kép
-   70%-ra nő, majd elengedés után 1 mp-cel visszaáll).
+   A --split-pct-t az App.jsx állítja, és háromféleképpen változhat: a fogantyú
+   húzásával, a fogantyú billentyűzetes léptetésével, illetve automatikusan,
+   amikor a felhasználó megfog egy csúszkát (ilyenkor a kép 70%-ra nő, majd
+   elengedés után 1 mp-cel visszaáll).
    ========================================================================= */
 @media (max-width: 1023px) {
-  /* Kompakt fejléc: az alcím és a hosszú cím mobilon két-négy sorba tördelődött,
-     és ~150px-et vett el a rollertől. */
-  .topbar { padding: 8px 16px; gap: 10px; }
-  .topbar .brand p { display: none; }
-  .topbar h1 { font-size: 15px; }
+  /* Kompakt fejléc, ami elgörög – a képernyő a rolleré és a vezérlőké. */
+  .topbar { position: static; padding: 8px 16px; gap: 10px; }
+  .topbar h1 { font-size: 14px; white-space: nowrap; }
+  .topbar-model { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .brand-logo { height: 26px; }
-  .topbar select { min-width: 0; }
-  .topbar .field { flex: 1; min-width: 0; }
 
-  /* egy oszlop, három sáv: kép | fogantyú | panel */
-  .layout { grid-template-columns: 1fr; grid-template-rows: var(--split-h, 45%) auto 1fr; }
-  .stage, .split-handle, .sidebar { grid-column: 1; }
+  /* egy oszlop, egymás alatt: kép | fogantyú | panel */
+  .layout { display: block; --stage-h: calc(var(--split-pct, 45) * 1vh); --stage-h: calc(var(--split-pct, 45) * 1dvh); }
 
-  .stage { padding: 8px 16px 0; gap: 8px; overflow: hidden; }
-  /* húzás közben nincs átmenet (különben az ujj után "kullogna" a felosztás) */
-  .layout:not(.dragging) .stage { transition: none; }
+  .stage { top: 0; height: var(--stage-h); z-index: 8; background: var(--bg);
+    padding: 8px 16px 0; gap: 8px; }
+  .layout:not(.dragging) .stage { transition: height 250ms ease; }
   .scooter-canvas { width: 100%; height: 100%; }
 
-  .split-handle { display: flex; align-items: center; justify-content: center;
+  .split-handle { position: sticky; top: var(--stage-h); z-index: 8;
+    display: flex; align-items: center; justify-content: center;
     height: 22px; cursor: ns-resize; touch-action: none; background: var(--bg);
     border-bottom: 1px solid var(--border); }
   .split-handle:hover .split-grip, .split-handle:focus-visible .split-grip { background: var(--accent); }
   .layout.dragging .split-grip { background: var(--accent); }
 
-  /* nagyobb specifikusság, mert a .sidebar alapszabálya (padding: 8px 16px 24px)
-     a fájlban KÉSŐBB áll, és felülírná a felső padding nullázását – arra pedig
-     szükség van, hogy a sticky gyorsnavigáció a panel legtetején tapadjon */
-  .layout > .sidebar { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain; padding-top: 0; }
-  /* A gyorsnavigáció a görgethető panel tetején marad. A negatív oldalmargó a
-     panel paddingját nyújtja ki, hogy a sáv széltől szélig fedjen – enélkül a
-     mögötte görgő tartalom kilátszana a gombok mellett. */
-  .sidebar > .quick-nav { top: 0; padding: 8px 16px 6px; }
+  /* a tapadó sávok alapja mobilon: a kép + a fogantyú. Nagyobb specifikusság
+     kell, mert a .sidebar alapszabálya (asztali értékek) a fájlban KÉSŐBB áll. */
+  .layout > .sidebar { --sticky-base: calc(var(--stage-h) + 22px); --nav-top: var(--sticky-base); }
 
   /* a képaláírás és a súgó külön sorban, teljes szélességben – így nem szorul
      4 sorba tördelt, kilógó buborékba */
@@ -203,24 +196,18 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   .view-switch button { padding: 5px 10px; font-size: 12px; }
   .canvas-icon-btn { width: 32px; height: 32px; font-size: 14px; }
 }
-
-/* A felosztás animációja: a rács sormérete változik, ezt animáljuk. Húzás
-   közben (.dragging) kikapcsolva, hogy az ujjat azonnal kövesse. */
-@media (max-width: 1023px) {
-  .layout { transition: grid-template-rows 250ms ease; }
-  .layout.dragging { transition: none; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .layout { transition: none; }
+  .stage { transition: none; }
 }
 
-/* A panel a saját rács-cellájában görög (a magasságot a .layout adja) – a
-   korábbi max-height: calc(100vh - 61px) a fejléc becsült magasságára épült,
-   ami törékeny volt; most a grid + a .app 100dvh magassága határozza meg. */
-/* padding-top: 0 – a tapadó ársáv így pontosan a görgethető terület tetejére
-   ül (8px felső paddinggal a mögötte görgő kártyák kilátszottak fölötte) */
+/* A panel NEM görgethető konténer: a lappal együtt folyik, a benne lévő
+   tapadó sávok a lap görgetéséhez képest tapadnak. A tapadási alap asztalin
+   a fejléc (--topbar-h); az ársáv alá sorakozik a gyorsnav (--nav-top), az alá
+   a nyitott kártya fejléce (--section-top). */
 .sidebar { border-left: 1px solid var(--border); background: var(--panel); padding: 0 16px 24px;
-  overflow-y: auto; min-height: 0; }
+  min-width: 0; align-self: stretch;
+  --sticky-base: var(--topbar-h, 0px);
+  --nav-top: calc(var(--sticky-base) + var(--price-bar-h, 0px)); }
 @media (max-width: 1023px) { .sidebar { border-left: none; border-top: none; } }
 details { border-bottom: 1px solid var(--border); padding: 6px 0 12px; }
 summary { cursor: pointer; font-weight: 600; padding: 8px 0; list-style: none; display: flex; align-items: center; }
@@ -317,10 +304,18 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #16110b; width: 100%; padding: 12px 14px; font-size: 15px; }
 .btn-primary:hover:not(:disabled) { filter: brightness(1.08); border-color: var(--accent); }
+/* Gombhierarchia: az EGYETLEN tömör narancs gomb a "Kosárba teszem".
+   Másodlagos (körvonalas, kisebb): "Mentsd le a tervedet!" – diszkréten a kép alatt.
+   Körvonalas kiemelt (türkiz keret): visszalépés a taposó-tervezőből. */
+.btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted);
+  font-weight: 600; font-size: 13px; padding: 7px 12px; }
+.btn-secondary:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.btn-outline { background: transparent; border: 1.5px solid var(--accent-2); color: var(--text); width: 100%; padding: 10px 14px; }
+.btn-outline:hover:not(:disabled) { background: rgba(25, 230, 193, .1); border-color: var(--accent-2); }
 
 /* --- ársáv: asztali nézetben a konfigurátor-oszlop tetejére tapad, mobilon
    a képernyő aljára rögzül és a bontás felfelé nyílik --- */
-.price-bar { position: sticky; top: 0; z-index: 6; margin: 0 -16px 10px; padding: 10px 16px;
+.price-bar { position: sticky; top: var(--sticky-base, 0px); z-index: 6; margin: 0 -16px 10px; padding: 10px 16px;
   background: var(--panel); border-bottom: 1px solid var(--border); }
 .pb-main { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 /* "Kiválasztva: X · Egyben: Y (−Z)" – mindig pontosan két szám, egy gombként
@@ -335,19 +330,10 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 .pb-savings-tag { color: var(--accent-2); font-weight: 700; font-size: 13px; }
 .pb-chevron { margin-left: auto; color: var(--muted); font-size: 12px; align-self: center; }
 .pb-context { margin: 0 0 4px; }
-
-/* Darab ki-/bekapcsolásakor felugró változás-jelzés: a vevő rögtön érzi a
-   döntése hatását ("−4 200 Ft"), nem kell az összeget fejben követnie. */
-.pb-delta { margin-left: 8px; font-size: 13px; font-weight: 700; vertical-align: middle;
-  display: inline-block; animation: pb-delta-pop 1.6s ease forwards; }
-.pb-delta.down { color: var(--accent-2); }
-.pb-delta.up { color: var(--accent); }
-@keyframes pb-delta-pop {
-  0%   { opacity: 0; transform: translateY(6px); }
-  15%  { opacity: 1; transform: translateY(0); }
-  70%  { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-8px); }
-}
+/* "5 300 Ft-tal több / kevesebb, mint egyben" – a különbözet magyarázattal */
+.pb-compare { margin: 2px 0 0; font-weight: 600; }
+.pb-compare.more { color: var(--accent); }
+.pb-compare.less { color: var(--accent-2); }
 
 .pb-details { display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
   border-top: 1px solid var(--border); padding-top: 10px; }
@@ -362,6 +348,7 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 @media (max-width: 1023px) {
   .price-bar { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20;
     display: flex; flex-direction: column-reverse; margin: 0;
+    /* a .pb-summary (számok, magyarázat, figyelmeztetés) belül normál sorrendű */
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--border); border-bottom: none;
     box-shadow: 0 -12px 22px -14px rgba(0, 0, 0, .85); }
@@ -382,8 +369,7 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
    ========================================================================= */
 .cards { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
 @media (max-width: 1023px) { .cards { gap: 24px; } }
-.sidebar { --section-top: calc(var(--price-bar-h, 0px) + var(--quick-nav-h, 0px)); }
-@media (max-width: 1023px) { .sidebar { --section-top: var(--quick-nav-h, 0px); } }
+.sidebar { --section-top: calc(var(--nav-top, 0px) + var(--quick-nav-h, 0px)); }
 
 .card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 14px;
   /* odagörgetéskor a tapadó sávok (ársáv, gyorsnav) ALÁ kerüljön a kártya teteje */
@@ -454,10 +440,10 @@ details.sub > summary { padding: 6px 0; }
 .btn-design { width: 100%; padding: 11px 14px; font-size: 14px; border-color: var(--accent-2); }
 .btn-design.active { background: rgba(25, 230, 193, .14); }
 .footboard-tools { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
-.footboard-backbar { position: sticky; top: 0; z-index: 6; display: flex; flex-direction: column; gap: 6px;
+.footboard-backbar { position: sticky; top: var(--nav-top, 0px); z-index: 6; display: flex; flex-direction: column; gap: 6px;
   background: var(--panel); margin: 0 -16px; padding: 10px 16px; border-bottom: 1px solid var(--border);
   box-shadow: 0 8px 12px -10px rgba(0, 0, 0, .9); }
-.footboard-backbar .btn-primary { width: 100%; }
+.footboard-backbar .btn-outline { width: 100%; }
 
 /* --- felrakás vagy postázás --- */
 .choice-list { display: flex; flex-direction: column; gap: 8px; }
@@ -466,6 +452,7 @@ details.sub > summary { padding: 6px 0; }
 .choice.active { border-color: var(--accent); background: rgba(255, 106, 26, .08); }
 .choice input { margin-top: 3px; accent-color: var(--accent); }
 .choice-text { display: flex; flex-direction: column; gap: 2px; }
+.choice-price { font-weight: 600; color: var(--accent-2); white-space: nowrap; }
 .install-options { padding-left: 4px; }
 
 /* --- évjárat-segítség --- */
@@ -481,11 +468,8 @@ details.sub > summary { padding: 6px 0; }
 .help-line { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
 .help-line strong { color: var(--text); }
 .help-line a { color: var(--accent-2); text-decoration: none; }
-.help-line-wrap { position: sticky; bottom: -24px; margin: 16px -16px -24px; padding: 10px 16px 12px;
-  background: var(--panel); border-top: 1px solid var(--border); z-index: 4; }
-/* mobilon a görgethető tartalom legalján (a rögzített ársáv fölött), nem tapad */
+.help-line-wrap { margin: 24px 0 0; padding: 12px 0 0; border-top: 1px solid var(--border); }
 @media (max-width: 1023px) {
-  .help-line-wrap { position: static; margin: 20px 0 0; padding: 12px 0 0; }
   /* a taposó-szerkesztő mobilon: a leírás és a második "vissza" gomb helyet
      foglalna – a tapadó visszalépő sáv úgyis közvetlenül a kép alatt van */
   .footboard-editor-head p, .footboard-editor-foot .btn { display: none; }

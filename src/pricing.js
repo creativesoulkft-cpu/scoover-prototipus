@@ -85,6 +85,11 @@ export const MIN_ORDER_HUF = 9900;
  *  (más anyag, más gyártás). */
 export const FOOTBOARD_EXTRA_HUF = 9900;
 
+/** Postázás díja, ha a vevő NEM kér felrakást. 0 = ingyenes (a címkén "ingyenes"
+ *  jelenik meg). Ha díjköteles lesz, ide írd az összeget – a felrakás/postázás
+ *  kártya címkéje, az ársáv bontása és a végösszeg is ebből dolgozik. */
+export const SHIPPING_HUF = 0;
+
 /** Felrakás mint szolgáltatás – csak személyes átvétellel. */
 export const INSTALLATION_OPTIONS = [
   { id: 'none', name: 'Nem kérem', price: 0 },
@@ -272,7 +277,7 @@ export function meetsMinResolution(width, height, min = MIN_CUSTOM_IMAGE_PX) {
  * @param {{model:string, tier:string, includeFootboard?:boolean, installation?:string,
  *          selectedZoneIds?:string[], availableZoneIds?:string[]}} config
  * @returns {{currency:string, base:number, zones:Array<{id:string,name:string,price:number}>,
- *            footboard:number, installation:number, installationId:string, total:number,
+ *            footboard:number, installation:number, installationId:string, shipping:number, total:number,
  *            isFullKit:boolean, kit:{listSum:number, kitPrice:number|null, savings:number},
  *            minimumOrder:{ok:boolean,message?:string}}}
  */
@@ -293,7 +298,9 @@ export function calculatePrice(config) {
   const footboard = config.includeFootboard ? FOOTBOARD_EXTRA_HUF : 0;
   const installationId = config.installation ?? 'none';
   const installation = getInstallation(installationId).price;
-  const total = base + footboard + installation;
+  // postázás csak felrakás nélkül – felrakásnál személyesen hozza a rollert
+  const shipping = installationId === 'none' ? SHIPPING_HUF : 0;
+  const total = base + footboard + installation + shipping;
 
   return {
     currency: CURRENCY,
@@ -302,6 +309,7 @@ export function calculatePrice(config) {
     footboard,
     installation,
     installationId,
+    shipping,
     total,
     isFullKit,
     kit: { listSum: kit.listSum, kitPrice: kit.kitPrice, savings: kit.savings },

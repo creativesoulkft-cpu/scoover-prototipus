@@ -79,7 +79,7 @@ export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, 
 
   return (
     <div className="share-panel">
-      <button type="button" className="btn btn-primary" disabled={status === 'working'} onClick={handleDownload}>
+      <button type="button" className="btn btn-secondary" disabled={status === 'working'} onClick={handleDownload}>
         {status === 'working' ? 'Kép készítése…' : '📸 Mentsd le a tervedet!'}
       </button>
 
