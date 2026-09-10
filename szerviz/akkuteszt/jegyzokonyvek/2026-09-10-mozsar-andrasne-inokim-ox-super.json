@@ -1,0 +1,41 @@
+{
+  "docId": "WH-AKT-2026-0910-01",
+  "docDate": "2026-09-10",
+  "customer": {
+    "name": "Mozsár Andrásné",
+    "phone": "+36 70 507 9674",
+    "email": "mozsarmoni@gmail.com"
+  },
+  "vehicle": {
+    "brand": "Inokim",
+    "model": "OX Super",
+    "frameNo": "",
+    "battery": {
+      "chemistry": "Li-ion, 16S (60 V rendszer)",
+      "nominalVoltage": 60,
+      "nominalAh": 26,
+      "nominalWh": 1560,
+      "fullVoltage": 67.2,
+      "avgVoltage": 57.6
+    }
+  },
+  "test": {
+    "date": "2026-09-10",
+    "method": "Terheléses kisütés állandó árammal, Ah-integrálással",
+    "instrument": "Elektronikus akkumulátor-kapacitás tesztkészülék (programozható terhelés, Ah-számláló)",
+    "dischargedAh": 20.79,
+    "duration": "06:55:46",
+    "cutoff": "BMS védelmi lekapcsolás (a csomag saját alsó feszültséghatára)",
+    "displayLines": ["00.00V 00.00A OF", "DSC   20.79Ah", "Time 06:55:46", "Connect to PC"],
+    "photo": "../assets/teszt-kijelzo.jpg",
+    "notes": ""
+  },
+  "technician": "",
+  "service": {
+    "name": "Whoosh elektromos roller",
+    "address": "8200 Veszprém, Kossuth u. 10.",
+    "phone": "+36 70 852 0208",
+    "email": "info@elektromosroller.net",
+    "web": "www.elektromosroller.net"
+  }
+}

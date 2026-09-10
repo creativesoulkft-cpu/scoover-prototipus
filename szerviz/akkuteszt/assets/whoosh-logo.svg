@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 330">
+  <g font-family="'Liberation Sans', Arial, Helvetica, sans-serif" font-weight="700" font-size="170" fill="#7A1F4E">
+    <text x="10" y="255">Wh</text>
+    <text x="598" y="255">sh</text>
+  </g>
+  <circle cx="330" cy="200" r="46" fill="none" stroke="#7A1F4E" stroke-width="34"/>
+  <circle cx="520" cy="200" r="58" fill="none" stroke="#7A1F4E" stroke-width="36"/>
+  <g fill="none" stroke="#1FC500" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M330 200 L462 180"/>
+    <path d="M520 200 L458 34"/>
+    <path d="M402 40 L508 26"/>
+  </g>
+  <g fill="#1FC500">
+    <rect x="372" y="218" width="36" height="20" rx="5"/>
+    <rect x="380" y="206" width="7" height="12"/>
+    <rect x="393" y="206" width="7" height="12"/>
+  </g>
+</svg>
