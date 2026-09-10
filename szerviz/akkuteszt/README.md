@@ -21,8 +21,8 @@ ha csak globálisan van telepítve, az `NPM_GLOBAL_ROOT` env-vel adható meg a h
 
 ## Logó
 
-`assets/whoosh-logo.png` (vagy .jpg/.webp) – ha megvan, ezt használja a fejléc.
-Amíg nincs, a `whoosh-logo.svg` vektoros újrarajzolás kerül be.
+`assets/whoosh-logo.svg` – az eredeti `LOGO_Whoosh.ai`-ból konvertált vektoros logó.
+Ha `whoosh-logo.png` (vagy .jpg/.webp) is van az `assets/`-ben, a build azt részesíti előnyben.
 
 ## Minősítési sávok (SOH = mért Ah / névleges Ah)
 
@@ -34,4 +34,4 @@ Amíg nincs, a `whoosh-logo.svg` vektoros újrarajzolás kerül be.
 | 60–69,9 % | Gyenge |
 | < 60 % | Csere javasolt |
 
-A SOH egy tizedesre kerekítve kerül minősítésre, hogy a kiírt érték és a sáv egyezzen.
+A SOH két tizedesre kerekítve kerül minősítésre, hogy a kiírt érték és a sáv egyezzen.

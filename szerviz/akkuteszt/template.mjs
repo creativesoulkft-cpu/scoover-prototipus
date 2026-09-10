@@ -7,6 +7,10 @@ const GREEN = '#1FC500';
 export function fmtNum(n, decimals = 2) {
   return n.toLocaleString('hu-HU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
+// kapacitás: max. 2 tizedes, felesleges nullák nélkül (26 → "26", 20,8 → "20,8")
+export function fmtCap(n) {
+  return n.toLocaleString('hu-HU', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
 export function fmtDate(iso) {
   const [y, m, d] = iso.split('-');
   return `${y}. ${m}. ${d}.`;
@@ -35,8 +39,8 @@ export function derive(data) {
   const b = data.vehicle.battery;
   const t = data.test;
   const hours = durationToHours(t.duration);
-  // egy tizedesre kerekítve, hogy a minősítés a kijelzett értékkel legyen összhangban
-  const soh = Math.round((t.dischargedAh / b.nominalAh) * 1000) / 10;
+  // két tizedesre kerekítve, hogy a minősítés a kijelzett értékkel legyen összhangban
+  const soh = Math.round((t.dischargedAh / b.nominalAh) * 10000) / 100;
   const avgCurrent = t.dischargedAh / hours;
   const estWh = t.dischargedAh * b.avgVoltage;
   const cRate = avgCurrent / b.nominalAh;
@@ -100,7 +104,7 @@ export function render(data, assets) {
 
   header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8mm;
            border-bottom: 2.2pt solid ${PURPLE}; padding-bottom: 4mm; }
-  .logo { width: 50mm; height: auto; display: block; }
+  .logo { width: 50mm; height: auto; display: block; margin-bottom: 1.5mm; }
   .logo-text { font-size: 26pt; font-weight: 700; color: ${PURPLE}; }
   .brand-line { font-size: 8.4pt; color: #555; margin-top: 1.5mm; }
   .title { text-align: right; }
@@ -211,7 +215,7 @@ export function render(data, assets) {
         <tr><td>Gyártó / típus</td><td>${esc(data.vehicle.brand)} ${esc(data.vehicle.model)}</td></tr>
         <tr><td>Alvázszám</td><td>${frameNo}</td></tr>
         <tr><td>Akkumulátor</td><td>${esc(b.chemistry)}</td></tr>
-        <tr><td>Névleges kapacitás</td><td>${fmtNum(b.nominalAh, 0)} Ah · ${fmtNum(b.nominalWh, 0)} Wh (gyári adat)</td></tr>
+        <tr><td>Névleges kapacitás</td><td>${fmtCap(b.nominalAh)} Ah · ${fmtNum(b.nominalWh, 0)} Wh (gyári adat)</td></tr>
       </table>
     </div>
   </div>
@@ -225,12 +229,12 @@ export function render(data, assets) {
     </div>
     <div class="kpi">
       <div class="l">Névleges kapacitás</div>
-      <div class="v">${fmtNum(b.nominalAh, 0)} <span class="u">Ah</span></div>
+      <div class="v">${fmtCap(b.nominalAh)} <span class="u">Ah</span></div>
       <div class="s">gyári adatlap</div>
     </div>
     <div class="kpi">
       <div class="l">Állapot (SOH)</div>
-      <div class="v">${fmtNum(d.soh, 1)} <span class="u">%</span></div>
+      <div class="v">${fmtNum(d.soh, 2)} <span class="u">%</span></div>
       <div class="s">mért / névleges kapacitás</div>
     </div>
     <div class="kpi">
@@ -260,15 +264,15 @@ export function render(data, assets) {
   <div class="verdict">
     <div>
       <div class="scale">
-        <div class="bar"><div class="marker" style="left:${sohPct.toFixed(1)}%" data-v="${fmtNum(d.soh, 1)} %"></div></div>
+        <div class="bar"><div class="marker" style="left:${sohPct.toFixed(1)}%" data-v="${fmtNum(d.soh, 2)} %"></div></div>
         <div class="ticks"><span>50 %</span><span>60 %</span><span>70 %</span><span>80 %</span><span>90 %</span><span>100 %</span></div>
         <div class="zones"><span>csere javasolt</span><span>gyenge</span><span>megfelelő</span><span>jó</span><span>kiváló</span></div>
       </div>
-      <p style="margin-top:3mm;margin-bottom:0"><b>${esc(g.label)}:</b> ${esc(g.text)} A gyári névleges kapacitás <b>${fmtNum(d.soh, 1)} %-a</b> áll rendelkezésre valós terhelés alatt, ami az iparági „egészséges” küszöböt (80 %) ${d.soh >= 80 ? 'eléri' : 'nem éri el'}.</p>
+      <p style="margin-top:3mm;margin-bottom:0"><b>${esc(g.label)}:</b> ${esc(g.text)} A gyári névleges kapacitás <b>${fmtNum(d.soh, 2)} %-a</b> áll rendelkezésre valós terhelés alatt, ami az iparági „egészséges” küszöböt (80 %) ${d.soh >= 80 ? 'eléri' : 'nem éri el'}.</p>
     </div>
     <div class="badge" style="background:${g.color}">
       <div class="bl">Akkumulátor állapota</div>
-      <div class="bv">${fmtNum(d.soh, 1)} %</div>
+      <div class="bv">${fmtNum(d.soh, 2)} %</div>
       <div class="bg">${esc(g.label)}</div>
     </div>
   </div>
@@ -284,7 +288,7 @@ export function render(data, assets) {
     <li><b>Terheléses kisütés.</b> A csomagot elektronikus terhelésre kötöttük, amely állandó, kíméletes árammal (≈ ${fmtNum(d.avgCurrent, 1)} A) sütötte ki. A készülék a leadott töltést folyamatosan integrálta (Ah-számlálás).</li>
     <li><b>Lekapcsolás.</b> A mérés a csomag saját akkumulátor-védelmi elektronikájának (BMS) lekapcsolásáig tartott, tehát a ténylegesen használható kapacitást mértük, nem egy önkényes feszültséghatárig.</li>
     <li><b>Rögzítés.</b> A mérés végén a kijelzőn megjelenő végértékeket (DSC ${fmtNum(t.dischargedAh)} Ah, ${esc(t.duration)}) fotóval és ezzel a jegyzőkönyvvel dokumentáltuk.</li>
-    <li><b>Kiértékelés.</b> Az állapotot (State of Health, SOH) a mért és a gyári névleges kapacitás hányadosaként számítottuk: ${fmtNum(t.dischargedAh)} Ah / ${fmtNum(b.nominalAh, 0)} Ah = <b>${fmtNum(d.soh, 1)} %</b>.</li>
+    <li><b>Kiértékelés.</b> Az állapotot (State of Health, SOH) a mért és a gyári névleges kapacitás hányadosaként számítottuk: ${fmtNum(t.dischargedAh)} Ah / ${fmtCap(b.nominalAh)} Ah = <b>${fmtNum(d.soh, 2)} %</b>.</li>
   </ol>
   <p class="small">Eszköz: ${esc(t.instrument)}. A kis áramerősségű (${fmtNum(d.cRate, 2)} C) kisütés a menet közbeni, nagyobb terheléshez képest az akkumulátor számára kedvező, ezért a kapott érték a valós használható kapacitás felső, de realisztikus becslése.</p>
 

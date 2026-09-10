@@ -44,7 +44,7 @@ fs.writeFileSync(base + '.html', html);
 console.log('HTML:', path.relative(process.cwd(), base + '.html'));
 
 const d = derive(data);
-console.log(`SOH: ${d.soh.toFixed(1)} % (${d.grade.label}), átlagáram ≈ ${d.avgCurrent.toFixed(2)} A, ≈ ${d.estWh.toFixed(0)} Wh`);
+console.log(`SOH: ${d.soh.toFixed(2)} % (${d.grade.label}), átlagáram ≈ ${d.avgCurrent.toFixed(2)} A, ≈ ${d.estWh.toFixed(0)} Wh`);
 
 let chromium;
 try {

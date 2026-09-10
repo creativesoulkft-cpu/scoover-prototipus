@@ -13,8 +13,8 @@
     "battery": {
       "chemistry": "Li-ion, 16S (60 V rendszer)",
       "nominalVoltage": 60,
-      "nominalAh": 26,
-      "nominalWh": 1560,
+      "nominalAh": 20.8,
+      "nominalWh": 1248,
       "fullVoltage": 67.2,
       "avgVoltage": 57.6
     }
@@ -26,7 +26,12 @@
     "dischargedAh": 20.79,
     "duration": "06:55:46",
     "cutoff": "BMS védelmi lekapcsolás (a csomag saját alsó feszültséghatára)",
-    "displayLines": ["00.00V 00.00A OF", "DSC   20.79Ah", "Time 06:55:46", "Connect to PC"],
+    "displayLines": [
+      "00.00V 00.00A OF",
+      "DSC   20.79Ah",
+      "Time 06:55:46",
+      "Connect to PC"
+    ],
     "photo": "../assets/teszt-kijelzo.jpg",
     "notes": ""
   },
