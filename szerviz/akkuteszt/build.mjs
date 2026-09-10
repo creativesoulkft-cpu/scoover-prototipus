@@ -62,6 +62,23 @@ try {
 }
 const browser = await chromium.launch();
 const page = await browser.newPage();
+
+// Nagy fotó kicsinyítése (max. 1600 px, JPEG 85 %), hogy a PDF ne legyen több MB – EXIF-forgatást a böngésző alkalmazza
+if (assets.photoDataUri && assets.photoDataUri.length > 600_000) {
+  await page.goto('about:blank');
+  const small = await page.evaluate(async (src) => {
+    const img = new Image(); img.src = src; await img.decode();
+    const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.85);
+  }, assets.photoDataUri);
+  assets.photoDataUri = small;
+  fs.writeFileSync(base + '.html', render(data, assets));
+  console.log('Fotó kicsinyítve a beágyazáshoz.');
+}
+
 await page.goto(pathToFileURL(base + '.html').href, { waitUntil: 'load' });
 await page.pdf({ path: base + '.pdf', format: 'A4', printBackground: true, preferCSSPageSize: true });
 if (process.env.PREVIEW_PNG) {

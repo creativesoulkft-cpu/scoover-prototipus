@@ -61,7 +61,7 @@ export function render(data, assets) {
   const photoBlock = assets.photoDataUri
     ? `<figure class="photo">
          <img src="${assets.photoDataUri}" alt="A tesztkészülék kijelzője a mérés végén">
-         <figcaption>1. ábra – A tesztkészülék kijelzője a mérés lezárásakor (eredeti, szerkesztetlen felvétel).</figcaption>
+         <figcaption>1. ábra – A tesztkészülék kijelzője a mérés lezárásakor${t.photoTaken ? ` (felvétel: ${esc(t.photoTaken)})` : ''}. Eredeti, szerkesztetlen fotó kivágata.</figcaption>
        </figure>`
     : `<figure class="photo">
          <div class="lcd-bezel"><div class="lcd">${t.displayLines.map(l => `<div>${esc(l)}</div>`).join('')}</div></div>
@@ -135,7 +135,7 @@ export function render(data, assets) {
 
   .evidence { display: grid; grid-template-columns: 78mm 1fr; gap: 6mm; align-items: start; margin-top: 2mm; }
   figure.photo { margin: 0; }
-  figure.photo img { width: 100%; max-height: 92mm; object-fit: cover; object-position: center 40%; border-radius: 1.5mm; border: .6pt solid #ccc; display: block; }
+  figure.photo img { width: 100%; height: 72mm; object-fit: cover; object-position: center 36%; border-radius: 1.5mm; border: .6pt solid #ccc; display: block; }
   figcaption { font-size: 8pt; color: #555; margin-top: 1.5mm; line-height: 1.3; }
   .lcd-bezel { background: #e9e9e6; border: .8pt solid #bbb; border-radius: 2mm; padding: 5mm 5mm; }
   .lcd { background: #1633e6; color: #8ff7ff; font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;

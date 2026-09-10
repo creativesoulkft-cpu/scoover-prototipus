@@ -20,7 +20,7 @@
     }
   },
   "test": {
-    "date": "2026-09-10",
+    "date": "2026-05-12",
     "method": "Terheléses kisütés állandó árammal, Ah-integrálással",
     "instrument": "Elektronikus akkumulátor-kapacitás tesztkészülék (programozható terhelés, Ah-számláló)",
     "dischargedAh": 20.79,
@@ -33,7 +33,8 @@
       "Connect to PC"
     ],
     "photo": "../assets/teszt-kijelzo.jpg",
-    "notes": ""
+    "notes": "",
+    "photoTaken": "2026. 05. 12. 09:58"
   },
   "technician": "",
   "service": {
