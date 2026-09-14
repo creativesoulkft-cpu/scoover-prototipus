@@ -4,8 +4,16 @@
   1. FORM_ACTION  – a <head>-ben lévő <script>-ben: ide a MiniCRM űrlap-URL. Amíg üres (""), mailto fallback megy.
   2. META PIXEL   – a <head>-ben a "META PIXEL IDE" komment helyére a Meta Pixel base kódot (Events Manager → Add events → Install code manually).
   3. og:image     – a <head> OG tagjében a kép URL-je (1200×630 px, pl. műhelyfotó a packekről). Most placeholder, a fájlt (og.jpg) a repo gyökerébe kell feltölteni.
-  4. Fotó         – a "[REFERENCIA FOTÓ HELYE]" placeholder helyére saját műhelyfotó (hajóba beépített pack).
+  4. Fotók        – az alábbi KÉPEK lista 5 fájlja az index.html mellé; amíg hiányoznak, szaggatott placeholder látszik.
   5. Domain       – README.md: GitHub Pages + Forpsi DNS. A canonical URL a <head>-ben már akkumulatorepites.hu.
+
+  KÉPEK – ezeket a fájlokat másold az index.html mellé (ugyanabba a mappába). Amíg hiányoznak, placeholder látszik, nem törött ikon.
+  JPG, 80% minőség (squoosh.app), fekvő:
+  1. hero.jpg             1600×1067 px  – hero háttér (kész pack a kézben / munkaasztalon, mögötte a műhely elmosódva)
+  2. pack-roller.jpg      1200×800 px   – E-roller panel mellé (21700 cellasor hegesztés közben, vagy kész pack BMS-sel)
+  3. pack-hajo.jpg        1200×800 px   – Hajó panel mellé (LiFePO4 prizmatikus cellák vagy nagy pack)
+  4. muhely.jpg           1200×800 px   – „Hogyan zajlik” szekció fölé, széles (műhely, ponthegesztő, kapacitásmérő, munka közben)
+  5. referencia-hajo.jpg  1200×800 px   – hajós szekció, beépített pack hajóban (ha még nincs, hagyd üresen, NE AI-kép)
 -->
 <html lang="hu">
 <head>
@@ -109,6 +117,7 @@
 
   /* Hero */
   .hero{
+    position:relative;overflow:hidden;
     padding:72px 0 48px;
     background:
       radial-gradient(900px 500px at 15% -10%,rgba(122,31,110,.55),transparent 60%),
@@ -116,9 +125,46 @@
       linear-gradient(180deg,#141821 0%,var(--bg) 100%);
     border-bottom:1px solid var(--line)
   }
+  .hero>.wrap{position:relative;z-index:1}
+  .hero .bg{position:absolute;inset:0;z-index:0}
+  .hero .bg img{display:none;width:100%;height:100%;object-fit:cover}
+  .hero .bg.loaded img{display:block}
+  .hero .bg.loaded::after{content:"";position:absolute;inset:0;background:rgba(15,17,21,.4)} /* 40% sötét overlay a kép fölé */
+  .hero .bg::before{content:attr(data-label) " helye";position:absolute;right:12px;top:12px;font-size:.75rem;color:#6b7686;border:1px dashed #3a4150;border-radius:6px;padding:3px 8px}
+  .hero .bg.loaded::before{content:none}
   .hero .sub{color:var(--muted);font-size:1.1rem;margin-top:14px;max-width:600px}
   .hero .facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;font-size:.92rem;color:#c5cbd6}
   .hero .facts span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:middle}
+
+  /* Képhelyek: amíg a kép hiányzik, szaggatott placeholder a fájlnévvel */
+  .ph{position:relative;margin:0;border:2px dashed #3a4150;border-radius:12px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#6b7686;font-size:.88rem;text-align:center;padding:16px;min-height:160px}
+  .ph::after{content:attr(data-label)}
+  .ph img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ph.loaded{border:1px solid var(--line);padding:0}
+  .ph.loaded::after{content:none}
+  .ph.loaded img{display:block}
+  .ph-side{aspect-ratio:3/2;max-width:100%}
+  .ph-wide{aspect-ratio:16/7;max-width:100%;margin-bottom:26px}
+
+  /* Miért lítium: eszközválasztó */
+  .picker{display:grid;gap:12px;grid-template-columns:1fr;margin-top:22px}
+  @media (min-width:640px){.picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .pick{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:#fff;background:var(--bg2);border:2px solid var(--line);border-radius:var(--radius);padding:16px 18px;cursor:pointer;min-height:64px;transition:border-color .15s,background .15s}
+  .pick .ic{font-size:1.7rem;line-height:1;flex:none}
+  .pick b{display:block;font-size:1.05rem}
+  .pick small{color:var(--muted);font-size:.85rem}
+  .pick:hover{border-color:var(--purple-soft)}
+  .pick[aria-pressed=true]{border-color:var(--green);background:rgba(61,212,0,.08)}
+  .pick:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+  .panel{margin-top:14px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .panel-grid{display:grid;gap:20px}
+  @media (min-width:860px){.panel-grid{grid-template-columns:1.2fr .8fr;align-items:start}}
+  .chem{display:inline-block;padding:4px 10px;border-radius:8px;background:rgba(122,31,110,.25);color:#f0c9ea;font-weight:700;margin-bottom:12px}
+  .kv{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+  .kv li{padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:.97rem}
+  .kv b{color:#fff}
+  .quote{margin:0 0 14px;padding:6px 14px;border-left:3px solid var(--purple-soft);color:#c5cbd6}
+  .panel .btns{margin-top:6px}
 
   /* Bizalom-sáv */
   .trust{background:var(--bg2);border-bottom:1px solid var(--line);padding:28px 0}
@@ -163,7 +209,6 @@
   .steps-inline li::before{content:counter(s);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center}
   .price-box{background:rgba(61,212,0,.07);border:1px solid rgba(61,212,0,.35);border-radius:12px;padding:18px 20px;margin-top:16px}
   .price-box b{color:#fff;font-size:1.25rem}
-  .photo-ph{border:2px dashed #2c3a5a;border-radius:12px;min-height:180px;display:flex;align-items:center;justify-content:center;color:#5f6f95;font-size:.9rem;text-align:center;padding:16px}
 
   /* Ártáblázat */
   .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg2)}
@@ -241,10 +286,11 @@
 
 <!-- ============ 1. HERO ============ -->
 <header class="hero" id="top">
+  <div class="bg" data-label="hero.jpg"><img data-src="hero.jpg" alt="" loading="eager"></div>
   <div class="wrap">
     <span class="tag">Egyedi Li-ion akkumulátorépítés</span>
     <h1>Több hatótáv. Ugyanaz a roller, ugyanaz a hajó.</h1>
-    <p class="sub">Veszprémben, saját műhelyben építjük a packot a te méretedre. Tenpower 21700 cellából, egyedi BMS-sel, teszttel átadva. 12 hónap garanciával.</p>
+    <p class="sub">Veszprémben, saját műhelyben építjük a packot a te méretedre. Tenpower 21700 cellából, hajóra LiFePO4-ből. Egyedi BMS-sel, teszttel átadva. 12 hónap garanciával.</p>
     <div class="facts">
       <span>Roller, e-bike, hajó</span>
       <span>Ajánlat 24 órán belül</span>
@@ -252,7 +298,7 @@
     </div>
     <div class="btns">
       <a class="btn btn-green" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku#urlap">Kérek ajánlatot</a>
-      <a class="btn btn-outline" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku#hajo">Hajóakku felmérés</a>
+      <a class="btn btn-outline" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku#hajo">Hajóakku (LiFePO4)</a>
     </div>
     <div class="contact-line">
       <span>Vagy hívj:</span>
@@ -262,13 +308,71 @@
   </div>
 </header>
 
+<!-- ============ 1b. MIÉRT LÍTIUM ============ -->
+<section id="litium">
+  <div class="wrap">
+    <span class="tag">Kémia</span>
+    <h2>Miért lítium, és melyik lítium?</h2>
+    <p class="lead">A lítium nem egy dolog, hanem több kémia, és a kettő, amivel dolgozunk, két különböző feladatra való. A rossz választás nem „gyengébb”, hanem veszélyes vagy felesleges.</p>
+
+    <div class="picker" role="group" aria-label="Mihez kell az akku?">
+      <button type="button" class="pick" data-key="roller" aria-pressed="true" aria-controls="panel-roller"><span class="ic" aria-hidden="true">⚡</span><span><b>E-roller</b><small>21700 NMC, a gyári rekeszbe</small></span></button>
+      <button type="button" class="pick" data-key="ebike" aria-pressed="false" aria-controls="panel-ebike"><span class="ic" aria-hidden="true">🚲</span><span><b>E-bike</b><small>21700 NMC, vázba vagy tokba</small></span></button>
+      <button type="button" class="pick" data-key="hajo" aria-pressed="false" aria-controls="panel-hajo"><span class="ic" aria-hidden="true">⛵</span><span><b>Elektromos hajó / csónak</b><small>LiFePO4, 2–6 kWh</small></span></button>
+    </div>
+
+    <div class="panel" id="panel-roller" data-key="roller">
+      <div class="panel-grid">
+        <div>
+          <span class="chem">Li-ion NMC, 21700 cella (Tenpower INR21700-50ME)</span>
+          <ul class="kv">
+            <li><b>Miért ez:</b> a legjobb energiasűrűség, ugyanabba a rekeszbe több Ah fér. Rollernél a hely a szűk keresztmetszet, nem a súly.</li>
+            <li><b>Amit kapsz:</b> 36–72 V, 10–35 Ah, a gyári helyre méretezve, saját BMS.</li>
+          </ul>
+          <p class="quote">A 21700 az, amit a legjobb gyári rollerek is használnak. Mi cellánként válogatjuk.</p>
+          <div class="btns"><a class="btn btn-green" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku&amp;tipus=roller#urlap">Rollerre kérek ajánlatot</a></div>
+        </div>
+        <figure class="ph ph-side" data-label="pack-roller.jpg – kész 21700 pack a műhelyben"><img data-src="pack-roller.jpg" alt="Kész 21700 NMC roller-akkupack a Whoosh műhelyében" loading="lazy"></figure>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-ebike" data-key="ebike" hidden>
+      <span class="chem">Li-ion NMC, 21700 (ugyanaz, mint rollernél)</span>
+      <ul class="kv">
+        <li><b>Miért ez:</b> vázba vagy csomagtartóra szerelt ház, itt is a méret számít.</li>
+        <li><b>Amit kapsz:</b> 36V / 48V / 52V, 10–25 Ah, meglévő házba vagy új tokba.</li>
+        <li><b>Megjegyzés:</b> a gyári e-bike vezérlők egy része kommunikál az akkuval. Ezt a felmérésnél nézzük.</li>
+      </ul>
+      <div class="btns"><a class="btn btn-green" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku&amp;tipus=ebike#urlap">E-bike-ra kérek ajánlatot</a></div>
+    </div>
+
+    <div class="panel" id="panel-hajo" data-key="hajo" hidden>
+      <div class="panel-grid">
+        <div>
+          <span class="chem">LiFePO4 (lítium-vas-foszfát), prizmatikus cellák</span>
+          <p><strong>Miért nem 21700 NMC:</strong> hajón, zárt térben a hőmegfutás kockázata nem vállalható. A LiFePO4 nem gyullad meg mechanikai sérülésre vagy túltöltésre, ezért ez a hajós szabvány.</p>
+          <ul class="kv">
+            <li><b>12,8 V / 25,6 V / 51,2 V névleges.</b> Ólom-kompatibilis: a fedélzeti rendszer, a műszerek, a töltő nagyrészt marad.</li>
+            <li><b>3000–6000 ciklus.</b> 10+ szezon. Az ólom 300–500.</li>
+            <li><b>Lapos kisütési görbe.</b> A motor a végéig ugyanazt a teljesítményt kapja, nem „fárad el” félúton.</li>
+            <li><b>Mély kisütés.</b> 80–90%-ot használhatsz belőle, az ólomból 50%-ot.</li>
+          </ul>
+          <p><strong>Amit kapsz:</strong> 2–6 kWh, egyedi ház, saját BMS Bluetooth-felügyelettel, beépítés, teszt a vízen.</p>
+          <div class="btns"><a class="btn btn-green" href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku&amp;tipus=hajo#hajo">Ingyenes felmérés a hajónál</a></div>
+        </div>
+        <figure class="ph ph-side" data-label="pack-hajo.jpg – LiFePO4 pack vagy beépítés"><img data-src="pack-hajo.jpg" alt="LiFePO4 prizmatikus cellákból épített hajóakku" loading="lazy"></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 2. BIZALOM-SÁV ============ -->
 <div class="trust">
   <div class="wrap">
     <div class="trust-grid">
       <div class="trust-item">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7" y="4" width="10" height="17" rx="2"/><path d="M10 2h4M10 9h4M10 13h4"/></svg>
-        <div><b>Tenpower 21700 cella</b><small>INR21700-50ME, 5000 mAh, minden packban ugyanaz</small></div>
+        <div><b>Tenpower 21700 cella</b><small>INR21700-50ME, 5000 mAh, minden roller- és e-bike-packban</small></div>
       </div>
       <div class="trust-item">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -307,7 +411,7 @@
       <div class="card">
         <h3>Hajód van és elég volt az ólomból</h3>
         <ul class="ps">
-          <li><span class="p">Az ólom/AGM telep nehéz, és pár szezon után cserélni kell.</span><span class="s">Li-ion pack harmadannyi súllyal, 3–5× hosszabb élettartammal.</span></li>
+          <li><span class="p">Az ólom/AGM telep nehéz, és pár szezon után cserélni kell.</span><span class="s">LiFePO4 pack harmadannyi súllyal, 3000–6000 ciklussal az ólom 300–500-a helyett.</span></li>
           <li><span class="p">Hamar leül, a töltés egy éjszaka.</span><span class="s">2–6 kWh valódi, kivehető kapacitás, gyors töltés.</span></li>
           <li><span class="p">Nem tudod, mekkora kell, és ki építi be.</span><span class="s">Ingyenes felmérés a hajónál, tervezés, beépítés, teszt a vízen.</span></li>
         </ul>
@@ -325,17 +429,17 @@
 <section class="boat" id="hajo">
   <div class="wrap">
     <span class="tag">Hajóakku a Balatonon</span>
-    <h2>Li-ion hajóakku ólom helyett. Felméréssel, beépítéssel.</h2>
-    <p class="lead">2–6 kWh, 12V / 24V / 48V rendszerre, elektromos csónakmotorhoz és fedélzeti fogyasztókhoz. A hajónál mérünk fel, oda tervezünk, ott adjuk át.</p>
+    <h2>LiFePO4 hajóakku ólom helyett. Felméréssel, beépítéssel.</h2>
+    <p class="lead">2–6 kWh, 12V / 24V / 48V rendszerre (12,8 / 25,6 / 51,2 V névleges), elektromos csónakmotorhoz és fedélzeti fogyasztókhoz. Lítium-vas-foszfát, nem 21700 NMC: hajón ez a biztonságos kémia. A hajónál mérünk fel, oda tervezünk, ott adjuk át.</p>
 
     <div class="boat-grid">
       <div>
-        <h3>Miért Li-ion ólom helyett</h3>
+        <h3>Miért LiFePO4 ólom helyett</h3>
         <div class="why">
           <div><b>1/3 súly</b><small>ugyanannyi használható energiánál</small></div>
-          <div><b>3–5× élettartam</b><small>ciklusszámban az ólom/AGM-hez képest</small></div>
-          <div><b>Nincs memóriaeffektus</b><small>félig töltve is állhat, nem szulfátosodik, mint az ólom</small></div>
-          <div><b>Gyors töltés</b><small>nem egy éjszaka, a BMS-hez méretezett töltővel</small></div>
+          <div><b>3000–6000 ciklus</b><small>10+ szezon, az ólom/AGM 300–500</small></div>
+          <div><b>Nem gyullad meg</b><small>sem mechanikai sérülésre, sem túltöltésre; félig töltve is állhat</small></div>
+          <div><b>Mély kisütés, lapos görbe</b><small>80–90% használható, a motor a végéig teljes erőt kap</small></div>
         </div>
 
         <div class="price-box">
@@ -349,11 +453,11 @@
         <ol class="steps-inline">
           <li><strong>Felmérés a hajónál.</strong> Motor, fogyasztók, akkurekesz, töltési lehetőség. Ingyenes, Balatonfüred–Siófok–Keszthely környék.</li>
           <li><strong>Tervezés.</strong> Feszültség, kapacitás, BMS áramhatár, házméret, csatlakozók, töltő.</li>
-          <li><strong>Építés.</strong> Tenpower 21700 cellák, ponthegesztett nikkel, balance harness, hőzsugor, egyedi ház.</li>
+          <li><strong>Építés.</strong> LiFePO4 prizmatikus cellák, saját BMS Bluetooth-felügyelettel, egyedi ház.</li>
           <li><strong>Beépítés.</strong> Rögzítés, kábelezés, biztosíték, csatlakoztatás a motorhoz és a töltőhöz.</li>
           <li><strong>Teszt a vízen.</strong> Terhelés alatt, veled együtt. Így adjuk át.</li>
         </ol>
-        <div class="photo-ph" style="margin-top:16px">[REFERENCIA FOTÓ HELYE – hajóba beépített pack]</div>
+        <figure class="ph ph-side" style="margin-top:16px" data-label="referencia-hajo.jpg – beépített pack hajóban"><img data-src="referencia-hajo.jpg" alt="Hajóba beépített LiFePO4 akkupack" loading="lazy"></figure>
       </div>
     </div>
 
@@ -374,6 +478,7 @@
   <div class="wrap">
     <span class="tag">Roller és e-bike packok</span>
     <h2>Árak</h2>
+    <p class="lead"><strong>Ezek az árak 21700 NMC packokra vonatkoznak. Hajóra LiFePO4-et építünk, egyedi ajánlattal.</strong></p>
     <p class="lead">Bruttó ügyfélárak, Tenpower INR21700-50ME cellákkal, a felhasználáshoz választott BMS-sel, teszttel és 12 hónap garanciával. <strong>Nem találod a méreted? Bármilyen konfiguráció, <a href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku#urlap">kérj ajánlatot</a>.</strong></p>
 
     <div class="table-wrap">
@@ -426,6 +531,7 @@
 <!-- ============ 6. HOGYAN ZAJLIK ============ -->
 <section id="folyamat" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
   <div class="wrap">
+    <figure class="ph ph-wide" data-label="muhely.jpg – a műhely, ponthegesztő, kapacitásmérő, munka közben"><img data-src="muhely.jpg" alt="A Whoosh akkuépítő műhelye Veszprémben munka közben" loading="lazy"></figure>
     <span class="tag">Folyamat</span>
     <h2>Hogyan zajlik</h2>
     <div class="steps">
@@ -458,7 +564,7 @@
     </details>
     <details>
       <summary>Kell új töltő?</summary>
-      <div class="a"><p>Ha a meglévő töltőd ugyanahhoz a rendszerfeszültséghez való, mint az új pack, marad. (Egy 36V-os roller töltője 42V-ot ad le, ez így normális.) Nagyobb kapacitásnál ugyanaz a töltő tovább tölt, mert több energiát kell betölteni. Ha gyorsabb töltés kell, vagy feszültséget váltunk, töltőt külön adunk. Hajónál a meglévő ólom/AGM töltő jellemzően nem használható: más a feszültsége és a töltési görbéje, a BMS védelemből leválasztana. A töltőt a felméréskor egyeztetjük, a BMS töltőáramához méretezve.</p></div>
+      <div class="a"><p>Ha a meglévő töltőd ugyanahhoz a rendszerfeszültséghez való, mint az új pack, marad. (Egy 36V-os roller töltője 42V-ot ad le, ez így normális.) Nagyobb kapacitásnál ugyanaz a töltő tovább tölt, mert több energiát kell betölteni. Ha gyorsabb töltés kell, vagy feszültséget váltunk, töltőt külön adunk. Hajónál a LiFePO4 feszültsége ólom-kompatibilis, ezért a meglévő töltő gyakran marad, ha van rajta lítium vagy AGM program, és nincs deszulfatáló vagy kiegyenlítő üzemmódja. Ezt a felméréskor nézzük meg, a BMS töltőáramához méretezve.</p></div>
     </details>
     <!-- Garanciális kizárásokat (pl. mechanikai sérülés, beázás, nem hozzá való töltő, mélykisütés) csak a tulaj jóváhagyása után írj ide. -->
     <details>
@@ -472,6 +578,10 @@
     <details>
       <summary>Hajóhoz mekkora kell nekem?</summary>
       <div class="a"><p>Durva ökölszabály: a motor teljesítménye (W) szorozva a napi menetórákkal, osztva 1000-rel, plusz kb. 20% tartalék, ez a kWh. Egy 1000 W-os motorral 3 órányi menet nagyjából 3,6 kWh. Ez végig teljes gázzal számol, tehát felső becslés; a legtöbben részgázon mennek, így ennél kevesebb is elég lehet. A valós fogyasztás a hajó súlyától, a széltől és a hullámzástól is függ, ezért <a href="?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku&amp;tipus=hajo#urlap">felmérés</a> nélkül nem mondunk számot. A felmérés ingyenes.</p></div>
+    </details>
+    <details>
+      <summary>Miért LiFePO4 a hajóra, ha a rollerre 21700?</summary>
+      <div class="a"><p>Rollernél a hely a szűk keresztmetszet, és a 21700 NMC adja a legtöbb Ah-t ugyanabba a rekeszbe, a pack pedig nyitott térben, a lábad alatt megy. Hajón zárt térben a hőmegfutás kockázata nem vállalható, a LiFePO4 viszont nem gyullad meg sem mechanikai sérülésre, sem túltöltésre. Ráadásul a 12,8 / 25,6 / 51,2 V ólom-kompatibilis, így a fedélzeti rendszer nagyrészt marad, és 3000–6000 ciklust bír az ólom 300–500-a helyett.</p></div>
     </details>
 
     <div class="contact-line">
@@ -544,19 +654,43 @@
   var form = document.getElementById('lead');
   var ok = document.getElementById('form-ok');
   function F(n){ return form.elements.namedItem(n); }
-  function selectBoat(){
-    var r = form.querySelector('input[name=type][value="Hajó"]');
+
+  // Eszköztípus: URL-kulcs → űrlap rádió értéke
+  var TYPES = { roller: 'Roller', ebike: 'E-bike', hajo: 'Hajó' };
+  function selectType(val){
+    var r = form.querySelector('input[name=type][value="' + val + '"]');
     if (r) r.checked = true;
   }
+  function tipusKey(qs){
+    try { var t = new URLSearchParams(qs).get('tipus'); return TYPES[t] ? t : null; } catch(e){ return null; }
+  }
 
-  // ?tipus=hajo az URL-ben (pl. megosztott linkről) → a "Hajó" rádió legyen kijelölve
-  try{
-    if (new URLSearchParams(location.search).get('tipus') === 'hajo') selectBoat();
-  }catch(e){}
+  // "Miért lítium" eszközválasztó: kártya → panel + az űrlap "Mihez kell?" rádiója is átáll
+  var picks = document.querySelectorAll('.pick'), panels = document.querySelectorAll('.panel');
+  function showPanel(key, syncForm){
+    Array.prototype.forEach.call(picks, function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-key') === key ? 'true' : 'false'); });
+    Array.prototype.forEach.call(panels, function(p){ p.hidden = p.getAttribute('data-key') !== key; });
+    if (syncForm) selectType(TYPES[key]);
+  }
+  Array.prototype.forEach.call(picks, function(b){
+    b.addEventListener('click', function(){ showPanel(b.getAttribute('data-key'), true); });
+  });
+  function applyTipus(key){ if (!key) return; selectType(TYPES[key]); showPanel(key, false); }
+
+  // ?tipus=roller|ebike|hajo az URL-ben (pl. megosztott linkről) → rádió + panel
+  applyTipus(tipusKey(location.search));
+
+  // Képhelyek: data-src → src; ha a fájl hiányzik, a placeholder marad, nincs törött ikon
+  Array.prototype.forEach.call(document.querySelectorAll('img[data-src]'), function(img){
+    var box = img.parentNode;
+    img.addEventListener('load', function(){ box.classList.add('loaded'); });
+    img.addEventListener('error', function(){ box.classList.remove('loaded'); img.removeAttribute('src'); });
+    img.src = img.getAttribute('data-src');
+  });
 
   // Belső CTA-k (?utm_...#urlap, #hajo): ne töltsük újra az oldalt (a Pixel PageView ne
   // duplázódjon, a hirdetésből jövő fbclid/UTM ne vesszen el, a beírt űrlapadat maradjon),
-  // csak görgessünk a célra. A href-ben az UTM marad, JS nélkül is működik a link.
+  // csak görgessünk a célra, és a ?tipus= szerint álljon át a rádió + a panel. A href-ben az UTM marad.
   document.addEventListener('click', function(ev){
     if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
     var a = ev.target.closest ? ev.target.closest('a[href^="?"]') : null;
@@ -565,7 +699,7 @@
     var target = parts[1] && document.getElementById(parts[1]);
     if (!target) return;
     ev.preventDefault();
-    if (/[?&]tipus=hajo(&|$)/.test(parts[0])) selectBoat();
+    applyTipus(tipusKey(parts[0]));
     target.scrollIntoView({behavior:'smooth', block:'start'});
     try { history.replaceState(null, '', location.pathname + location.search + '#' + parts[1]); } catch(e){}
   });
