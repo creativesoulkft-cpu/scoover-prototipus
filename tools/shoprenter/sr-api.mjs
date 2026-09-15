@@ -167,6 +167,14 @@ async function main() {
     console.log(await readFile(new URL(import.meta.url)).then((b) => b.toString().split('\n').filter((l) => l.startsWith('//')).join('\n')));
     return;
   }
+  // --dry-run: nem hív API-t, ezért hitelesítés (és beállított kulcsok) nélkül is fut.
+  if (cmd === 'create' && flags.has('--dry-run')) {
+    const file = rest[0];
+    if (!file) throw new Error('Adj meg egy JSON fájlt (lásd tools/shoprenter/sample-product.json).');
+    const payload = JSON.parse(await readFile(file, 'utf8'));
+    console.log('DRY-RUN – ez menne POST productExtend-re:\n' + JSON.stringify(payload, null, 2));
+    return;
+  }
   const mode = await initAuth();
   console.error(`# bolt: ${SHOP}  auth: ${mode}`);
 

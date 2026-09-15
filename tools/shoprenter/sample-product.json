@@ -1,23 +1,90 @@
 {
-  "sku": "SCV-PONYVA-G2",
-  "price": "9990",
-  "stock1": "10",
+  "sku": "WHSHFL1G2MPRS",
   "status": "0",
+  "price": "23543.3071",
+  "stock1": "0",
   "orderable": "1",
   "subtractStock": "1",
   "shipped": "1",
   "minimalOrderNumber": "1",
-  "manufacturer": { "name": "Scoover" },
-  "taxClass": { "id": "IDE_A_TAX_CLASS_ID  (node tools/shoprenter/sr-api.mjs get taxClasses?full=1)" },
+  "maximalOrderNumber": "0",
+  "freeShipping": "0",
+  "sortOrder": "1",
+  "weight": "250.00",
+  "width": "8.00",
+  "height": "8.00",
+  "length": "35.00",
+  "mainPicture": "Foliak/egyszinu-foliak/g2-master/kukirin-g2-master-egyszinu-folia-piros.png",
+  "imageAlt": "Kukirin G2 Master egyszínű fóliaszett piros",
+  "taxClass": {
+    "id": "dGF4Q2xhc3MtdGF4X2NsYXNzX2lkPTEw"
+  },
+  "productClass": {
+    "id": "cHJvZHVjdENsYXNzLXByb2R1Y3RfY2xhc3NfaWQ9MTY="
+  },
+  "manufacturer": {
+    "id": "bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yNw=="
+  },
+  "weightUnit": {
+    "id": "d2VpZ2h0Q2xhc3Mtd2VpZ2h0X2NsYXNzX2lkPTI="
+  },
+  "volumeUnit": {
+    "id": "bGVuZ3RoQ2xhc3MtbGVuZ3RoX2NsYXNzX2lkPTE="
+  },
+  "inStockStatus": {
+    "id": "c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "onlyStock1Status": {
+    "id": "c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "noStockStatus": {
+    "id": "c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTEx"
+  },
   "productDescriptions": [
     {
-      "name": "Scoover vízálló rollerponyva – Kukirin G2",
-      "shortDescription": "Méretre szabott, UV-álló ponyva Kukirin G2 rollerhez.",
-      "description": "<p>Méretre szabott, vízálló és UV-álló ponyva Kukirin G2 elektromos rollerhez. Gumis szegély, tükröződő csík, hordtasak.</p>",
-      "language": { "id": "IDE_A_NYELV_ID  (node tools/shoprenter/sr-api.mjs languages)" }
+      "language": {
+        "id": "bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9MQ=="
+      },
+      "name": "Kukirin G2 Master egyszínű fóliaszett - Piros",
+      "metaTitle": "Kukirin G2 Master egyszínű fóliaszett piros",
+      "metaDescription": "Prémium fólia Kukirin G2 Master rollerhez. Piros egyszínű design, pontos illeszkedés, látványos megjelenés és tartós kivitel.",
+      "shortDescription": "<span style=\"font-size:18px;\"><span style=\"font-family:arial,helvetica,sans-serif;\"><span style=\"color:#000000;\">Teljes egyszínű fóliaszett Kukirin G2 Masterhez, 6 színben. Saját sablonról vágva, pontosan illeszkedik — kormányoszlop, dekk oldala, akkuház, első és hátsó lengőkarok. Nem kell szétszedni a rollert, nem karcolja a fényezést, később nyom nélkül cserélhető. 3–5 munkanap, Veszprémben</span></span></span>",
+      "description": "<p dir=\"ltr\"><strong>Új színt a G2 Masternek — egy hét alatt, fényezés nélkül.</strong>\n</p>\n\n<p dir=\"ltr\">Ez nem matrica és nem \"díszcsík\": a roller vázelemét borító, egyszínű fóliaszett, amit mi vágunk és mi rakunk fel. A sablonokat saját magunk mértük le a G2 családról, ezért az illesztés hézagmentes — a csavarfuratok, élek és kábelkivezetések pontosan a helyükön vannak.\n</p>\n\n<p dir=\"ltr\"><strong>Mit fed le a szett</strong>\n</p>\n\n<ul dir=\"ltr\">\n\t<li>Kormányoszlop és kijelzőborítás</li>\n\t<li>Dekk két oldala (a legnagyobb, legjobban látható felület)</li>\n\t<li>Akkuház alja, dekk-nyak és csuklóborítás</li>\n\t<li>Első lengőkar / villa </li>\n\t<li>Hátsó lengőkar </li>\n</ul>\n\n<p dir=\"ltr\">A taposófelület, a gumik, a fékek és a kormány gumija eredeti marad.\n</p>\n\n<p dir=\"ltr\"><strong>Színek</strong><br />\n\tCián · Fehér · Kék · Lila · Piros · Zöld<br />\n\t(Mintás és egyedi grafikás változat külön termékként, hamarosan.)\n</p>\n\n<p dir=\"ltr\"><strong>Kompatibilitás</strong><br />\n\tKukirin G2 (2023–2026), G2 Master, G2 Max, G2 Pro. Rendeléskor add meg a pontos típust és évjáratot — a fóliát csak azután vágjuk ki.\n</p>\n\n<p dir=\"ltr\"><strong>Miért fólia, miért nem festés</strong>\n</p>\n\n<ul dir=\"ltr\">\n\t<li>Nem kell szétszedni a rollert, a garancia nem sérül</li>\n\t<li>Védi az eredeti fényezést kavicsfelverődéstől, karcolástól</li>\n\t<li>Kültéri, időjárásálló anyag</li>\n\t<li>Ha megunod, nyom nélkül eltávolítható vagy cserélhető</li>\n</ul>\n\n<p dir=\"ltr\"><strong>Hogyan megy</strong>\n</p>\n\n<ol dir=\"ltr\">\n\t<li>Megrendeled, kiválasztod a színt és a típust</li>\n\t<li>Egyeztetünk időpontot — behozod a rollert Veszprémbe</li>\n\t<li>3–5 munkanapon belül kész, felrakva viszed haza</li>\n</ol>\n\n<p dir=\"ltr\">Ár: <strong>29.900 Ft</strong>, felrakással együtt.\n</p>\n\n<p dir=\"ltr\"><strong>Ápolás</strong><br />\n\tKézi mosás, magasnyomású mosót az élekre ne irányíts. Az első 48 órában ne mosd.\n</p>\n\n<p dir=\"ltr\"><strong>Gyakori kérdések</strong><br />\n\t<em>Csak egy részt szeretnék fóliázni?</em> Lehet — hívj vagy írj, zónánként is kiadjuk.<br />\n\t<em>Más rollerem van?</em> Készülnek a további típusok (Joyor T10, Ninebot Max G2). Írj, ha a tiéd nincs a listán.<br />\n\t<em>Postán is kérhető?</em> Az egyszínű szettet felrakással adjuk; önfelrakós, postázott változatért keress minket.\n</p>",
+      "measurementUnit": "db"
+    },
+    {
+      "language": {
+        "id": "bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9NA=="
+      },
+      "name": "Kukirin G2 Master egyszínű fóliaszett - Piros",
+      "metaTitle": "Kukirin G2 Master egyszínű fóliaszett piros",
+      "metaDescription": "Prémium fólia Kukirin G2 Master rollerhez. Piros egyszínű design, pontos illeszkedés, látványos megjelenés és tartós kivitel.",
+      "shortDescription": "<span style=\"font-size:18px;\"><span style=\"font-family:arial,helvetica,sans-serif;\"><span style=\"color:#000000;\">Teljes egyszínű fóliaszett Kukirin G2 Masterhez, 6 színben. Saját sablonról vágva, pontosan illeszkedik — kormányoszlop, dekk oldala, akkuház, első és hátsó lengőkarok. Nem kell szétszedni a rollert, nem karcolja a fényezést, később nyom nélkül cserélhető. 3–5 munkanap, Veszprémben</span></span></span>",
+      "description": "<p dir=\"ltr\"><strong>Új színt a G2 Masternek — egy hét alatt, fényezés nélkül.</strong>\n</p>\n\n<p dir=\"ltr\">Ez nem matrica és nem \"díszcsík\": a roller vázelemét borító, egyszínű fóliaszett, amit mi vágunk és mi rakunk fel. A sablonokat saját magunk mértük le a G2 családról, ezért az illesztés hézagmentes — a csavarfuratok, élek és kábelkivezetések pontosan a helyükön vannak.\n</p>\n\n<p dir=\"ltr\"><strong>Mit fed le a szett</strong>\n</p>\n\n<ul dir=\"ltr\">\n\t<li>Kormányoszlop és kijelzőborítás</li>\n\t<li>Dekk két oldala (a legnagyobb, legjobban látható felület)</li>\n\t<li>Akkuház alja, dekk-nyak és csuklóborítás</li>\n\t<li>Első lengőkar / villa </li>\n\t<li>Hátsó lengőkar </li>\n</ul>\n\n<p dir=\"ltr\">A taposófelület, a gumik, a fékek és a kormány gumija eredeti marad.\n</p>\n\n<p dir=\"ltr\"><strong>Színek</strong><br />\n\tCián · Fehér · Kék · Lila · Piros · Zöld<br />\n\t(Mintás és egyedi grafikás változat külön termékként, hamarosan.)\n</p>\n\n<p dir=\"ltr\"><strong>Kompatibilitás</strong><br />\n\tKukirin G2 (2023–2026), G2 Master, G2 Max, G2 Pro. Rendeléskor add meg a pontos típust és évjáratot — a fóliát csak azután vágjuk ki.\n</p>\n\n<p dir=\"ltr\"><strong>Miért fólia, miért nem festés</strong>\n</p>\n\n<ul dir=\"ltr\">\n\t<li>Nem kell szétszedni a rollert, a garancia nem sérül</li>\n\t<li>Védi az eredeti fényezést kavicsfelverődéstől, karcolástól</li>\n\t<li>Kültéri, időjárásálló anyag</li>\n\t<li>Ha megunod, nyom nélkül eltávolítható vagy cserélhető</li>\n</ul>\n\n<p dir=\"ltr\"><strong>Hogyan megy</strong>\n</p>\n\n<ol dir=\"ltr\">\n\t<li>Megrendeled, kiválasztod a színt és a típust</li>\n\t<li>Egyeztetünk időpontot — behozod a rollert Veszprémbe</li>\n\t<li>3–5 munkanapon belül kész, felrakva viszed haza</li>\n</ol>\n\n<p dir=\"ltr\">Ár: <strong>29.900 Ft</strong>, felrakással együtt.\n</p>\n\n<p dir=\"ltr\"><strong>Ápolás</strong><br />\n\tKézi mosás, magasnyomású mosót az élekre ne irányíts. Az első 48 órában ne mosd.\n</p>\n\n<p dir=\"ltr\"><strong>Gyakori kérdések</strong><br />\n\t<em>Csak egy részt szeretnék fóliázni?</em> Lehet — hívj vagy írj, zónánként is kiadjuk.<br />\n\t<em>Más rollerem van?</em> Készülnek a további típusok (Joyor T10, Ninebot Max G2). Írj, ha a tiéd nincs a listán.<br />\n\t<em>Postán is kérhető?</em> Az egyszínű szettet felrakással adjuk; önfelrakós, postázott változatért keress minket.\n</p>",
+      "measurementUnit": "db"
     }
   ],
   "productCategoryRelations": [
-    { "category": { "id": "IDE_A_KATEGORIA_ID  (node tools/shoprenter/sr-api.mjs categories)" } }
+    {
+      "category": {
+        "id": "Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MzM0"
+      }
+    },
+    {
+      "category": {
+        "id": "Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTM4"
+      }
+    },
+    {
+      "category": {
+        "id": "Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQ0"
+      }
+    }
+  ],
+  "productSpecials": [
+    {
+      "price": "19606.2992",
+      "dateTo": "2026-09-30 23:59:00"
+    }
   ]
 }
