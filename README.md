@@ -157,3 +157,27 @@ A `LabelLayer` ma egy szöveget tesz egy darabra. A vevői egyedi felirat ebből
 7. **Minőség.** Egységtesztek az adatfájlok sémájára (minden darabnak van `d`,
    egyedi `id`), vizuális regressziós teszt (Playwright screenshot) modellenként,
    hogy egy vágófájl-frissítés ne törje el csendben az előnézetet.
+
+## Shoprenter API (termékfeltöltés)
+
+`tools/shoprenter/sr-api.mjs` – a bolt (`elektromosroller.api.myshoprenter.hu`) kategóriáit és
+termékeit kérdezi le, illetve termékeket tölt fel a `productExtend` erőforráson keresztül.
+Hitelesítő adatok környezeti változóból (a script nem írja ki őket):
+
+- régi API: `SHOPRENTER_API_USER` + `SHOPRENTER_API_PASSWORD` (Basic auth)
+- új API-kliens: `SHOPRENTER_CLIENT_ID` + `SHOPRENTER_CLIENT_SECRET` (OAuth, `api2` végpont) – ha meg van adva, ezt használja
+- `SHOPRENTER_SHOP` – bolt neve, alapértelmezés `elektromosroller`
+
+```bash
+node tools/shoprenter/sr-api.mjs check                 # hitelesítés próbája
+node tools/shoprenter/sr-api.mjs categories            # teljes kategóriafa (név, innerId, API id)
+node tools/shoprenter/sr-api.mjs products 2            # első 2 termék
+node tools/shoprenter/sr-api.mjs product SKU-123       # egy termék SKU alapján
+node tools/shoprenter/sr-api.mjs languages             # nyelv-id a leírásokhoz
+node tools/shoprenter/sr-api.mjs get taxClasses?full=1 # adóosztály-id
+node tools/shoprenter/sr-api.mjs create termek.json --dry-run
+node tools/shoprenter/sr-api.mjs create termek.json    # POST productExtend
+```
+
+Minta-payload: `tools/shoprenter/sample-product.json` (a `language`, `taxClass`, `category`
+id-ket a fenti parancsokból kell kitölteni). Rate limit: 3 kérés/mp, a script tartja.

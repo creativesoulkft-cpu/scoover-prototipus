@@ -1,0 +1,23 @@
+{
+  "sku": "SCV-PONYVA-G2",
+  "price": "9990",
+  "stock1": "10",
+  "status": "0",
+  "orderable": "1",
+  "subtractStock": "1",
+  "shipped": "1",
+  "minimalOrderNumber": "1",
+  "manufacturer": { "name": "Scoover" },
+  "taxClass": { "id": "IDE_A_TAX_CLASS_ID  (node tools/shoprenter/sr-api.mjs get taxClasses?full=1)" },
+  "productDescriptions": [
+    {
+      "name": "Scoover vízálló rollerponyva – Kukirin G2",
+      "shortDescription": "Méretre szabott, UV-álló ponyva Kukirin G2 rollerhez.",
+      "description": "<p>Méretre szabott, vízálló és UV-álló ponyva Kukirin G2 elektromos rollerhez. Gumis szegély, tükröződő csík, hordtasak.</p>",
+      "language": { "id": "IDE_A_NYELV_ID  (node tools/shoprenter/sr-api.mjs languages)" }
+    }
+  ],
+  "productCategoryRelations": [
+    { "category": { "id": "IDE_A_KATEGORIA_ID  (node tools/shoprenter/sr-api.mjs categories)" } }
+  ]
+}
