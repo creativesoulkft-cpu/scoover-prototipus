@@ -179,5 +179,11 @@ node tools/shoprenter/sr-api.mjs create termek.json --dry-run
 node tools/shoprenter/sr-api.mjs create termek.json    # POST productExtend
 ```
 
+Az API-kliensnél (admin > Beállítások > API beállítások > Egyedi API felhasználó) bepipálandó
+engedélyek a termékfeltöltéshez: `product.product:read` + `:write`, `product.category:read`
+(+ `:write`, ha kategóriát is hozunk létre), `product.manufacturer:read` + `:write`,
+`taxClass.taxClass:read`, `localization.language:read`, `product.stockStatus:read`,
+`store.file:read` + `:write` (termékképek feltöltéséhez).
+
 Minta-payload: `tools/shoprenter/sample-product.json` (a `language`, `taxClass`, `category`
 id-ket a fenti parancsokból kell kitölteni). Rate limit: 3 kérés/mp, a script tartja.
