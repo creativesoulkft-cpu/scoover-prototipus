@@ -7,6 +7,8 @@
 //   SHOPRENTER_API_PASSWORD   régi (Basic auth) API jelszó
 //   SHOPRENTER_CLIENT_ID      új OAuth API-kliens azonosító (Beállítások > API beállítások)
 //   SHOPRENTER_CLIENT_SECRET  új OAuth API-kliens titok
+//   (kényelmi mód: ha a Client ID a SHOPRENTER_API_USER-be, a Client Secret a
+//    SHOPRENTER_API_PASSWORD-be kerül, azt is felismeri és OAuth-ként használja)
 // Ha CLIENT_ID+SECRET meg van adva, az új api2 végpontot (Bearer token) használja,
 // különben a régi Basic auth-os api.myshoprenter.hu végpontot.
 //
@@ -36,8 +38,14 @@ let base;
 let authHeader;
 
 async function initAuth() {
-  const cid = process.env.SHOPRENTER_CLIENT_ID;
-  const csec = process.env.SHOPRENTER_CLIENT_SECRET;
+  let cid = process.env.SHOPRENTER_CLIENT_ID;
+  let csec = process.env.SHOPRENTER_CLIENT_SECRET;
+  // Kényelmi mód: ha a régi nevű változókba került az új típusú Client ID / Client Secret
+  // (32 hex, ill. 40+ hex karakter), azt is OAuth-ként kezeljük.
+  if (!cid && !csec && /^[0-9a-f]{32}$/i.test(process.env.SHOPRENTER_API_USER || '') && /^[0-9a-f]{40,}$/i.test(process.env.SHOPRENTER_API_PASSWORD || '')) {
+    cid = process.env.SHOPRENTER_API_USER;
+    csec = process.env.SHOPRENTER_API_PASSWORD;
+  }
   if (cid && csec) {
     base = `https://${SHOP}.api2.myshoprenter.hu/api`;
     const r = await fetch(`https://oauth.app.shoprenter.net/${SHOP}/app/token`, {
@@ -45,7 +53,12 @@ async function initAuth() {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ grant_type: 'client_credentials', client_id: cid, client_secret: csec }),
     });
-    if (!r.ok) throw new Error(`OAuth token hiba: HTTP ${r.status} ${(await r.text()).slice(0, 300)}`);
+    if (!r.ok) {
+      const t = (await r.text()).slice(0, 300);
+      let hint = '';
+      if (r.status === 401) hint = '\n  → Client ID vagy Client Secret hibás/hiányos. Az admin Egyedi API felhasználó oldalán a másolás ikonnal másold ki a TELJES értéket (a mező kijelzőjében levágódhat), és ellenőrizd, hogy a kliens Aktív.';
+      throw new Error(`OAuth token hiba: HTTP ${r.status} ${t}${hint}`);
+    }
     const tok = await r.json();
     authHeader = `Bearer ${tok.access_token}`;
     return `OAuth (api2), token ${tok.expires_in}s-ig érvényes`;
