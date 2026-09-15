@@ -187,3 +187,17 @@ engedélyek a termékfeltöltéshez: `product.product:read` + `:write`, `product
 
 Minta-payload: `tools/shoprenter/sample-product.json` (a `language`, `taxClass`, `category`
 id-ket a fenti parancsokból kell kitölteni). Rate limit: 3 kérés/mp, a script tartja.
+
+### Teljes bolt-mentés (WooCommerce migrációhoz)
+
+`tools/shoprenter/sr-export.mjs` – minden lekérhető adatot (termékek, kategóriák, gyártók,
+tulajdonságok, URL-aliasok, vevők, rendelések, infó-oldalak) `export/shoprenter/*.json`-ba ment,
+a termékképeket `export/shoprenter/images/` alá tölti. Újraindítható, a kész fájlokat kihagyja.
+
+```bash
+node tools/shoprenter/sr-export.mjs               # minden
+node tools/shoprenter/sr-export.mjs --no-orders   # rendelések nélkül
+node tools/shoprenter/sr-export.mjs --images-only # csak képek a kész products.json alapján
+```
+
+Az `export/` mappa a `.gitignore`-ban van (személyes adatok), a mentést külön kell megőrizni.

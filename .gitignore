@@ -3,3 +3,5 @@ dist
 .DS_Store
 *.local
 dist-single
+# Shoprenter bolt-mentés (személyes adatok, képek) – nem kerül a repóba
+export/
