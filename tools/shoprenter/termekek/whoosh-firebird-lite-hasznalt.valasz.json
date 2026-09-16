@@ -1,0 +1,343 @@
+{
+  "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE=",
+  "id": "cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE=",
+  "innerId": "2801",
+  "sku": "WHSH2026FRBRDLTHSZNLT",
+  "modelNumber": "",
+  "gtin": "",
+  "orderable": "1",
+  "price": "307086.6142",
+  "cost": "0.0000",
+  "multiplier": "1.0000",
+  "multiplierLock": "0",
+  "loyaltyPoints": "",
+  "stock1": "1",
+  "stock2": "0",
+  "stock3": "0",
+  "stock4": "0",
+  "subtractStock": "1",
+  "mainPicture": "product/whoosh-firebird-lite-hasznalt/whoosh-firebird-lite-hasznalt-elektromos-roller-3200w-52v-19ah.jpg",
+  "width": "0.00",
+  "height": "0.00",
+  "length": "0.00",
+  "weight": "33.00",
+  "status": "1",
+  "shipped": "1",
+  "minimalOrderNumber": "1",
+  "maximalOrderNumber": "1",
+  "minimalOrderNumberMultiply": "0",
+  "availableDate": "0000-00-00",
+  "quantity": "0.0000",
+  "sortOrder": "1",
+  "dateCreated": "2026-09-16T14:03:26",
+  "dateUpdated": "2026-09-16T14:03:26",
+  "imageAlt": "Használt Whoosh Firebird Lite elektromos roller 3200W 52V 19Ah 86 km",
+  "freeShipping": "0",
+  "productAttributeExtend": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9Mg==",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9Mg==",
+      "type": "LIST",
+      "name": "szin"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01",
+      "type": "INTEGER",
+      "name": "motor",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD02",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD02",
+      "type": "FLOAT",
+      "name": "akku",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD03",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD03",
+      "type": "INTEGER",
+      "name": "max_sebesseg",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD04",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD04",
+      "type": "INTEGER",
+      "name": "suly",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD05",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD05",
+      "type": "INTEGER",
+      "name": "maximalis_terheles",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTE=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTE=",
+      "type": "LIST",
+      "name": "fek_tipus"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0xNA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0xNA==",
+      "type": "FLOAT",
+      "name": "kerekmeret",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTU=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTU=",
+      "type": "LIST",
+      "name": "kerektipus"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yMw==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yMw==",
+      "type": "INTEGER",
+      "name": "feszultseg",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MjU=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MjU=",
+      "type": "LIST",
+      "name": "lengescsillapitas"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yOA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yOA==",
+      "type": "INTEGER",
+      "name": "hatotavolsag",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MzI=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MzI=",
+      "type": "LIST",
+      "name": "allithato_kormanymagassag"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD00Mw==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD00Mw==",
+      "type": "FLOAT",
+      "name": "kerekmeret_elol",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01MA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01MA==",
+      "type": "FLOAT",
+      "name": "kerekmeret_hatul",
+      "value": null
+    }
+  ],
+  "productPrices": [
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD02",
+        "innerId": 6,
+        "default": false
+      },
+      "net": "307087",
+      "netOriginal": "307087",
+      "netSpecial": null,
+      "gross": "390000",
+      "grossOriginal": "390000",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    },
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD04",
+        "innerId": 8,
+        "default": true
+      },
+      "net": "307087",
+      "netOriginal": "307087",
+      "netSpecial": null,
+      "gross": "390000",
+      "grossOriginal": "390000",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    },
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD05",
+        "innerId": 9,
+        "default": false
+      },
+      "net": "214961",
+      "netOriginal": "214961",
+      "netSpecial": null,
+      "gross": "273000",
+      "grossOriginal": "273000",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    }
+  ],
+  "durableMediaDevice": "0",
+  "taxClass": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/taxClasses/dGF4Q2xhc3MtdGF4X2NsYXNzX2lkPTEw"
+  },
+  "noStockStatus": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTE0"
+  },
+  "inStockStatus": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "productClass": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productClasses/cHJvZHVjdENsYXNzLXByb2R1Y3RfY2xhc3NfaWQ9OQ=="
+  },
+  "parentProduct": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+  },
+  "volumeUnit": null,
+  "weightUnit": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/weightClasses/d2VpZ2h0Q2xhc3Mtd2VpZ2h0X2NsYXNzX2lkPTE="
+  },
+  "manufacturer": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/manufacturers/bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yNw==",
+    "id": "bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yNw==",
+    "innerId": "27",
+    "name": "Whoosh",
+    "picture": "",
+    "sortOrder": "0",
+    "robotsMetaTag": "0",
+    "dateCreated": "1970-01-01T00:00:00",
+    "dateUpdated": "1970-01-01T00:00:00",
+    "manufacturerDescriptions": {
+      "href": "https://elektromosroller.api.myshoprenter.hu/manufacturerDescriptions?manufacturerId=bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yNw=="
+    }
+  },
+  "onlyStock1Status": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "onlyStock2Status": null,
+  "onlyStock3Status": null,
+  "onlyStock4Status": null,
+  "allImages": {
+    "mainImage": "https://elektromosroller.cdn.shoprenter.hu/custom/elektromosroller/image/cache/w600h600wt1/product/whoosh-firebird-lite-hasznalt/whoosh-firebird-lite-hasznalt-elektromos-roller-3200w-52v-19ah.jpg?lastmod=1789560206.1748947734"
+  },
+  "productDescriptions": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productDescriptions/cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwMSZsYW5ndWFnZV9pZD0x",
+      "id": "cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwMSZsYW5ndWFnZV9pZD0x",
+      "name": "Használt Whoosh Firebird Lite - Elektromos roller - 52V - 2x1600W - 19Ah - 86 km-t futott",
+      "metaTitle": "Használt Whoosh Firebird Lite elektromos roller - 3200W, 52V 19Ah, 86 km - 390.000 Ft",
+      "metaKeywords": "használt elektromos roller, whoosh firebird lite, 3200W elektromos roller, dupla motoros roller, használt whoosh roller veszprém",
+      "metaDescription": "Használt Whoosh Firebird Lite dupla motoros elektromos roller, 2x1600W, 52V 19Ah, csak 86 km-t futott. Kifogástalan, szervizelve, garanciával, ajándék táska + telefontartó. Veszprémben kipróbálható.",
+      "shortDescription": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Használt Whoosh Firebird Lite - 52V - 2x1600W (3200W) - 19Ah - mindössze 86 km-t futott</span></span></p><p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Pár hónapja 550.000 Ft volt az új ára. Kifogástalan, alig használt állapot, szervizelve, garanciával. Ajándék kormánytáska + telefontartó. Veszprémben kipróbálható.</span></span></p>",
+      "description": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Használt Whoosh Firebird Lite – 86 km-rel, kifogástalan állapotban, 390.000 Ft-ért.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Pár hónapja 550.000 Ft volt az új ára, azóta mindössze 86 km-t ment (a kijelzőn ellenőrizhető). Nem bérelt, nem bontott, nem javított darab: a szervizünk átnézte, beállította, feltöltötte, így garanciával adjuk tovább. Ez a dupla motoros kategória belépője kedvező áron: 2 x 1600W, 52V 19Ah akku, első-hátsó rugózás, tárcsafék elöl-hátul.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Amit kapsz</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Whoosh Firebird Lite dupla motoros elektromos roller, 86 km-rel, 2025-ös akkumulátorral (52V 19Ah)</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Ajándék: keménytokos kormánytáska + telefontartó (a képeken felszerelve)</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Töltő, kulcsok</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Szervizelve, beállítva, garanciával – veszprémi és kapuvári szervizháttérrel</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Állapot</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Kifogástalan, alig használt: karcmentes fellépő és váz, ép gumik, tökéletes fék és rugózás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Akkumulátor: teljes kapacitás, 86 km összes futás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Veszprémben, az üzletünkben (Kossuth Lajos u. 10.) kipróbálható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Műszaki adatok</strong></span></span></p>\n<table border=\"1\" cellpadding=\"4\" style=\"border-collapse:collapse;\">\n<tbody>\n<tr><td><strong>Motor</strong></td><td>2 x 1600W (3200W), dupla agymotor</td></tr>\n<tr><td><strong>Akkumulátor</strong></td><td>52V 19Ah Li-ion (2025)</td></tr>\n<tr><td><strong>Hatótáv</strong></td><td>akár 60 km</td></tr>\n<tr><td><strong>Végsebesség</strong></td><td>max. 70 km/h (közúton a KRESZ szerinti fokozatban használható)</td></tr>\n<tr><td><strong>Fék</strong></td><td>tárcsafék elöl-hátul</td></tr>\n<tr><td><strong>Rugózás</strong></td><td>első + hátsó</td></tr>\n<tr><td><strong>Kerék</strong></td><td>10\" felfújható</td></tr>\n<tr><td><strong>Terhelhetőség</strong></td><td>120 kg</td></tr>\n<tr><td><strong>Tömeg</strong></td><td>33 kg</td></tr>\n<tr><td><strong>Világítás</strong></td><td>erős LED első lámpa, oldalsó LED-sáv, hátsó lámpa</td></tr>\n<tr><td><strong>Kijelző</strong></td><td>TF-100 színes LCD (sebesség, fokozat, ODO, töltöttség)</td></tr>\n<tr><td><strong>Futott táv</strong></td><td>86 km</td></tr>\n<tr><td><strong>Új ára volt</strong></td><td>550.000 Ft</td></tr>\n</tbody>\n</table>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Whoosh garancia és szerviz</strong><br />Használt rollereinket is saját szervizünk készíti elő, magyar garanciával, alkatrész-ellátással, akkumulátor-építéssel és tuninggal házon belül. Egy darab van belőle: ha érdekel, hívj, félretesszük.</span></span></p>",
+      "parameters": null,
+      "packagingUnit": "",
+      "measurementUnit": "db",
+      "customContentTitle": null,
+      "customContent": null,
+      "dateCreated": "2026-09-16T14:03:26",
+      "dateUpdated": "2026-09-16T14:03:26",
+      "videoCode": null,
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "language": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/languages/bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9MQ=="
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productDescriptions/cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwMSZsYW5ndWFnZV9pZD00",
+      "id": "cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwMSZsYW5ndWFnZV9pZD00",
+      "name": "Használt Whoosh Firebird Lite - Elektromos roller - 52V - 2x1600W - 19Ah - 86 km-t futott",
+      "metaTitle": "Használt Whoosh Firebird Lite elektromos roller - 3200W, 52V 19Ah, 86 km - 390.000 Ft",
+      "metaKeywords": "használt elektromos roller, whoosh firebird lite, 3200W elektromos roller, dupla motoros roller, használt whoosh roller veszprém",
+      "metaDescription": "Használt Whoosh Firebird Lite dupla motoros elektromos roller, 2x1600W, 52V 19Ah, csak 86 km-t futott. Kifogástalan, szervizelve, garanciával, ajándék táska + telefontartó. Veszprémben kipróbálható.",
+      "shortDescription": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Használt Whoosh Firebird Lite - 52V - 2x1600W (3200W) - 19Ah - mindössze 86 km-t futott</span></span></p><p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Pár hónapja 550.000 Ft volt az új ára. Kifogástalan, alig használt állapot, szervizelve, garanciával. Ajándék kormánytáska + telefontartó. Veszprémben kipróbálható.</span></span></p>",
+      "description": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Használt Whoosh Firebird Lite – 86 km-rel, kifogástalan állapotban, 390.000 Ft-ért.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Pár hónapja 550.000 Ft volt az új ára, azóta mindössze 86 km-t ment (a kijelzőn ellenőrizhető). Nem bérelt, nem bontott, nem javított darab: a szervizünk átnézte, beállította, feltöltötte, így garanciával adjuk tovább. Ez a dupla motoros kategória belépője kedvező áron: 2 x 1600W, 52V 19Ah akku, első-hátsó rugózás, tárcsafék elöl-hátul.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Amit kapsz</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Whoosh Firebird Lite dupla motoros elektromos roller, 86 km-rel, 2025-ös akkumulátorral (52V 19Ah)</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Ajándék: keménytokos kormánytáska + telefontartó (a képeken felszerelve)</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Töltő, kulcsok</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Szervizelve, beállítva, garanciával – veszprémi és kapuvári szervizháttérrel</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Állapot</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Kifogástalan, alig használt: karcmentes fellépő és váz, ép gumik, tökéletes fék és rugózás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Akkumulátor: teljes kapacitás, 86 km összes futás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Veszprémben, az üzletünkben (Kossuth Lajos u. 10.) kipróbálható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Műszaki adatok</strong></span></span></p>\n<table border=\"1\" cellpadding=\"4\" style=\"border-collapse:collapse;\">\n<tbody>\n<tr><td><strong>Motor</strong></td><td>2 x 1600W (3200W), dupla agymotor</td></tr>\n<tr><td><strong>Akkumulátor</strong></td><td>52V 19Ah Li-ion (2025)</td></tr>\n<tr><td><strong>Hatótáv</strong></td><td>akár 60 km</td></tr>\n<tr><td><strong>Végsebesség</strong></td><td>max. 70 km/h (közúton a KRESZ szerinti fokozatban használható)</td></tr>\n<tr><td><strong>Fék</strong></td><td>tárcsafék elöl-hátul</td></tr>\n<tr><td><strong>Rugózás</strong></td><td>első + hátsó</td></tr>\n<tr><td><strong>Kerék</strong></td><td>10\" felfújható</td></tr>\n<tr><td><strong>Terhelhetőség</strong></td><td>120 kg</td></tr>\n<tr><td><strong>Tömeg</strong></td><td>33 kg</td></tr>\n<tr><td><strong>Világítás</strong></td><td>erős LED első lámpa, oldalsó LED-sáv, hátsó lámpa</td></tr>\n<tr><td><strong>Kijelző</strong></td><td>TF-100 színes LCD (sebesség, fokozat, ODO, töltöttség)</td></tr>\n<tr><td><strong>Futott táv</strong></td><td>86 km</td></tr>\n<tr><td><strong>Új ára volt</strong></td><td>550.000 Ft</td></tr>\n</tbody>\n</table>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Whoosh garancia és szerviz</strong><br />Használt rollereinket is saját szervizünk készíti elő, magyar garanciával, alkatrész-ellátással, akkumulátor-építéssel és tuninggal házon belül. Egy darab van belőle: ha érdekel, hívj, félretesszük.</span></span></p>",
+      "parameters": null,
+      "packagingUnit": "",
+      "measurementUnit": "db",
+      "customContentTitle": null,
+      "customContent": null,
+      "dateCreated": "2026-09-16T14:03:26",
+      "dateUpdated": "2026-09-16T14:03:26",
+      "videoCode": null,
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "language": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/languages/bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9NA=="
+      }
+    }
+  ],
+  "productRelatedProductRelations": [],
+  "productCategoryRelations": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xMzg=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xMzg=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTM4"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNDI=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNDI=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQy"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNDg=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNDg=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQ4"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNTk=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwMSZjYXRlZ29yeV9pZD0xNTk=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTU5"
+      }
+    }
+  ],
+  "productSpecials": [],
+  "productProductBadgeRelations": [],
+  "productListAttributeValueRelations": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productListAttributeValueRelations?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+  },
+  "numberAttributeValues": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributeValues?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+  },
+  "textAttributeValues": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/textAttributeValues?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE="
+  },
+  "productTags": [],
+  "productCollateralProductRelations": [],
+  "customerGroupProductPrices": [],
+  "productAddonProductRelations": [],
+  "relatedProducts": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE=/relatedProducts"
+  },
+  "collateralProducts": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE=/collateralProducts"
+  },
+  "productAddons": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDE=/productAddons"
+  },
+  "urlAliases": []
+}
