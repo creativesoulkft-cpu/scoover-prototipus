@@ -219,3 +219,49 @@ node tools/shoprenter/sr-api.mjs get 'listAttributeValues?full=1&attributeId=bGl
 Új fólia másik színben: másold a `sample-product.json`-t, és cseréld: `sku` (színkód), `mainPicture` (fájlnév), `imageAlt`, mindkét nyelvben `name`, `metaTitle`, `metaDescription`, és a Színek sort a leírásban. Prémium szetthez: `price` `47165.3543`, `noStockStatus` 26, `productSpecials` `[]`, A-sablon leírás.
 
 Ismert script-korlátok: a `képek=` sor mindig 0 (a válaszban `allImages` van, nem `productImages`); nincs automatikus SKU-előellenőrzés és POST utáni GET – ezeket a fenti 2. és 5. lépés pótolja.
+
+---
+
+## 7. Roller (Elektromos rollerek termékosztály) – konvenciók és attribútumok
+
+Forrás: a „WHOOSH elektromos rollerek” kategória 50 terméke. Termékosztály **Elektromos rollerek** = `cHJvZHVjdENsYXNzLXByb2R1Y3RfY2xhc3NfaWQ9OQ==` (id 9).
+Kategóriák rollerhez: **138** (Elektromos rollerek) + **142** (Felnőtt) + **148** (WHOOSH) [+ 183 „Jogosítvány nélkül”, csak lassú/kis teljesítményű típusnál; 159 = Használt].
+Név: `Whoosh <Modell> - Elektromos roller - <V> - <W> - <Ah>`; SKU: `WHSH<év><MODELLKÓD><W>W<Ah>AH`. Súly: kg, súlyosztály 1 = `d2VpZ2h0Q2xhc3Mtd2VpZ2h0X2NsYXNzX2lkPTE=`.
+`noStockStatus` régi rollereknél 14 (Elfogyott); új modellnél 5 (Előrendelhető) vagy 11 (Szállítás alatt).
+
+A productExtend POST **nem** viszi át az attribútumokat – létrehozás után külön kérések (scope: `product.product:write`, működik):
+
+```json
+POST numberAttributeValues            {"value":"1200","numberAttribute":{"id":"<numberAttribute id>"},"product":{"id":"<termék id>"}}
+POST productListAttributeValueRelations {"product":{"id":"<termék id>"},"listAttributeValue":{"id":"<listAttributeValue id>"}}
+```
+
+Szám-attribútumok (`numberAttribute-attribute_id=N` base64-ben):
+
+| név | id | egység |
+|---|---|---|
+| motor | 5 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01` | W |
+| akku | 6 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD02` | Ah |
+| max_sebesseg | 7 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD03` | km/h |
+| suly | 8 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD04` | kg |
+| maximalis_terheles | 9 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD05` | kg |
+| kerekmeret | 14 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0xNA==` | coll |
+| feszultseg | 23 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yMw==` | V |
+| hatotavolsag | 28 `bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yOA==` | km |
+| kerekmeret_elol / kerekmeret_hatul | 43 / 50 | coll (ritkán kitöltve) |
+
+Lista-attribútum értékek (`listAttributeValue-attribute_id=A&value_id=V` base64-ben):
+
+| attribútum (A) | értékek (V) |
+|---|---|
+| szin (2) | Piros 4, Kék 5, Zöld 7, Fekete 8, Fehér 9, Szürke 10, Pink 15, Fekete/piros 17, Zöld-fekete 19, Kék-fekete 20, Piros-fekete 21, Világoskék 33 |
+| fek_tipus (11) | elektromos 1, kézi 2, elektromos + kézi 3, elől + hátul tárcsafék 4, hidraulikus olajfék 6, hátsó tárcsafék 8, Elől dobfék + hátul motorfék 9 |
+| kerektipus (15) | Tömör 1, Felfújható 2, Elől felfújható, hátul tömör 3 |
+| lengescsillapitas (25) | Első 1, Első-hátsó 3, Nincs 4 – **„Hátsó” érték nincs**, ha kell: `POST listAttributeValues` |
+| allithato_kormanymagassag (32) | Igen 1, Nem 2 |
+
+## 8. Feltöltött termékek naplója
+
+| Dátum | SKU | Név | innerId / id | Státusz | Megjegyzés |
+|---|---|---|---|---|---|
+| 2026-09-16 | WHSH2026D3S1200W15AH | Whoosh D3-S City Commute - Elektromos roller - 48V - 1200W - 15Ah | 2798 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI3OTg=` | **inaktív (0)** | payload: `termekek/whoosh-d3s.json`, válasz: `termekek/whoosh-d3s.valasz.json`; lista 279 900 Ft, akció 249 900 Ft (2026-10-31-ig); 12 attribútum felvéve; képek: `termekek/whoosh-d3s-kepek/` → Filemanager `product/whoosh-d3s/` mappába kell feltölteni (store.file:write scope nélkül API-n nem megy); lengéscsillapítás attribútum kimaradt (nincs „Hátsó” érték) |
