@@ -224,3 +224,31 @@ kulcsával (`--price=net` a nettó átvitelhez, `--vat=27` az alapértelmezett k
 A képeket a WooCommerce a régi boltból tölti le, ezért a migrációt a régi bolt lekapcsolása
 előtt kell lefuttatni, vagy `--image-base` kapcsolóval más forrást kell megadni.
 Az állapot `export/woocommerce/state.json`-ban van, a futás bármikor újraindítható.
+
+### WordPress beállítása (Forpsi tárhely, SSH)
+
+`tools/woocommerce/wp-setup.sh` – egy menetben felkonfigurálja az új boltot: WP-CLI, magyar nyelv,
+időzóna, HUF pénznem, 27% ÁFA bruttó árakkal, `/termek/` és `/termekkategoria/` útvonalak
+(ugyanaz, amit a `redirects` parancs vár), magyar pluginok, Astra sablon, végül létrehoz egy
+WooCommerce REST API kulcsot és kiírja.
+
+```bash
+SITE_URL=https://uj.elektromos-roller.net bash wp-setup.sh
+```
+
+Telepített pluginok: HuCommerce, Számlázz.hu integráció, Barion, Csomagpontok és Címkék
+(GLS, Foxpost, Packeta, MPL egyben), Redirection, Rank Math SEO, WP Super Cache, Loco Translate.
+A SimplePay plugin nincs a WordPress könyvtárában, azt az OTP oldaláról kell letölteni.
+
+### Élesítés
+
+Az új boltot ideiglenes aldomainen érdemes építeni, hogy a régi bolt addig is menjen.
+Amikor kész, a Forpsi DNS-ben átáll a fő domain, és a WordPress címét át kell írni:
+
+```bash
+php wp-cli.phar search-replace 'uj.elektromos-roller.net' 'www.elektromos-roller.net' --all-tables
+php wp-cli.phar option update home 'https://www.elektromos-roller.net'
+php wp-cli.phar option update siteurl 'https://www.elektromos-roller.net'
+php wp-cli.phar rewrite flush --hard
+php wp-cli.phar cache flush
+```
