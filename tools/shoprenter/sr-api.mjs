@@ -21,6 +21,7 @@
 //   node tools/shoprenter/sr-api.mjs create <file.json> [--dry-run] – termék létrehozása (productExtend POST)
 //   node tools/shoprenter/sr-api.mjs update <id> <file.json>  – termék módosítása (productExtend PUT)
 //   node tools/shoprenter/sr-api.mjs get <path>               – tetszőleges GET (pl. taxClasses, manufacturers)
+//   node tools/shoprenter/sr-api.mjs images <id> <mappa> [--main=f] – képek feltöltése + hozzárendelés (store.file:write kell)
 
 import { readFile } from 'node:fs/promises';
 
@@ -239,6 +240,38 @@ async function main() {
       if (asJson) return console.log(JSON.stringify(d, null, 2));
       console.log('Módosítva:');
       printProduct(d);
+      return;
+    }
+    case 'images': {
+      // images <termék id> <mappa> [--main=<fájlnév>] : a mappa összes jpg/png/webp képét feltölti a
+      // Filemanager product/<mappanév>/ útvonalára (files POST, scope: store.file:write), az első
+      // (vagy --main) képet mainPicture-nek állítja, a többit productImages-ként rendeli a termékhez.
+      const [pid, dir] = rest;
+      if (!pid || !dir) throw new Error('images <termék id> <képmappa> [--main=fájlnév]');
+      const { readdir, stat } = await import('node:fs/promises');
+      const path = await import('node:path');
+      const mainFlag = args.find((a) => a.startsWith('--main='))?.slice(7);
+      const files = (await readdir(dir)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort();
+      if (!files.length) throw new Error('Nincs kép a mappában.');
+      for (const f of files) if (!/^[a-z0-9()_\-]+\.[a-z0-9]+$/.test(f)) throw new Error(`Fájlnév nem megfelelő (csak a-z 0-9 ( ) _ - és kisbetűs kiterjesztés): ${f}`);
+      const folder = 'product/' + path.basename(path.resolve(dir));
+      const main = mainFlag || files[0];
+      console.log(`Feltöltés: ${files.length} kép → ${folder}/  (főkép: ${main})`);
+      for (const f of files) {
+        const b64 = (await readFile(path.join(dir, f))).toString('base64');
+        await call('POST', 'files', { filePath: `${folder}/${f}`, type: 'image', attachment: b64 });
+        console.log(`  ✓ ${f} (${Math.round((await stat(path.join(dir, f))).size / 1024)} KB)`);
+      }
+      await call('PUT', `productExtend/${pid}`, { mainPicture: `${folder}/${main}` });
+      console.log(`  ✓ mainPicture = ${folder}/${main}`);
+      let order = 1;
+      for (const f of files) {
+        if (f === main) continue;
+        await call('POST', 'productImages', { imagePath: `${folder}/${f}`, sortOrder: String(order++), product: { id: pid } });
+        console.log(`  ✓ galéria: ${f}`);
+      }
+      const d = await call('GET', `productExtend/${pid}?full=1`);
+      console.log(`Kész. allImages: ${Object.keys(d.allImages || {}).length} kép.`);
       return;
     }
     case 'get': {
