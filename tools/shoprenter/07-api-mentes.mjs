@@ -9,8 +9,12 @@ await ensureDir(apiDir)
 
 const GYUJTEMENYEK = [
   'products', 'productImages', 'productDescriptions', 'categories',
-  'categoryDescriptions', 'manufacturers', 'productSpecials', 'stockStatuses',
-  'productClasses', 'productAttributeValues'
+  'categoryDescriptions', 'manufacturers', 'manufacturerDescriptions',
+  'productSpecials', 'stockStatuses', 'stockStatusDescriptions',
+  'productClasses', 'productCategoryRelations',
+  // Az urlAliases adja a SEO-címeket – a nem publikált termékekét is, amikre
+  // a Google-ben és külső oldalakon még élhetnek hivatkozások.
+  'urlAliases'
 ]
 
 const eredmeny = {}
