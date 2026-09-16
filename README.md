@@ -201,3 +201,26 @@ node tools/shoprenter/sr-export.mjs --images-only # csak képek a kész products
 ```
 
 Az `export/` mappa a `.gitignore`-ban van (személyes adatok), a mentést külön kell megőrizni.
+
+## WooCommerce migráció
+
+`tools/woocommerce/wc-import.mjs` – a Shoprenter-mentésből feltölti a kategóriákat, gyártókat és
+termékeket a WooCommerce boltba, és elkészíti a 301-átirányítási listát a régi URL-ekről.
+Környezeti változók: `WC_URL`, `WC_KEY`, `WC_SECRET` (WooCommerce > Beállítások > Haladó > REST API,
+Olvasás/Írás joggal).
+
+```bash
+node tools/woocommerce/wc-import.mjs fields           # a mentett Shoprenter-mezők ellenőrzése
+node tools/woocommerce/wc-import.mjs check            # kapcsolat, WooCommerce-verzió, ÁFA-beállítás
+node tools/woocommerce/wc-import.mjs categories       # kategóriafa (szülő előbb)
+node tools/woocommerce/wc-import.mjs brands           # gyártók
+node tools/woocommerce/wc-import.mjs products 5 --dry-run   # 5 termék próbája küldés nélkül
+node tools/woocommerce/wc-import.mjs products         # az összes termék, 50-es kötegekben
+node tools/woocommerce/wc-import.mjs redirects        # export/woocommerce/redirects.csv
+```
+
+Az árat a Shoprenter nettóban tárolja; az importáló alapból bruttóra váltja az adóosztály
+kulcsával (`--price=net` a nettó átvitelhez, `--vat=27` az alapértelmezett kulcs).
+A képeket a WooCommerce a régi boltból tölti le, ezért a migrációt a régi bolt lekapcsolása
+előtt kell lefuttatni, vagy `--image-base` kapcsolóval más forrást kell megadni.
+Az állapot `export/woocommerce/state.json`-ban van, a futás bármikor újraindítható.
