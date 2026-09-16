@@ -145,7 +145,7 @@ Az API-kliensen csak `product.*` scope-ok vannak (product.product / category / m
 |---|---|---|---|
 | `productExtend`, `products`, `productDescriptions`, `productSpecials`, `productCategoryRelations`, `productImages`, `productListAttributeValueRelations` | product.product:read/write | igen | termék létrehozás/módosítás, kép-hivatkozás, attribútum-kapcsolás mehet |
 | `categoryExtend`, `manufacturers`, `stockStatuses`, `stockStatusDescriptions`, `productClasses`, `listAttributes`, `listAttributeValues` | product.category / manufacturer / stockStatus / attribute :read | igen | id-k lekérhetők |
-| `files` (kép feltöltés) | store.file:write | **nincs** | **képet API-n nem lehet feltölteni** → a fájlt előbb az admin Filemanagerbe töltsd fel, a `mainPicture` csak létező útvonalra mutathat |
+| `files` (kép feltöltés) | store.file:write | igen (2026-09-16-tól) | `images` parancs: feltöltés + főkép + galéria egy lépésben |
 | `languages` | localization.language:read | nincs | 401 → nyelv-id beégetve (1 és 4) |
 | `taxClasses` | taxClass.taxClass:read | nincs | 401 → adóosztály-id beégetve (10) |
 | `weightClasses`, `lengthClasses` | localization.weightUnit/lengthUnit:read | nincs | osztálynév nem ellenőrizhető, id beégetve (2, 1) |
@@ -264,4 +264,4 @@ Lista-attribútum értékek (`listAttributeValue-attribute_id=A&value_id=V` base
 
 | Dátum | SKU | Név | innerId / id | Státusz | Megjegyzés |
 |---|---|---|---|---|---|
-| 2026-09-16 | WHSH2026D3S1200W15AH | Whoosh D3-S City Commute - Elektromos roller - 48V - 1200W - 15Ah | 2798 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI3OTg=` | **inaktív (0)** | payload: `termekek/whoosh-d3s.json`, válasz: `termekek/whoosh-d3s.valasz.json`; lista 279 900 Ft, akció 249 900 Ft (2026-10-31-ig); 12 attribútum felvéve; képek: `termekek/whoosh-d3-s/` (SEO-nevek), feltöltés: `images cHJvZHVjdC1wcm9kdWN0X2lkPTI3OTg= tools/shoprenter/termekek/whoosh-d3-s --main=whoosh-d3-s-elektromos-roller-1200w-48v-15ah.jpg` (store.file:write scope kell); lengéscsillapítás attribútum kimaradt (nincs „Hátsó” érték) |
+| 2026-09-16 | WHSH2026D3S1200W15AH | Whoosh D3-S City Commute - Elektromos roller - 48V - 1200W - 15Ah | 2798 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI3OTg=` | **inaktív (0)** | payload: `termekek/whoosh-d3s.json`, válasz: `termekek/whoosh-d3s.valasz.json`; lista 279 900 Ft, akció 249 900 Ft (2026-10-31-ig); 12 attribútum felvéve; képek: `termekek/whoosh-d3-s/` (SEO-nevek), feltöltés: `images cHJvZHVjdC1wcm9kdWN0X2lkPTI3OTg= tools/shoprenter/termekek/whoosh-d3-s --main=whoosh-d3-s-elektromos-roller-1200w-48v-15ah.jpg` – feltöltve 2026-09-16, 10 kép él a CDN-en; lengéscsillapítás attribútum kimaradt (nincs „Hátsó” érték) |
