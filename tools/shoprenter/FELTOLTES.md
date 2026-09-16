@@ -172,7 +172,7 @@ A script 401-es üzenete („rossz felhasználó/jelszó”) OAuth-módban hián
 | 11 | URL-alias `-innerId` utótaggal vagy rossz designnal | 2771 (…-fluor-2771), 2774, 2776, 2777 (…-mcqueen-red-2777), 2747 (…-piros) | csak adminban / `store.urlAlias:write` scope-pal javítható – vagy hagyni (301 nincs) |
 | 12 | Lejárt akció a terméken | 2770, 2777 `dateTo` 2026-07-23 | `productSpecials` törlése (DELETE `productSpecials/<id>`) |
 | 13 | Gyártó vegyes ugyanabban a sorozatban | Kukirin: 2734, 2747, 2750, 2758, 2760, 2770, 2777, 2779; a többi Whoosh | egységesen Whoosh (27) |
-| 14 | `szin` attribútum üres | 2783, 2795 (Lila – nincs ilyen érték), 2784 (Zöld) | „Lila” érték felvétele (`POST listAttributeValues`), majd kapcsolás |
+| 14 | `szin` attribútum üres/rossz | 2783, 2795, 2784 + 12 másik | **Javítva 2026-09-16:** Lila/Ciánkék/Metálkék/Neonzöld/Többszínű létrehozva, mind a 26 fólia színe a névhez igazítva |
 | 15 | `noStockStatus` kétféle: prémium „14-21 nap szállítási idő” (26), egyszínű „Szállítás alatt” (11) | prémium 16/16 = 26, egyszínű 10/10 = 11 | a valós átfutás szerint egységesíteni (egyszínű: helyben 3–5 munkanap → pl. `2-3 munkanap` (22) vagy saját státusz) |
 | 16 | `cost` 0, `gtin` üres | 26/26 | beszerzési ár felvitele, ha kell árrés-riport |
 
@@ -254,7 +254,7 @@ Lista-attribútum értékek (`listAttributeValue-attribute_id=A&value_id=V` base
 
 | attribútum (A) | értékek (V) |
 |---|---|
-| szin (2) | Piros 4, Kék 5, Zöld 7, Fekete 8, Fehér 9, Szürke 10, Pink 15, Fekete/piros 17, Zöld-fekete 19, Kék-fekete 20, Piros-fekete 21, Világoskék 33 |
+| szin (2) | Magenta 1, Piros 4, Kék 5, Sárga 6, Zöld 7, Fekete 8, Fehér 9, Szürke 10, Pink 11 és 15 (duplikált), Barna 12, Narancssárga 13, Khaki 14, Kékeszöld 16, Fekete/piros 17, Arany 18, Zöld-fekete 19, Kék-fekete 20, Piros-fekete 21, Ezüst 22, Ezüst-kék 23, Kék-ezüst 24, Ezüst-kék-piros 25, Ezüst-piros 26, Piros-ezüst-piros 27, Lágy kék 28, Zöld/barna/fekete 29, Babakék 30, Mályva 31, Keki 32, Világoskék 33, **Lila 34, Ciánkék 35, Metálkék 36, Neonzöld 37, Többszínű 38, Homok-fekete 39** (utóbbi 6 API-n létrehozva 2026-09-16). Új érték: `POST listAttributeValues {listAttribute:{id}}` → `POST listAttributeValueDescriptions {name, language:{id}, listAttributeValue:{id}}` mindkét nyelvre. Reláció törlése: `DELETE productListAttributeValueRelations/<base64(productListAttributeValueRelation-product_id=P&attribute_id=2&value_id=V)>` |
 | fek_tipus (11) | elektromos 1, kézi 2, elektromos + kézi 3, elől + hátul tárcsafék 4, hidraulikus olajfék 6, hátsó tárcsafék 8, Elől dobfék + hátul motorfék 9 |
 | kerektipus (15) | Tömör 1, Felfújható 2, Elől felfújható, hátul tömör 3 |
 | lengescsillapitas (25) | Első 1, Első-hátsó 3, Nincs 4 – **„Hátsó” érték nincs**, ha kell: `POST listAttributeValues` |
