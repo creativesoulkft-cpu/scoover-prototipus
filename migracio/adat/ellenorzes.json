@@ -1,0 +1,29 @@
+{
+  "nev_nelkul": 0,
+  "ar_nelkul": 0,
+  "cikkszam_nelkul": 0,
+  "leiras_nelkul": 39,
+  "kep_nelkul": 0,
+  "kepszam_elteres": [
+    {
+      "slug": "8-os-tubeless-kulso-gumi-elektromos-rollerhez-83-5-8065-5",
+      "jelzett": 2,
+      "talalt": 1
+    },
+    {
+      "slug": "10-os-tomor-gumi-elektromos-rollerhez-10x25-1522",
+      "jelzett": 2,
+      "talalt": 1
+    },
+    {
+      "slug": "10-os-tomor-gumi-piros-csikkal-elektromos-rollerhez-10x25-belso-szelesseg-36mm",
+      "jelzett": 2,
+      "talalt": 1
+    },
+    {
+      "slug": "elektromos-roller-alkatresz-xiaomi-m365-roller-elso-lampa",
+      "jelzett": 2,
+      "talalt": 1
+    }
+  ]
+}
