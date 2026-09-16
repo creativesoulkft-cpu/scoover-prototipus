@@ -3,6 +3,17 @@
 Teljes mentés az **elektromos-roller.net** Shoprenter-boltról, a lekapcsolás
 előtt. A pontos darabszámok gépi formában: [`adat/osszefoglalo.json`](adat/osszefoglalo.json).
 
+| | darab |
+|---|---|
+| termék | 716 |
+| kategória | 91 |
+| szöveges oldal | 59 |
+| **termékkép (eredeti felbontás)** | **2447** fájl, 716 mappában |
+| banner / ckeditor / kategória kép | 68 |
+| beágyazott termékvideó | 21 |
+| webcím a 301-térképben | 866 |
+| képanyag mérete | ~2,1 GB |
+
 Az archívumot a [`tools/shoprenter/`](../tools/shoprenter/) scriptjei készítették,
 a folyamat bármikor újrafuttatható és frissíthető.
 
@@ -75,6 +86,26 @@ Két megvalósítási út közül lehet választani:
    régi címek nagy része **változatlanul megtartható**, átirányítás nélkül. A
    `lapos_linkkel_valtozatlan` oszlop mutatja, melyiknél működik ez. Cserébe
    nagyobb az esélye, hogy egy termék slug-ja ütközzön egy WordPress-oldaléval.
+
+## A képszámról: 2447 vagy 4833?
+
+Az archívum **2447 termékképet** tartalmaz, nem 4833-at. Ez nem hiányos mentés,
+hanem ennyi kép érhető el a publikus boltból — három, egymástól független forrás
+mondja ugyanezt:
+
+1. a termékoldalak galériái összesen 2447 képet listáznak,
+2. a bolt saját „Kép N/M” számlálóinak összege ugyanennyi (a 4 eltérés mind
+   galériába tett videó, nem hiányzó kép),
+3. a bolt **saját `image-sitemap.xml`-je 2228 egyedi képet** ismer – az
+   archívum 2308-at tartalmaz, vagyis **egyetlen kép sem hiányzik belőle**,
+   sőt bővebb nála.
+
+A 4833-as szám tehát jó eséllyel a Shoprenter admin **médiatárának** mérete,
+ami a már nem publikált és törölt termékek képeit, valamint a sehol nem
+hivatkozott fájlokat is számolja. Ezekhez a publikus bolt felől nincs út –
+**csak működő API-kulccsal vagy admin-exporttal menthetők**. Ha ezek is
+kellenek, az API-kulcsot kell rendbe tenni (lásd lejjebb), mert a lekapcsolás
+után ezek vesznek el végleg.
 
 ## Ismert hiányok
 

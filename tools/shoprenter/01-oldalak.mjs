@@ -5,8 +5,15 @@ import { SHOP, cacheDir, cachePath, curlBatch, ensureDir, writeJson, migracioDir
 const sitemapOut = path.join(cacheDir, 'sitemap.xml')
 await ensureDir(cacheDir)
 
-await curlBatch([{ url: `${SHOP}/sitemap.xml`, out: sitemapOut }], { label: 'sitemap', concurrency: 1 })
+const kepSitemapOut = path.join(cacheDir, 'image-sitemap.xml')
+await curlBatch([
+  { url: `${SHOP}/sitemap.xml`, out: sitemapOut },
+  { url: `${SHOP}/image-sitemap.xml`, out: kepSitemapOut }
+], { label: 'sitemap', concurrency: 2 })
 const xml = await fs.readFile(sitemapOut, 'utf8')
+// A bolt képsitemapje néhány olyan oldalt is felsorol, ami a fő sitemapből kimarad.
+let kepXml = ''
+try { kepXml = await fs.readFile(kepSitemapOut, 'utf8') } catch { /* nem kötelező */ }
 
 const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
   .map(m => m[1].trim())
@@ -21,8 +28,12 @@ const entries = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(m => {
   return { loc, lastmod, priority }
 }).filter(e => e.loc)
 
-const uniq = [...new Map(entries.map(e => [e.loc, e])).values()]
-process.stderr.write(`Sitemap: ${urls.length} <loc>, ${uniq.length} egyedi URL\n`)
+const kepSitemapUrls = [...kepXml.matchAll(/<url><loc>([^<]+)<\/loc>/g)].map(m => m[1].trim())
+const ismert = new Set(entries.map(e => e.loc))
+const extra = kepSitemapUrls.filter(u => !ismert.has(u)).map(loc => ({ loc, lastmod: null, priority: null, forras: 'image-sitemap' }))
+
+const uniq = [...new Map([...entries, ...extra].map(e => [e.loc, e])).values()]
+process.stderr.write(`Sitemap: ${urls.length} <loc>, képsitemapből ${extra.length} további oldal, összesen ${uniq.length} egyedi URL\n`)
 
 const jobs = uniq.map(e => ({ url: e.loc, out: cachePath(e.loc) }))
 const res = await curlBatch(jobs, { label: 'oldalak', concurrency: 8, minBytes: 500 })

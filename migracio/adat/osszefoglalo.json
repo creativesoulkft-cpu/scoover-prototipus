@@ -1,0 +1,46 @@
+{
+  "keszult": "2026-09-16T20:42:38.351Z",
+  "forras": {
+    "bolt": "https://elektromos-roller.net",
+    "motor": "ShopRenter",
+    "cdn": "https://elektromosroller.cdn.shoprenter.hu/custom/elektromosroller",
+    "modszer": "publikus sitemap + termékoldalak feldolgozása (az API-kulcs nem működött)"
+  },
+  "mennyisegek": {
+    "sitemap_url": 866,
+    "termek": 716,
+    "kategoria": 91,
+    "egyeb_oldal": 59,
+    "termekkep_galeriaban": 2447,
+    "egyedi_termekkep_url": 2240,
+    "letoltott_termekkep_fajl": 2447,
+    "termek_mappa": 716,
+    "tartalmi_kep": 68,
+    "kepmappa_fajl_osszesen": 2515,
+    "kepmappa_meret_mb": 2106.8,
+    "beagyazott_video": 21
+  },
+  "adatteljesseg": {
+    "nev_nelkul": 0,
+    "cikkszam_nelkul": 0,
+    "ar_nelkul": 0,
+    "kep_nelkul": 0,
+    "hosszu_leiras_nelkul": 39,
+    "csak_rovid_leirassal": 37,
+    "meta_leiras_nelkul": 0,
+    "kategoria_nelkul": 716,
+    "raktaron": 416,
+    "nincs_raktaron": 300
+  },
+  "atiranyitas": {
+    "sorok": 866,
+    "elotagos_uttal_atiranyitando": 865,
+    "lapos_linkkel_valtozatlan": 787,
+    "opcionalisan_tisztithato_slug": 133
+  },
+  "ismert_hianyok": [
+    "A Shoprenter REST API a megadott kulccsal 401-et ad, ezért az archívum a publikus boltoldalakból készült.",
+    "Emiatt NEM tartalmazza: a nem publikált/inaktív termékeket, a nem listázott médiatár-fájlokat és a pontos darabszámú készletértékeket (csak a bolt által kiírt elérhetőségi szöveg és a schema.org InStock/OutOfStock szerepel).",
+    "Vevő-, rendelés- és számlaadat nincs az archívumban; azt a Shoprenter admin felületéről kell exportálni."
+  ]
+}

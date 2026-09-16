@@ -860,3 +860,9 @@ Redirect 301 /szallitas-fizetes /szallitas-fizetes/
 Redirect 301 /index.php /index.php-857/
 Redirect 301 /index.php /index.php-858/
 Redirect 301 /kapcsolat-whoosh-elektromos-roller /kapcsolat-whoosh-elektromos-roller/
+Redirect 301 /kugoo /kugoo/
+Redirect 301 /whoosh-xiaomi-mi-elektromos-rollerek /whoosh-xiaomi-mi-elektromos-rollerek/
+Redirect 301 /hero-elektromos /hero-elektromos/
+Redirect 301 /whoosh-elektromos-roller-whoosh /whoosh-elektromos-roller-whoosh/
+Redirect 301 /elektromos-roller-csereakcio /elektromos-roller-csereakcio/
+Redirect 301 /akkuepites /akkuepites/
