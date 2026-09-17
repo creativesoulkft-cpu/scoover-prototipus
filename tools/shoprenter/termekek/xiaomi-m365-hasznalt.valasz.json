@@ -1,0 +1,363 @@
+{
+  "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=",
+  "id": "cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=",
+  "innerId": "2809",
+  "sku": "WHSH2026XMM365HSZNLT",
+  "modelNumber": "",
+  "gtin": "",
+  "orderable": "1",
+  "price": "78661.4173",
+  "cost": "0.0000",
+  "multiplier": "1.0000",
+  "multiplierLock": "0",
+  "loyaltyPoints": "",
+  "stock1": "1",
+  "stock2": "0",
+  "stock3": "0",
+  "stock4": "0",
+  "subtractStock": "1",
+  "mainPicture": "product/xiaomi-m365-hasznalt/xiaomi-m365-hasznalt-elektromos-roller-uj-akkumulatorral.jpg",
+  "width": "0.00",
+  "height": "0.00",
+  "length": "0.00",
+  "weight": "12.50",
+  "status": "1",
+  "shipped": "1",
+  "minimalOrderNumber": "1",
+  "maximalOrderNumber": "1",
+  "minimalOrderNumberMultiply": "0",
+  "availableDate": "0000-00-00",
+  "quantity": "0.0000",
+  "sortOrder": "1",
+  "dateCreated": "2026-09-17T13:06:52",
+  "dateUpdated": "2026-09-17T13:06:52",
+  "imageAlt": "Használt Xiaomi M365 elektromos roller új akkumulátorral 36V 250W",
+  "freeShipping": "0",
+  "productAttributeExtend": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9Mg==",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9Mg==",
+      "type": "LIST",
+      "name": "szin"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01",
+      "type": "INTEGER",
+      "name": "motor",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD02",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD02",
+      "type": "FLOAT",
+      "name": "akku",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD03",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD03",
+      "type": "INTEGER",
+      "name": "max_sebesseg",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD04",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD04",
+      "type": "INTEGER",
+      "name": "suly",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD05",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD05",
+      "type": "INTEGER",
+      "name": "maximalis_terheles",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTE=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTE=",
+      "type": "LIST",
+      "name": "fek_tipus"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0xNA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0xNA==",
+      "type": "FLOAT",
+      "name": "kerekmeret",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTU=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MTU=",
+      "type": "LIST",
+      "name": "kerektipus"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yMw==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yMw==",
+      "type": "INTEGER",
+      "name": "feszultseg",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MjU=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MjU=",
+      "type": "LIST",
+      "name": "lengescsillapitas"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yOA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD0yOA==",
+      "type": "INTEGER",
+      "name": "hatotavolsag",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/listAttributes/bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MzI=",
+      "id": "bGlzdEF0dHJpYnV0ZS1hdHRyaWJ1dGVfaWQ9MzI=",
+      "type": "LIST",
+      "name": "allithato_kormanymagassag"
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD00Mw==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD00Mw==",
+      "type": "FLOAT",
+      "name": "kerekmeret_elol",
+      "value": null
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributes/bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01MA==",
+      "id": "bnVtYmVyQXR0cmlidXRlLWF0dHJpYnV0ZV9pZD01MA==",
+      "type": "FLOAT",
+      "name": "kerekmeret_hatul",
+      "value": null
+    }
+  ],
+  "productPrices": [
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD02",
+        "innerId": 6,
+        "default": false
+      },
+      "net": "78661",
+      "netOriginal": "78661",
+      "netSpecial": null,
+      "gross": "99900",
+      "grossOriginal": "99900",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    },
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD04",
+        "innerId": 8,
+        "default": true
+      },
+      "net": "78661",
+      "netOriginal": "78661",
+      "netSpecial": null,
+      "gross": "99900",
+      "grossOriginal": "99900",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    },
+    {
+      "customerGroup": {
+        "id": "Y3VzdG9tZXJHcm91cC1jdXN0b21lcl9ncm91cF9pZD05",
+        "innerId": 9,
+        "default": false
+      },
+      "net": "55063",
+      "netOriginal": "55063",
+      "netSpecial": null,
+      "gross": "69930",
+      "grossOriginal": "69930",
+      "grossSpecial": null,
+      "currencyCode": "HUF"
+    }
+  ],
+  "durableMediaDevice": "0",
+  "taxClass": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/taxClasses/dGF4Q2xhc3MtdGF4X2NsYXNzX2lkPTEw"
+  },
+  "noStockStatus": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTE0"
+  },
+  "inStockStatus": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "productClass": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productClasses/cHJvZHVjdENsYXNzLXByb2R1Y3RfY2xhc3NfaWQ9OQ=="
+  },
+  "parentProduct": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+  },
+  "volumeUnit": null,
+  "weightUnit": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/weightClasses/d2VpZ2h0Q2xhc3Mtd2VpZ2h0X2NsYXNzX2lkPTE="
+  },
+  "manufacturer": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/manufacturers/bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yOA==",
+    "id": "bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yOA==",
+    "innerId": "28",
+    "name": "Xiaomi",
+    "picture": "data/product/Xiaomi Pro2/Xiaomi-logo-1200x846.jpg",
+    "sortOrder": "0",
+    "robotsMetaTag": "0",
+    "dateCreated": "1970-01-01T00:00:00",
+    "dateUpdated": "1970-01-01T00:00:00",
+    "manufacturerDescriptions": {
+      "href": "https://elektromosroller.api.myshoprenter.hu/manufacturerDescriptions?manufacturerId=bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0yOA=="
+    }
+  },
+  "onlyStock1Status": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/stockStatuses/c3RvY2tTdGF0dXMtc3RvY2tfc3RhdHVzX2lkPTk="
+  },
+  "onlyStock2Status": null,
+  "onlyStock3Status": null,
+  "onlyStock4Status": null,
+  "allImages": {
+    "mainImage": "https://elektromosroller.cdn.shoprenter.hu/custom/elektromosroller/image/cache/w600h600wt1/product/xiaomi-m365-hasznalt/xiaomi-m365-hasznalt-elektromos-roller-uj-akkumulatorral.jpg?lastmod=1789643212.1748947734"
+  },
+  "productDescriptions": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productDescriptions/cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwOSZsYW5ndWFnZV9pZD0x",
+      "id": "cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwOSZsYW5ndWFnZV9pZD0x",
+      "name": "Használt Xiaomi M365 - Elektromos roller - 36V - 250W - ÚJ akkumulátorral - 121 km-t futott",
+      "metaTitle": "Használt Xiaomi M365 elektromos roller ÚJ akkumulátorral - 121 km - 99.900 Ft",
+      "metaKeywords": "használt xiaomi m365, xiaomi m365 ár, használt elektromos roller, olcsó használt elektromos roller, elektromos roller új akkumulátorral, összecsukható elektromos roller, használt elektromos roller veszprém",
+      "metaDescription": "Használt Xiaomi M365 elektromos roller vadonatúj, saját építésű akkumulátorral, jótállással. 36V 250W, 25 km/h, 12,5 kg, összecsukható, jogosítvány nélkül. Kifogástalan, 121 km. Veszprém. 99.900 Ft.",
+      "shortDescription": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Használt Xiaomi M365 elektromos roller – 36V, 250W, 8,5 colos tubeless gumik, összecsukható, 25 km/h, jogosítvány nélkül használható.</span></span></p><p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Vadonatúj, nálunk épített akkumulátorral, jótállással.</strong> Kifogástalan állapot, mindössze 121 km. Szervizelve, Veszprémben kipróbálható. 99.900 Ft.</span></span></p>",
+      "description": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Használt Xiaomi M365 új akkumulátorral – 99.900 Ft.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">A Xiaomi M365 a világ legismertebb elektromos rollere, és nem véletlenül: könnyű, 12,5 kg-os, három másodperc alatt összecsukható, és pont annyit tud, amennyi a városi közlekedéshez kell. Ez a példány kifogástalan állapotú, összesen 121 km-t futott, és ami a legfontosabb: <strong>a régi akkumulátor helyett vadonatúj, a saját műhelyünkben épített pakk került bele, jótállással.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Egy használt rollernél az akkumulátor a legnagyobb kockázat és a legdrágább alkatrész. Itt ez a rész új, vagyis a következő évekre nem kell vele foglalkoznod.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Miért jó választás az M365</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>25 km/h végsebesség</strong> – jogosítvány nélkül, a KRESZ szerint használható</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>12,5 kg</strong> – felviszed a lépcsőn, beteszed a csomagtartóba, felviszed a buszra</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Másodpercek alatt összecsukható</strong>, a kormány a hátsó sárvédőhöz kapcsolódik</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>8,5 colos tubeless gumik</strong> – kényelmes futás, jó tapadás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Elektronikus motorfék elöl és mechanikus tárcsafék hátul, kettős fékrendszer</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Első LED lámpa, hátsó fék- és helyzetjelző lámpa, oldalsó prizmák</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Mi Home alkalmazás: sebesség, akkumulátor-állapot, menetmódok, zárolás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>A legjobb alkatrész-ellátottságú roller</strong> – nálunk minden alkatrész raktáron, bármikor javítható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Állapot</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Futott táv: <strong>121 km</strong></span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Akkumulátor: <strong>ÚJ</strong>, saját építés, jótállással</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Váz, dekk, gumik, fékek, világítás, hajtogató mechanika: kifogástalan, karcmentes állapot</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Szervizünk átnézte, beállította, feltöltötte</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Veszprémben, az üzletünkben kipróbálható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Kinek ajánljuk</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Aki most kezdi a rollerezést, és nem akar mindjárt több százezret költeni. Aki napi 5-15 km-es városi útra keres megbízható, könnyű gépet. Diáknak, ingázónak, a buszhoz-vonathoz vezető szakasz megtételére. Az M365 a legbiztonságosabb belépő a kategóriában, mert mindenhol ismerik és mindenhol javítható.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Műszaki adatok</strong></span></span></p>\n<table border=\"1\" cellpadding=\"4\" style=\"border-collapse:collapse;\"><tbody>\n<tr><td><strong>Motor</strong></td><td>250W névleges, kefe nélküli agymotor (csúcs 500W)</td></tr>\n<tr><td><strong>Akkumulátor</strong></td><td>36V 7,8Ah (280Wh) Li-ion – ÚJ, saját építésű, jótállással</td></tr>\n<tr><td><strong>Hatótáv</strong></td><td>akár 30 km (75 kg-os vezetővel, sík úton; vegyes városi használatban 20-25 km)</td></tr>\n<tr><td><strong>Végsebesség</strong></td><td>25 km/h</td></tr>\n<tr><td><strong>Emelkedő</strong></td><td>14%</td></tr>\n<tr><td><strong>Fék</strong></td><td>elektronikus motorfék elöl + mechanikus tárcsafék hátul</td></tr>\n<tr><td><strong>Kerék</strong></td><td>8,5\" tubeless, felfújható</td></tr>\n<tr><td><strong>Tömeg</strong></td><td>12,5 kg</td></tr>\n<tr><td><strong>Terhelhetőség</strong></td><td>100 kg</td></tr>\n<tr><td><strong>Váz</strong></td><td>alumínium, összecsukható</td></tr>\n<tr><td><strong>Vízállóság</strong></td><td>IP54</td></tr>\n<tr><td><strong>Alkalmazás</strong></td><td>Mi Home, Bluetooth</td></tr>\n<tr><td><strong>Futott táv</strong></td><td>121 km</td></tr>\n</tbody></table>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Whoosh garancia és szerviz</strong><br />Az akkumulátor-építés a szakterületünk, ezt a rollert is mi újítottuk fel. Jótállás az akkumulátorra és az elvégzett munkára, veszprémi és kapuvári szervizháttér, teljes Xiaomi alkatrész-választék. Egy darab van belőle – hívj, félretesszük.</span></span></p>",
+      "parameters": null,
+      "packagingUnit": "",
+      "measurementUnit": "db",
+      "customContentTitle": null,
+      "customContent": null,
+      "dateCreated": "2026-09-17T13:06:52",
+      "dateUpdated": "2026-09-17T13:06:52",
+      "videoCode": null,
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "language": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/languages/bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9MQ=="
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productDescriptions/cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwOSZsYW5ndWFnZV9pZD00",
+      "id": "cHJvZHVjdERlc2NyaXB0aW9uLXByb2R1Y3RfaWQ9MjgwOSZsYW5ndWFnZV9pZD00",
+      "name": "Használt Xiaomi M365 - Elektromos roller - 36V - 250W - ÚJ akkumulátorral - 121 km-t futott",
+      "metaTitle": "Használt Xiaomi M365 elektromos roller ÚJ akkumulátorral - 121 km - 99.900 Ft",
+      "metaKeywords": "használt xiaomi m365, xiaomi m365 ár, használt elektromos roller, olcsó használt elektromos roller, elektromos roller új akkumulátorral, összecsukható elektromos roller, használt elektromos roller veszprém",
+      "metaDescription": "Használt Xiaomi M365 elektromos roller vadonatúj, saját építésű akkumulátorral, jótállással. 36V 250W, 25 km/h, 12,5 kg, összecsukható, jogosítvány nélkül. Kifogástalan, 121 km. Veszprém. 99.900 Ft.",
+      "shortDescription": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Használt Xiaomi M365 elektromos roller – 36V, 250W, 8,5 colos tubeless gumik, összecsukható, 25 km/h, jogosítvány nélkül használható.</span></span></p><p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Vadonatúj, nálunk épített akkumulátorral, jótállással.</strong> Kifogástalan állapot, mindössze 121 km. Szervizelve, Veszprémben kipróbálható. 99.900 Ft.</span></span></p>",
+      "description": "<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Használt Xiaomi M365 új akkumulátorral – 99.900 Ft.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">A Xiaomi M365 a világ legismertebb elektromos rollere, és nem véletlenül: könnyű, 12,5 kg-os, három másodperc alatt összecsukható, és pont annyit tud, amennyi a városi közlekedéshez kell. Ez a példány kifogástalan állapotú, összesen 121 km-t futott, és ami a legfontosabb: <strong>a régi akkumulátor helyett vadonatúj, a saját műhelyünkben épített pakk került bele, jótállással.</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Egy használt rollernél az akkumulátor a legnagyobb kockázat és a legdrágább alkatrész. Itt ez a rész új, vagyis a következő évekre nem kell vele foglalkoznod.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Miért jó választás az M365</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>25 km/h végsebesség</strong> – jogosítvány nélkül, a KRESZ szerint használható</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>12,5 kg</strong> – felviszed a lépcsőn, beteszed a csomagtartóba, felviszed a buszra</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Másodpercek alatt összecsukható</strong>, a kormány a hátsó sárvédőhöz kapcsolódik</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>8,5 colos tubeless gumik</strong> – kényelmes futás, jó tapadás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Elektronikus motorfék elöl és mechanikus tárcsafék hátul, kettős fékrendszer</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Első LED lámpa, hátsó fék- és helyzetjelző lámpa, oldalsó prizmák</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Mi Home alkalmazás: sebesség, akkumulátor-állapot, menetmódok, zárolás</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>A legjobb alkatrész-ellátottságú roller</strong> – nálunk minden alkatrész raktáron, bármikor javítható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Állapot</strong></span></span></p>\n<ul>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Futott táv: <strong>121 km</strong></span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Akkumulátor: <strong>ÚJ</strong>, saját építés, jótállással</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Váz, dekk, gumik, fékek, világítás, hajtogató mechanika: kifogástalan, karcmentes állapot</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Szervizünk átnézte, beállította, feltöltötte</span></span></li>\n<li><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Veszprémben, az üzletünkben kipróbálható</span></span></li>\n</ul>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Kinek ajánljuk</strong></span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\">Aki most kezdi a rollerezést, és nem akar mindjárt több százezret költeni. Aki napi 5-15 km-es városi útra keres megbízható, könnyű gépet. Diáknak, ingázónak, a buszhoz-vonathoz vezető szakasz megtételére. Az M365 a legbiztonságosabb belépő a kategóriában, mert mindenhol ismerik és mindenhol javítható.</span></span></p>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Műszaki adatok</strong></span></span></p>\n<table border=\"1\" cellpadding=\"4\" style=\"border-collapse:collapse;\"><tbody>\n<tr><td><strong>Motor</strong></td><td>250W névleges, kefe nélküli agymotor (csúcs 500W)</td></tr>\n<tr><td><strong>Akkumulátor</strong></td><td>36V 7,8Ah (280Wh) Li-ion – ÚJ, saját építésű, jótállással</td></tr>\n<tr><td><strong>Hatótáv</strong></td><td>akár 30 km (75 kg-os vezetővel, sík úton; vegyes városi használatban 20-25 km)</td></tr>\n<tr><td><strong>Végsebesség</strong></td><td>25 km/h</td></tr>\n<tr><td><strong>Emelkedő</strong></td><td>14%</td></tr>\n<tr><td><strong>Fék</strong></td><td>elektronikus motorfék elöl + mechanikus tárcsafék hátul</td></tr>\n<tr><td><strong>Kerék</strong></td><td>8,5\" tubeless, felfújható</td></tr>\n<tr><td><strong>Tömeg</strong></td><td>12,5 kg</td></tr>\n<tr><td><strong>Terhelhetőség</strong></td><td>100 kg</td></tr>\n<tr><td><strong>Váz</strong></td><td>alumínium, összecsukható</td></tr>\n<tr><td><strong>Vízállóság</strong></td><td>IP54</td></tr>\n<tr><td><strong>Alkalmazás</strong></td><td>Mi Home, Bluetooth</td></tr>\n<tr><td><strong>Futott táv</strong></td><td>121 km</td></tr>\n</tbody></table>\n<p><span style=\"font-size:16px;\"><span style=\"color:#000000;\"><strong>Whoosh garancia és szerviz</strong><br />Az akkumulátor-építés a szakterületünk, ezt a rollert is mi újítottuk fel. Jótállás az akkumulátorra és az elvégzett munkára, veszprémi és kapuvári szervizháttér, teljes Xiaomi alkatrész-választék. Egy darab van belőle – hívj, félretesszük.</span></span></p>",
+      "parameters": null,
+      "packagingUnit": "",
+      "measurementUnit": "db",
+      "customContentTitle": null,
+      "customContent": null,
+      "dateCreated": "2026-09-17T13:06:52",
+      "dateUpdated": "2026-09-17T13:06:52",
+      "videoCode": null,
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "language": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/languages/bGFuZ3VhZ2UtbGFuZ3VhZ2VfaWQ9NA=="
+      }
+    }
+  ],
+  "productRelatedProductRelations": [],
+  "productCategoryRelations": [
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xMzg=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xMzg=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTM4"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDI=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDI=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQy"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDM=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDM=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQz"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDY=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNDY=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTQ2"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNTk=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xNTk=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTU5"
+      }
+    },
+    {
+      "href": "https://elektromosroller.api.myshoprenter.hu/productCategoryRelations/cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xODM=",
+      "id": "cHJvZHVjdENhdGVnb3J5LXByb2R1Y3RfaWQ9MjgwOSZjYXRlZ29yeV9pZD0xODM=",
+      "product": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/products/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+      },
+      "category": {
+        "href": "https://elektromosroller.api.myshoprenter.hu/categories/Y2F0ZWdvcnktY2F0ZWdvcnlfaWQ9MTgz"
+      }
+    }
+  ],
+  "productSpecials": [],
+  "productProductBadgeRelations": [],
+  "productListAttributeValueRelations": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productListAttributeValueRelations?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+  },
+  "numberAttributeValues": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/numberAttributeValues?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+  },
+  "textAttributeValues": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/textAttributeValues?productId=cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk="
+  },
+  "productTags": [],
+  "productCollateralProductRelations": [],
+  "customerGroupProductPrices": [],
+  "productAddonProductRelations": [],
+  "relatedProducts": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=/relatedProducts"
+  },
+  "collateralProducts": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=/collateralProducts"
+  },
+  "productAddons": {
+    "href": "https://elektromosroller.api.myshoprenter.hu/productExtend/cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=/productAddons"
+  },
+  "urlAliases": []
+}
