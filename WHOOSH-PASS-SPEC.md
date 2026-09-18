@@ -80,7 +80,7 @@ Nyelv: magyar UI, magyar kód-kommentek nem kötelezők. Mobil-first minden néz
 | felvetel_fotok | json | állapotfotók felvételkor — vitavédelem |
 | sav | enum | gyors / muhely |
 | allomas_id | FK NULL | hova van kiosztva |
-| szerelo_user_id | FK NULL | kinek |
+| szerelo_id | FK NULL → 2.8 | kinek. Csak aktív, fiókkal rendelkező személy választható |
 | statusz | enum | felvett / kiosztva / folyamatban / alkatreszre_var / arajanlatra_var / kesz / atadva / lezart |
 | prioritas | tinyint | 1-3 |
 | eloleg_brutto | int | "ami nincs foglalózva, az nincs megrendelve" |
@@ -92,7 +92,7 @@ Nyelv: magyar UI, magyar kód-kommentek nem kötelezők. Mobil-first minden néz
 | tuning_nyilatkozat | bool | VESC/tuning esetén kötelező pipa + PDF csatolva |
 
 ### 2.4 `wp_wpass_allomas`
-id, nev (A/B/C…), telephely_id, aktiv. Kiosztás **személyhez** kötött (szerelo_user_id), az állomás csak a fizikai hely — a fiúk cserélhetik egymást.
+id, nev (A/B/C…), telephely_id, aktiv. Kiosztás **személyhez** kötött (szerelo_id → 2.8), az állomás csak a fizikai hely — a fiúk cserélhetik egymást.
 
 ### 2.5 `wp_wpass_telephely`
 id, nev, cim, tipus (sajat / partner), kapcsolattarto_user_id.
@@ -103,7 +103,31 @@ id, user_id, roller_id NULL, esemeny_id NULL, pont (+/−), indok, datum, kupon_
 ### 2.7 `wp_wpass_naplo` (audit)
 id, user_id, muvelet (megtekintes / szerkesztes / export / torles / kiosztas), cel_tipus, cel_id, ip, datetime. **Minden belső megtekintés naplózva.**
 
-### 2.8 Tulajdonosváltás
+### 2.8 `wp_wpass_szemely` (szerelők, a kilépettek is)
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigint PK | |
+| nev | varchar | megjelenítendő név, pl. Adrián |
+| nev_kulcs | varchar UNIQUE | kisbetűs, ékezet nélküli kulcs a párosításhoz: `adrian` |
+| aliasok | json | írásváltozatok az importhoz: `["adrián","adrian","Adrián"]` |
+| user_id | FK NULL | WP-fiók, **ha van**. Kilépett munkatársnak nincs, a rekordja mégis megmarad |
+| statusz | enum | aktiv / inaktiv |
+| belepes, kilepes | date NULL | időszakos statisztikához |
+| telephely_id | FK NULL | |
+
+Ez a tábla választja szét a **személyt** a **belépési fióktól**. Kilépett munkatárs fiókja letiltható, a munkája mégis kereshető és összesíthető marad. Munkalap csak olyan személyhez osztható ki, akinek `statusz = aktiv` és van `user_id`-je.
+
+### 2.9 `wp_wpass_esemeny_szerelo` (ki dolgozott rajta)
+| mező | típus | megjegyzés |
+|---|---|---|
+| esemeny_id | FK | |
+| szemely_id | FK → 2.8 | |
+| szerep | enum | fo / segito / ellenorizte |
+| munkaora | decimal NULL | ha ismert |
+
+Egy munkán **több szerelő is dolgozhat**, az örökölt táblázatban ez bevett (`Adrián / Xavér`, `Béla / Péter / Xavér`), és külön szerepel az ellenőrző neve is. Ezért kapcsolótábla, nem egyetlen mező: csak így összesíthető szerelőnként és időszakonként.
+
+### 2.10 Tulajdonosváltás
 `wp_wpass_atadas`: roller_id, regi_user_id, uj_telefon, token, lejar (72 óra), statusz. Flow: régi tulaj indítja → SMS/email az újnak → új tulaj regisztrál/belép → megerősít → roller átkerül, régi tulaj csak "eladás" eseményt lát a saját listájában, a részletes történetet többé nem.
 
 ---
@@ -154,7 +178,8 @@ Belépés: kód + rekordhoz kötött telefonszám → SMS-kód (vagy WC-fiók). 
 - **Roller-kártya:** teljes történet, tulaj, pontok, aktív munkalap.
 - **Új munkalap:** hiba, fotó (kamera), sáv, prioritás, előleg, szerelő/állomás kiosztás, becsült munkadíj. Tuning esetén nyilatkozat-pipa kötelező.
 - **Műhely-tábla:** oszlopok = szerelők/állomások, kártyák = munkalapok, drag-and-drop átkiosztás. Színkód státusz szerint. Számláló: hány roller vár, átlag várakozás.
-- **Riportok:** napi lezárt munkák, szerelőnkénti munkaidő, sávonkénti átfutás, pontkiadás, Whoosh-igazolt rollerek száma.
+- **Riportok:** napi lezárt munkák, sávonkénti átfutás, pontkiadás, Whoosh-igazolt rollerek száma.
+- **Szerelői kimutatás:** szabadon szűrhető **személyre** (a kilépettekre is) és **időszakra** (naptól napig, vagy gyorsválasztó: idei év, elmúlt 12 hónap, egy adott év). Bontható telephelyre, munkatípusra és elszámolásra. Oszlopai: munkák száma, összes munkaóra, átlagos átfutási idő, visszahozott munkák aránya (ugyanazzal a hibával), ellenőrzésen elsőre megfelelt aránya. CSV-export, naplózva. Ez a nézet a kilépett munkatársak évekre visszamenő munkáját is kiadja, mert a személy rekordja megmarad (2.8).
 - **Ügyfelek:** keresés, lista, export CSV (naplózva).
 
 ### 4.4 Állomás — `/allomas/` (tablet, fali)
@@ -226,7 +251,7 @@ Sáv-logika: `gyors` munkalap alapból 1-es prioritás, max 4 óra célátfutás
 
 ## 10. Fázisok
 
-**MVP (1. hét):** 2.1–2.3, 2.7 táblák · nyilvános oldal · Pult beolvasás + roller-kártya + munkalap + műhely-tábla · Állomás-nézet tablet · esemény-automatika átadáskor · címke-PNG · szerepkörök + TOTP · napi mentés.
+**MVP (1. hét):** 2.1–2.3, 2.7–2.9 táblák · nyilvános oldal · Pult beolvasás + roller-kártya + munkalap + műhely-tábla · Állomás-nézet tablet · esemény-automatika átadáskor · címke-PNG · szerepkörök + TOTP · napi mentés.
 
 **2. fázis:** tulajdonosi nézet + SMS-belépés · pontok + kuponok · emlékeztetők · tulajdonosváltás · CSV-import régi ügyfelekhez · Brevo-export.
 
@@ -242,7 +267,8 @@ Sáv-logika: `gyors` munkalap alapból 1-es prioritás, max 4 óra célátfutás
    - Pult: Szilárd (`wpass_pult`).
    - Szerelők: Adrián, Milán, Ádám, Erik (`wpass_szerelo`, tabletenként külön fiók).
    - Telephely: Veszprém (saját), Kapuvár (saját). Partnerek később.
-   - A régi táblázatban további nevek is szerepelnek (Alex, Xavér, Péter, Tamás, Gábor, Béla, Márk, Robi, Kristóf, Soma). Ezek nem kapnak fiókot; az importált eseményekben **szövegként** maradnak a `leiras_technikai` végén, hogy a történet ne csonkuljon.
+   - Korábbi munkatársak: Alex, Xavér, Péter, Tamás, Gábor, Béla, Márk, Robi, Kristóf, Soma. Mindegyikük **kap egy személy-rekordot** (2.8) `statusz = inaktiv` értékkel, de **belépési fiókot nem**. Így a munkájuk névre és időszakra szűrhető marad, belépni viszont nem tudnak.
+   - Alex esetleg visszatér: az ő rekordja egyetlen kapcsolóval aktiválható, és akkor kap fiókot. A többieknél ez nem várható, de a mechanizmus ugyanaz.
 4. **Örökölt szerviztörténet.** Importáljuk, a forrás és a szabályok a 13. fejezetben.
 
 ---
@@ -278,6 +304,21 @@ Közös kulcs a **JAV-azonosító**. Egyedi azonosító 3643 darab van, tehát m
 - **Az eszköznév szabad szöveg** ("Xiaomi Pro 2", "Xiaomi pro 2", "Kugoo G2 Pro", "Whoosh-Gecko 32Ah"). Márka és típus szétválasztása szótárral, a maradék a `tipus` mezőbe kerül nyersen.
 - **Dátumok Excel-sorszámként** jönnek (44509 = 2021-11-08), néhol szöveges dátum keveredik közéjük.
 - **Pénzügyi adat gyakorlatilag nincs**: a teljes munkafüzetben hét darab "Ft" alakú cella van. Az importált események `munkadij_brutto` mezője ezért üresen marad, az `elszamolas` pedig `belso` lesz, nem `fizetett` — így az örökölt tételek nem torzítják a riportokat és nem osztanak hűségpontot.
+- **A szerelőnevek írásmódja ingadozik**, ezért az importnak alias-szótárral kell dolgoznia, nem szó szerinti egyezéssel. A két lapon ténylegesen előforduló változatok:
+
+  | személy | változatok a táblázatban |
+  |---|---|
+  | Adrián | `Adrian`, `Adrián` |
+  | Xavér | `Xavér`, `xavér`, `XAVÉR`, `xaVÉR`, `Xaver`, `xaver` |
+  | Szilárd | `Szilárd`, `SZilárd`, `sZILÁRD` |
+  | Soma | `Soma`, `soma`, `SOma` |
+  | Kristóf | `Kristóf`, `kristóf`, `KRistóf` |
+  | Milán | `Milán`, `milán` |
+  | Péter | `Péter`, `péter` |
+  | Gábor | `Gábor`, `gábor` |
+  | további, egy alakban | Ádám, Alex, Márk, Béla, Dávid, Erik, Robi, Tamás, Zsolt |
+
+  A párosítás kisbetűs, ékezet nélküli kulcson (`nev_kulcs`) történjen. **Vigyázat:** ugyanezek a keresztnevek ügyfélnévként is előfordulnak (például `Mazur Gábor`), ezért csak az adott korszak szerelő-oszlopából szabad nevet olvasni, nem a sor bármelyik cellájából.
 - **Telefonszám 82%-ban van meg**, formátuma vegyes. Normalizálás `+36XXXXXXXXX` alakra, ami nem értelmezhető, az marad üresen.
 
 ### 13.3 Az import menete
@@ -287,6 +328,7 @@ Közös kulcs a **JAV-azonosító**. Egyedi azonosító 3643 darab van, tehát m
 3. Soronkénti áttekintő lista, ahol minden sor **kihagyható** és az `elszamolas` értéke soronként állítható.
 4. Éles futás után minden importált rekord `import_forras` mezőt kap a JAV-azonosítóval, hogy a művelet visszafordítható legyen.
 5. Az import nem hoz létre WooCommerce-felhasználót automatikusan. Ügyfél csak akkor jön létre, amikor a roller először kap QR-matricát a pultnál.
+6. **Szerelők betöltése.** Az importáló minden felismert nevet a személy-táblába (2.8) tesz, `inaktiv` státusszal, a talált írásváltozatokkal az `aliasok` mezőben, és a munkákat a kapcsolótáblán (2.9) köti hozzájuk. A száraz futás előnézete listázza a felismert neveket és találatszámukat, hogy összevonhatók vagy elvethetők legyenek, mielőtt bármi az adatbázisba kerül. Így a kilépett munkatársak munkája évekre visszamenőleg szűrhető és összesíthető marad.
 
 ### 13.4 Ingyenes, baráti és barter munkák
 
