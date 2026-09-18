@@ -56,8 +56,9 @@ Nyelv: magyar UI, magyar kód-kommentek nem kötelezők. Mobil-first minden néz
 | datum | date | |
 | leiras_publikus | text | amit a tulajdonos lát (pl. "Első fék csere, hidraulikus XOD") |
 | leiras_technikai | text | amit a szerelő lát (pl. "XOD 2 dug., 160mm tárcsa, légtelenítve, 4 bar") |
-| alkatreszek | json | [{nev, db, ar_brutto}] — ár csak Pult-szerepkörnek |
+| alkatreszek | json | [{nev, db, ar_brutto}] — az árat a tulajdonos a **saját** rollerén és a Pult látja, a szerelő soha (3. fejezet) |
 | munkadij_brutto | int NULL | |
+| elszamolas | enum | fizetett / ingyenes / barter / garancialis / belso — alapértelmezés `fizetett` |
 | ceg | enum | CS / SP — melyik cég számlázta |
 | szamla_azonosito | varchar NULL | |
 | munkalap_id | FK NULL | ha munkalapból jött |
@@ -84,6 +85,7 @@ Nyelv: magyar UI, magyar kód-kommentek nem kötelezők. Mobil-first minden néz
 | prioritas | tinyint | 1-3 |
 | eloleg_brutto | int | "ami nincs foglalózva, az nincs megrendelve" |
 | becsult_munkadij | int NULL | |
+| elszamolas | enum | fizetett / ingyenes / barter / garancialis / belso — átadáskor átöröklődik az eseményre |
 | szerelo_jegyzet | text | menet közben |
 | kesz_fotok | json | |
 | kesz_ido, atadva_ido | datetime NULL | |
@@ -120,7 +122,7 @@ id, user_id, muvelet (megtekintes / szerkesztes / export / torles / kiosztas), c
 | leiras_technikai | | | ✓ | ✓ | ✓ |
 | alkatrész neve | | ✓ | ✓ | ✓ | ✓ |
 | alkatrész ára | | ✓ | | | ✓ |
-| munkadíj | | ✓ | ✓ (csak saját) | ✓ (csak saját) | ✓ |
+| munkadíj | | ✓ | | ✓ (csak saját) | ✓ |
 | beszerzési ár, árrés | | | | | ✓ |
 | tulajdonos neve, telefonja | | ✓ (saját) | | | ✓ |
 | ügyféllista | | | | | ✓ |
@@ -128,6 +130,10 @@ id, user_id, muvelet (megtekintes / szerkesztes / export / torles / kiosztas), c
 | más telephely rollerei | | | | csak beolvasva | ✓ |
 | pontok | | ✓ | | | ✓ |
 | riportok | | | | | ✓ |
+
+**Ár-szabály a szerelőre:** a szerelő **semmilyen pénzügyi adatot nem lát** — sem beszerzési árat, sem alkatrész-eladási árat, sem munkadíjat, a sajátját sem. A végpontok soha nem küldenek árat `wpass_szerelo` szerepkörnek, nem elég a felületen elrejteni.
+
+Ez később átállítható legyen anélkül, hogy kódot kelljen írni: `wpass_szerelo_lat_munkadijat` admin-kapcsoló, alapértelmezés **kikapcsolva**. Bekapcsolva a szerelő a saját munkadíját látja, alkatrész- és beszerzési árat akkor sem. A kapcsoló állását egyetlen helyen kell kiértékelni (egy `wpass_lathato_mezok( $user, $kontextus )` szűrő), hogy ne kelljen minden végponton külön feltétel.
 
 **Partner-szabály:** partner csak azt látja, amit ő vett fel — KIVÉVE, ha egy rollert fizikailag beolvas nála a pultnál: akkor annak a rollernek a technikai történetét látja (szerelő-szint), de ügyféladatot nem. Ez a hálózat lényege.
 
@@ -177,6 +183,7 @@ Sáv-logika: `gyors` munkalap alapból 1-es prioritás, max 4 óra célátfutás
 
 - 1 pont / 100 Ft bruttó költés (szerviz + webshop egyaránt, WC order hook).
 - 100 pont → 1.000 Ft WC-kupon, egyszer használatos, 6 hónap lejárat, min. 5.000 Ft kosárérték.
+- Pont csak `fizetett` elszámolású tétel után jár (13.4).
 - Matrica felragasztása régi ügyfélnek: +2.000 pont egyszeri (esemeny tipus=megjegyzes, indok="Pass aktiválás").
 - Ajánlói kód: `/r/{KOD}?aj={ajanlo_kod}` → sikeres első munkalap után mindkettő +1.000 pont.
 - Évfordulós szabályok táblázatban admin által szerkeszthetők: {év, jutalom_tipus, érték, szöveg}. Alapból: 1 év → ingyen átvizsgálás kupon; 3 év → fóliázás 50%; 5 év → akkuvizsgálat + "Whoosh Veterán" jelvény a nyilvános oldalon.
@@ -227,12 +234,16 @@ Sáv-logika: `gyors` munkalap alapból 1-es prioritás, max 4 óra célátfutás
 
 ---
 
-## 11. Amit Claude Code-nak kérdeznie kell, mielőtt kódol
+## 11. Induló adatok (a nyitó kérdések megválaszolva)
 
-1. Forpsi tárhely PHP-verzió és van-e composer? (ha nincs, a QR-lib vendorolva legyen)
-2. SMS-szolgáltató: van-e már fiók, vagy MVP-ben csak email?
-3. Kezdő telephely-lista és felhasználók (kik a szerelők, ki a pult).
-4. Meglévő szerviz-Google-Sheet: importáljuk-e a történetet? (ha igen, oszlopstruktúra kell)
+1. **Tárhely.** Forpsi Advanced, PHP 8.5 / 8.4 / 8.3, `memory_limit` 1024 MB, `max_execution_time` 900 s, MySQL 8.0 InnoDB, SSH és Softaculous. Composert a Forpsi nem hirdet, SSH-n a `composer.phar` futtatható, de a QR-könyvtár **vendorolva** legyen, hogy ne függjön tárhely-oldali csomagkezeléstől.
+2. **SMS.** A meglévő MiniCRM tud SMS-t küldeni, MVP-ben ez a kiindulás. Az SMS-küldés legyen egy cserélhető illesztő (`WPass_Sms_Interface`), hogy olcsóbb szolgáltatóra váltás egyetlen osztály cseréje legyen, ne kódátírás.
+3. **Felhasználók induláskor.**
+   - Pult: Szilárd (`wpass_pult`).
+   - Szerelők: Adrián, Milán, Ádám, Erik (`wpass_szerelo`, tabletenként külön fiók).
+   - Telephely: Veszprém (saját), Kapuvár (saját). Partnerek később.
+   - A régi táblázatban további nevek is szerepelnek (Alex, Xavér, Péter, Tamás, Gábor, Béla, Márk, Robi, Kristóf, Soma). Ezek nem kapnak fiókot; az importált eseményekben **szövegként** maradnak a `leiras_technikai` végén, hogy a történet ne csonkuljon.
+4. **Örökölt szerviztörténet.** Importáljuk, a forrás és a szabályok a 13. fejezetben.
 
 ---
 
@@ -244,3 +255,51 @@ Sáv-logika: `gyors` munkalap alapból 1-es prioritás, max 4 óra célátfutás
 - "Kész" → átadás → szervizkönyv-esemény létrejön a munkalap adataival, kézi másolás nélkül.
 - Címke-PNG Brother P-touch Editorba importálva olvasható QR-t ad 24 mm-es szalagon.
 - Napi mentés lefut és külső helyre kerül; visszaállítás dokumentálva.
+
+---
+
+## 13. Örökölt adat: a szerviz-Google-Sheet importja
+
+Forrás: a meglévő Google-táblázat, 19 munkalap. Kettő érdekes, a többit nem importáljuk.
+
+### 13.1 Amit a két lap tartalmaz
+
+| lap | sorok | mit ad |
+|---|---|---|
+| Aktuális javítások | 586 érdemi | a futó és friss munkák, ügyfélnévvel és telefonnal, 2024-2025 |
+| Összes munkák | 3732 munkasor | a teljes archívum, JAV100-tól JAV4585-ig, 2020-2025 |
+
+Közös kulcs a **JAV-azonosító**. Egyedi azonosító 3643 darab van, tehát mintegy 90 duplikált sorral számolni kell.
+
+### 13.2 Amire fel kell készülni (a tábla valós állapota)
+
+- **Az oszlopkiosztás korszakonként változik.** Az "Összes munkák" lapon a JAV-azonosító hol az 1., hol a 3., 4., 5. vagy 6. oszlopban áll, összesen tizenhárom váltással. Ezért az importáló **soronként keresse meg** a `JAV\d+` mintát, és onnan olvasson relatív pozícióval; fix oszlopindexre épített import biztosan hibás adatot ad.
+- **Nincs gyári szám sehol.** A roller azonosítása ügyfélnév és eszközmegnevezés együttese alapján megy, ami nem egyértelmű. Ütközés esetén az importáló ne vonjon össze két rollert, hanem hozzon létre külön rekordot, és jelölje `import_bizonytalan` jelzővel kézi átnézésre.
+- **Az eszköznév szabad szöveg** ("Xiaomi Pro 2", "Xiaomi pro 2", "Kugoo G2 Pro", "Whoosh-Gecko 32Ah"). Márka és típus szétválasztása szótárral, a maradék a `tipus` mezőbe kerül nyersen.
+- **Dátumok Excel-sorszámként** jönnek (44509 = 2021-11-08), néhol szöveges dátum keveredik közéjük.
+- **Pénzügyi adat gyakorlatilag nincs**: a teljes munkafüzetben hét darab "Ft" alakú cella van. Az importált események `munkadij_brutto` mezője ezért üresen marad, az `elszamolas` pedig `belso` lesz, nem `fizetett` — így az örökölt tételek nem torzítják a riportokat és nem osztanak hűségpontot.
+- **Telefonszám 82%-ban van meg**, formátuma vegyes. Normalizálás `+36XXXXXXXXX` alakra, ami nem értelmezhető, az marad üresen.
+
+### 13.3 Az import menete
+
+1. Feltöltés: a Pult admin-felületén xlsx vagy CSV feltöltés, nem parancssor.
+2. **Száraz futás kötelező elsőre**: az importáló kiír egy előnézeti táblát (hány roller, hány esemény, hány bizonytalan, hány duplikátum), és semmit nem ír az adatbázisba.
+3. Soronkénti áttekintő lista, ahol minden sor **kihagyható** és az `elszamolas` értéke soronként állítható.
+4. Éles futás után minden importált rekord `import_forras` mezőt kap a JAV-azonosítóval, hogy a művelet visszafordítható legyen.
+5. Az import nem hoz létre WooCommerce-felhasználót automatikusan. Ügyfél csak akkor jön létre, amikor a roller először kap QR-matricát a pultnál.
+
+### 13.4 Ingyenes, baráti és barter munkák
+
+Ezek valódi szervizmunkák, a roller szervizkönyvébe valók, de nem bevétel. Kezelésük az `elszamolas` mezővel történik:
+
+| érték | mikor | riportban | hűségpont |
+|---|---|---|---|
+| fizetett | normál munka | benne | jár |
+| ingyenes | baráti, családi szívesség | külön soron | nem jár |
+| barter | csereszolgáltatás, például akku grafikáért | külön soron | nem jár |
+| garancialis | garanciában végzett javítás | külön soron | nem jár |
+| belso | saját roller, bemutató, importált előzmény | nincs benne | nem jár |
+
+A Pult riportjai alapból csak a `fizetett` tételeket összesítik, a többi külön sorban jelenik meg, hogy látszódjon mennyi munka megy el rájuk.
+
+**Törlés.** A `wpass_pult` és admin szerepkör törölhet eseményt és teljes rollert, két lépésben megerősítve. A törlés naplózódik (`wp_wpass_naplo`, művelet `torles`), és a napló maga nem törölhető a felületről. Ez összefér a 0.2 alapelvvel: a rendszer bizonyíték marad, de a valóban nem odavaló tétel eltávolítható.
