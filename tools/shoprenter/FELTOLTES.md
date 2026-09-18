@@ -270,3 +270,35 @@ Lista-attribútum értékek (`listAttributeValue-attribute_id=A&value_id=V` base
 | 2026-09-16 | HNYW2026G2PROHSZNLT | Használt Honey Whale G2 Pro - Elektromos roller - 48V - 600W - 13Ah - ÚJ akkumulátorral és új elektronikával | 2806 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDY=` | aktív (1), készlet 1 | 189 900 Ft; új gyártó „Honey Whale” (id 119, `bWFudWZhY3R1cmVyLW1hbnVmYWN0dXJlcl9pZD0xMTk=`); 12 attribútum (szín kihagyva – homok/fekete nincs a listában); 4 kép `termekek/honey-whale-g2-pro-hasznalt/`; kategóriák 138+142+159 |
 | 2026-09-17 | WHSHNAMIKLMMXHSZNLT | Használt Nami Klima Max - Elektromos roller - 60V - 2x1000W - 30Ah - 241 km-t futott | 2807 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDc=` | aktív (1), készlet 1 | 699 000 Ft (új ár a boltban 1 349 000 Ft); adatok az adattábláról + a meglévő WHSHNAMIKLMMX termékből; 13 attribútum, szín „Matt fekete” (44); 8 kép `termekek/nami-klima-max-hasznalt/`; kategóriák 138+142+159+307 |
 | 2026-09-17 | WHSH2026XMM365HSZNLT | Használt Xiaomi M365 - Elektromos roller - 36V - 250W - ÚJ akkumulátorral - 121 km-t futott | 2809 / `cHJvZHVjdC1wcm9kdWN0X2lkPTI4MDk=` | aktív (1), készlet 1 | 99 900 Ft; gyári M365 adatok + új akku (36V 7,8Ah, saját építés); 13 attribútum; 5 kép `termekek/xiaomi-m365-hasznalt/`; kategóriák 138+142+143+146+159+183 |
+| 2026-09-18 | WHSHNAVEE* (16 db) | NAVEE teljes rollerkínálat: Easyride 25 Pro, GT3, GT3 Max, K100, K100 Pro, K100 Max, N65i II, NT5 Max, NT5 Ultra X, ST3, ST3 Pro, ST5 Max, ST5 Pro, V50i Pro, XT5 Pro, XT5 Ultra | 2812-2842 | **INAKTÍV (0)**, készlet 0, Előrendelhető | Tanfield-partnerség előkészítése. Új gyártó „Navee" (id 122), új kategória „NAVEE elektromos rollerek" (343, a 138 alatt). Árazás: 40% árrés 250 e Ft alatti beszerzésnél, 35% fölötte. NT5 Max, NT5 Ultra X, V50i Pro ára BECSÜLT (nincs beszerzési ár). Adatok és képek a naveeshop.hu hivatalos magyar oldaláról. Generátor: `tools/shoprenter/navee/generate.py`, feltöltő: `upload.mjs` |
+
+## 9. Navee termékcsalád – árazás és jogi besorolás (2026-09-18)
+
+Beszerzési árak a 2026 tavaszi B2B listából. Árrés: **40% a 250 000 Ft alatti beszerzéseknél, 35% fölötte**.
+
+| Modell | B2B bruttó | Eladási ár | Árrés | Régi B2C lista |
+|---|---|---|---|---|
+| K100 | 64 000 | 106 900 | 40,1% | 79 990 |
+| K100 Pro | 83 000 | 138 900 | 40,2% | 99 996 |
+| Easyride 25 Pro | 92 000 | 153 900 | 40,2% | 134 990 |
+| K100 Max | 106 000 | 176 900 | 40,1% | 129 990 |
+| GT3 | 138 000 | 230 900 | 40,2% | 189 990 |
+| GT3 Max | 175 000 | 291 900 | 40,0% | 229 990 |
+| ST3 | 211 000 | 351 900 | 40,0% | 279 990 |
+| ST3 Pro | 220 000 | 366 900 | 40,0% | 309 990 |
+| N65i II | 230 000 | 383 900 | 40,1% | 269 990 |
+| ST5 Pro | 285 000 | 438 900 | 35,1% | 332 990 |
+| ST5 Max | 303 000 | 466 900 | 35,1% | 369 990 |
+| XT5 Pro | 350 000 | 538 900 | 35,1% | 399 999 |
+| XT5 Ultra | 526 000 | 809 900 | 35,1% | 599 999 |
+| NT5 Max | *becsült 300 000* | 461 900 | – | nincs |
+| NT5 Ultra X | *becsült 500 000* | 769 900 | – | nincs |
+| V50i Pro | *becsült 130 000* | 216 900 | – | nincs |
+
+A régi promóciós áron minden modell árrése pontosan 8% volt.
+
+**KRESZ-besorolás (2026-09-01-től hatályos):** kis kategória = max 25 km/h, max 1000 W névleges, 35 kg alatt.
+Ide esik a felnőtt modellek nagy része, ezek vezetői engedély nélkül, 12 éves kortól használhatók, bukósisakkal.
+**Kivétel: XT5 Ultra (38,6 kg) és NT5 Ultra X (36,5 kg)** – 35 kg fölött, nagyobb kategória: sisak, biztosítás
+és vezetői engedély kell. Ez bele van írva a leírásukba. A K100 gyerekszéria 12 év alattiaknak készült, ezért
+közterületen nem használható; a leírás ezt is kimondja.

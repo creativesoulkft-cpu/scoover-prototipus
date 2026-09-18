@@ -1,0 +1,668 @@
+{
+ "easyride-25-pro": {
+  "sku": "WHSHNAVEEEASYRIDE25PRO",
+  "attr": {
+   "nums": {
+    "5": "480",
+    "6": "7.65",
+    "7": "25",
+    "8": "16",
+    "9": "90",
+    "14": "8.5",
+    "23": "48",
+    "28": "25"
+   },
+   "lists": [
+    [
+     11,
+     3
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     1
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-easyride-25-pro-elektromos-roller-01.jpg",
+   "navee-easyride-25-pro-elektromos-roller-02.jpg",
+   "navee-easyride-25-pro-elektromos-roller-03.jpg",
+   "navee-easyride-25-pro-elektromos-roller-04.jpg",
+   "navee-easyride-25-pro-elektromos-roller-05.jpg",
+   "navee-easyride-25-pro-elektromos-roller-06.jpg"
+  ],
+  "b2b": 92000,
+  "ar": 153900,
+  "becsult": false,
+  "tomeg": 15.9,
+  "gyerek": false
+ },
+ "gt3": {
+  "sku": "WHSHNAVEEGT3",
+  "attr": {
+   "nums": {
+    "5": "700",
+    "6": "7.65",
+    "7": "25",
+    "8": "21",
+    "9": "120",
+    "14": "10",
+    "23": "48",
+    "28": "50"
+   },
+   "lists": [
+    [
+     11,
+     3
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-gt3-elektromos-roller-01.jpg"
+  ],
+  "b2b": 138000,
+  "ar": 230900,
+  "becsult": false,
+  "tomeg": 21.0,
+  "gyerek": false
+ },
+ "gt3-max": {
+  "sku": "WHSHNAVEEGT3MAX",
+  "attr": {
+   "nums": {
+    "5": "1000",
+    "6": "12.75",
+    "7": "25",
+    "8": "23",
+    "9": "120",
+    "14": "10",
+    "23": "48",
+    "28": "75"
+   },
+   "lists": [
+    [
+     11,
+     3
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-gt3-max-elektromos-roller-01.jpg"
+  ],
+  "b2b": 175000,
+  "ar": 291900,
+  "becsult": false,
+  "tomeg": 23.0,
+  "gyerek": false
+ },
+ "k100": {
+  "sku": "WHSHNAVEEK100",
+  "attr": {
+   "nums": {
+    "5": "160",
+    "7": "16",
+    "8": "9",
+    "9": "50",
+    "23": "21",
+    "28": "11"
+   },
+   "lists": [
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-k100-elektromos-roller-01.jpg",
+   "navee-k100-elektromos-roller-02.jpg",
+   "navee-k100-elektromos-roller-03.jpg",
+   "navee-k100-elektromos-roller-04.jpg",
+   "navee-k100-elektromos-roller-05.jpg",
+   "navee-k100-elektromos-roller-06.jpg"
+  ],
+  "b2b": 64000,
+  "ar": 106900,
+  "becsult": false,
+  "tomeg": 9.0,
+  "gyerek": true
+ },
+ "k100-pro": {
+  "sku": "WHSHNAVEEK100PRO",
+  "attr": {
+   "nums": {
+    "5": "160",
+    "7": "16",
+    "8": "9",
+    "9": "50",
+    "23": "21",
+    "28": "11"
+   },
+   "lists": [
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-k100-pro-elektromos-roller-01.jpg",
+   "navee-k100-pro-elektromos-roller-02.jpg",
+   "navee-k100-pro-elektromos-roller-03.jpg",
+   "navee-k100-pro-elektromos-roller-04.jpg",
+   "navee-k100-pro-elektromos-roller-05.jpg",
+   "navee-k100-pro-elektromos-roller-06.jpg"
+  ],
+  "b2b": 83000,
+  "ar": 138900,
+  "becsult": false,
+  "tomeg": 9.0,
+  "gyerek": true
+ },
+ "k100-max": {
+  "sku": "WHSHNAVEEK100MAX",
+  "attr": {
+   "nums": {
+    "5": "260",
+    "7": "16",
+    "8": "10",
+    "9": "50",
+    "23": "21",
+    "28": "24"
+   },
+   "lists": [
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-k100-max-elektromos-roller-01.jpg",
+   "navee-k100-max-elektromos-roller-02.jpg",
+   "navee-k100-max-elektromos-roller-03.jpg",
+   "navee-k100-max-elektromos-roller-04.jpg",
+   "navee-k100-max-elektromos-roller-05.jpg",
+   "navee-k100-max-elektromos-roller-06.jpg"
+  ],
+  "b2b": 106000,
+  "ar": 176900,
+  "becsult": false,
+  "tomeg": 9.6,
+  "gyerek": true
+ },
+ "n65i-ii": {
+  "sku": "WHSHNAVEEN65I2",
+  "attr": {
+   "nums": {
+    "5": "250",
+    "7": "20",
+    "8": "24",
+    "9": "150",
+    "14": "10.5",
+    "23": "46",
+    "28": "70"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     1
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-n65i-ii-elektromos-roller-01.jpg",
+   "navee-n65i-ii-elektromos-roller-02.jpg",
+   "navee-n65i-ii-elektromos-roller-03.jpg",
+   "navee-n65i-ii-elektromos-roller-04.jpg",
+   "navee-n65i-ii-elektromos-roller-05.jpg",
+   "navee-n65i-ii-elektromos-roller-06.jpg"
+  ],
+  "b2b": 230000,
+  "ar": 383900,
+  "becsult": false,
+  "tomeg": 23.6,
+  "gyerek": false
+ },
+ "nt5-max": {
+  "sku": "WHSHNAVEENT5MAX",
+  "attr": {
+   "nums": {
+    "5": "1600",
+    "6": "12",
+    "7": "25",
+    "8": "34",
+    "9": "150",
+    "14": "10.5",
+    "23": "46",
+    "28": "85"
+   },
+   "lists": [
+    [
+     11,
+     8
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-nt5-max-elektromos-roller-01.jpg",
+   "navee-nt5-max-elektromos-roller-02.jpg",
+   "navee-nt5-max-elektromos-roller-03.jpg",
+   "navee-nt5-max-elektromos-roller-04.jpg",
+   "navee-nt5-max-elektromos-roller-05.jpg"
+  ],
+  "b2b": 300000,
+  "ar": 461900,
+  "becsult": true,
+  "tomeg": 33.5,
+  "gyerek": false
+ },
+ "nt5-ultra-x": {
+  "sku": "WHSHNAVEENT5ULTRAX",
+  "attr": {
+   "nums": {
+    "5": "2400",
+    "7": "25",
+    "8": "36",
+    "9": "150",
+    "14": "10.5",
+    "23": "46",
+    "28": "90"
+   },
+   "lists": [
+    [
+     11,
+     8
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-nt5-ultra-x-elektromos-roller-01.jpg",
+   "navee-nt5-ultra-x-elektromos-roller-02.jpg",
+   "navee-nt5-ultra-x-elektromos-roller-03.jpg",
+   "navee-nt5-ultra-x-elektromos-roller-04.jpg",
+   "navee-nt5-ultra-x-elektromos-roller-05.jpg",
+   "navee-nt5-ultra-x-elektromos-roller-06.jpg"
+  ],
+  "b2b": 500000,
+  "ar": 769900,
+  "becsult": true,
+  "tomeg": 36.5,
+  "gyerek": false
+ },
+ "st3": {
+  "sku": "WHSHNAVEEST3",
+  "attr": {
+   "nums": {
+    "5": "1000",
+    "6": "10.2",
+    "7": "25",
+    "8": "25",
+    "9": "120",
+    "14": "10",
+    "23": "48",
+    "28": "60"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-st3-elektromos-roller-01.jpg",
+   "navee-st3-elektromos-roller-02.jpg",
+   "navee-st3-elektromos-roller-03.jpg",
+   "navee-st3-elektromos-roller-04.jpg",
+   "navee-st3-elektromos-roller-05.jpg",
+   "navee-st3-elektromos-roller-06.jpg"
+  ],
+  "b2b": 211000,
+  "ar": 351900,
+  "becsult": false,
+  "tomeg": 24.8,
+  "gyerek": false
+ },
+ "st3-pro": {
+  "sku": "WHSHNAVEEST3PRO",
+  "attr": {
+   "nums": {
+    "5": "1350",
+    "6": "12.75",
+    "7": "25",
+    "8": "25",
+    "9": "120",
+    "14": "10",
+    "23": "48",
+    "28": "75"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-st3-pro-elektromos-roller-01.jpg",
+   "navee-st3-pro-elektromos-roller-02.jpg",
+   "navee-st3-pro-elektromos-roller-03.jpg"
+  ],
+  "b2b": 220000,
+  "ar": 366900,
+  "becsult": false,
+  "tomeg": 25.3,
+  "gyerek": false
+ },
+ "st5-max": {
+  "sku": "WHSHNAVEEST5MAX",
+  "attr": {
+   "nums": {
+    "5": "1650",
+    "7": "25",
+    "8": "25",
+    "9": "150",
+    "14": "10",
+    "23": "46",
+    "28": "90"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-st5-max-elektromos-roller-01.jpg",
+   "navee-st5-max-elektromos-roller-02.jpg",
+   "navee-st5-max-elektromos-roller-03.jpg",
+   "navee-st5-max-elektromos-roller-04.jpg",
+   "navee-st5-max-elektromos-roller-05.jpg"
+  ],
+  "b2b": 303000,
+  "ar": 466900,
+  "becsult": false,
+  "tomeg": 25.4,
+  "gyerek": false
+ },
+ "st5-pro": {
+  "sku": "WHSHNAVEEST5PRO",
+  "attr": {
+   "nums": {
+    "5": "1350",
+    "7": "25",
+    "8": "25",
+    "9": "150",
+    "14": "10",
+    "23": "46",
+    "28": "75"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     3
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-st5-pro-elektromos-roller-01.jpg",
+   "navee-st5-pro-elektromos-roller-02.jpg",
+   "navee-st5-pro-elektromos-roller-03.jpg",
+   "navee-st5-pro-elektromos-roller-04.jpg",
+   "navee-st5-pro-elektromos-roller-05.jpg"
+  ],
+  "b2b": 285000,
+  "ar": 438900,
+  "becsult": false,
+  "tomeg": 24.8,
+  "gyerek": false
+ },
+ "v50i-pro": {
+  "sku": "WHSHNAVEEV50IPRO",
+  "attr": {
+   "nums": {
+    "5": "350",
+    "6": "10.2",
+    "7": "25",
+    "8": "18",
+    "9": "120",
+    "14": "10",
+    "23": "36",
+    "28": "50"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-v50i-pro-elektromos-roller-01.jpg",
+   "navee-v50i-pro-elektromos-roller-02.jpg",
+   "navee-v50i-pro-elektromos-roller-03.jpg",
+   "navee-v50i-pro-elektromos-roller-04.jpg",
+   "navee-v50i-pro-elektromos-roller-05.jpg",
+   "navee-v50i-pro-elektromos-roller-06.jpg"
+  ],
+  "b2b": 130000,
+  "ar": 216900,
+  "becsult": true,
+  "tomeg": 18.3,
+  "gyerek": false
+ },
+ "xt5-pro": {
+  "sku": "WHSHNAVEEXT5PRO",
+  "attr": {
+   "nums": {
+    "5": "2200",
+    "7": "25",
+    "8": "35",
+    "9": "150",
+    "14": "12",
+    "23": "46",
+    "28": "75"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     4
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-xt5-pro-elektromos-roller-01.jpg",
+   "navee-xt5-pro-elektromos-roller-02.jpg",
+   "navee-xt5-pro-elektromos-roller-03.jpg",
+   "navee-xt5-pro-elektromos-roller-04.jpg"
+  ],
+  "b2b": 350000,
+  "ar": 538900,
+  "becsult": false,
+  "tomeg": 34.8,
+  "gyerek": false
+ },
+ "xt5-ultra": {
+  "sku": "WHSHNAVEEXT5ULTRA",
+  "attr": {
+   "nums": {
+    "5": "4400",
+    "7": "25",
+    "8": "39",
+    "9": "150",
+    "14": "12",
+    "23": "46",
+    "28": "90"
+   },
+   "lists": [
+    [
+     11,
+     4
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     25,
+     4
+    ],
+    [
+     2,
+     8
+    ]
+   ]
+  },
+  "kepek": [
+   "navee-xt5-ultra-elektromos-roller-01.jpg",
+   "navee-xt5-ultra-elektromos-roller-02.jpg"
+  ],
+  "b2b": 526000,
+  "ar": 809900,
+  "becsult": false,
+  "tomeg": 38.6,
+  "gyerek": false
+ }
+}
