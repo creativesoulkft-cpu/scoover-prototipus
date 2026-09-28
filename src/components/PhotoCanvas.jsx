@@ -4,7 +4,8 @@
  * Rétegek (alulról felfelé):
  *   1. a termékfotó változatlanul;
  *   2. a fóliázható felületek maszkjai (a fotón körberajzolt SVG path-ok),
- *      a közös mintával kitöltve – ugyanaz a userSpaceOnUse-elv, mint a vázlaton;
+ *      a darab RÉTEGÉNEK mintájával kitöltve (src/design/layers.js) – ugyanaz a
+ *      userSpaceOnUse-elv, mint a vázlaton: egy rétegen belül folytonos;
  *   3. "árnyalás": a fotó szürkeárnyalatos, gammával kiemelt másolata a maszkokra
  *      vágva, overlay/soft-light keveréssel → a fény-árnyék, csillanás, domborulat
  *      átüt a mintán, így az "rásimul" a felületre;
@@ -19,13 +20,13 @@ import LabelLayer from './LabelLayer.jsx';
 import { assetUrl } from '../utils/assets.js';
 
 const SIZE_CLASSES = ['large', 'medium', 'small'];
+const isTiled = (pattern) => pattern?.type === 'image-tile' || pattern?.type === 'tile';
 
 export default function PhotoCanvas({
   view,               // model.photoView: { image, viewBox, pieces[], shading }
   modelName,
-  pattern,
-  transform,
-  patternScale,
+  layers,
+  layerOfPiece,
   sizeAwareTiling = true,
   showCutLines = false,
   disabledPieces,
@@ -34,24 +35,20 @@ export default function PhotoCanvas({
   onTogglePiece,
   labels = [],
   onLabelDrag,
+  targetPieceIds = null,
+  gesture = null,
 }) {
   const uid = useId();
   const { width, height } = view.viewBox;
   const image = assetUrl(view.image);
   const shading = { blend: 'overlay', gamma: 0.55, opacity: 0.95, saturate: 0, ...(view.shading ?? {}) };
 
-  const tiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
-  const classes = tiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
-  const sizeOf = (piece) => (classes.includes(piece.size) ? piece.size : 'large');
-
-  // Darabok egyedi ferdítéssel külön def-et kapnak; a többi méretosztályonként közöset.
-  const defIdFor = (piece) =>
-    piece.patternTransform ? `fill${uid}-${piece.id}` : `fill${uid}-${sizeOf(piece)}`;
-  const withTransform = (piece) => ({
-    ...transform,
-    // a darab saját ferdítése a felhasználói transzformáció ELÉ kerül
-    pre: piece.patternTransform,
-  });
+  const layerIndex = Object.fromEntries(layers.map((l, i) => [l.key, i]));
+  const sizeOf = (layer, piece) =>
+    (isTiled(layer.pattern) && sizeAwareTiling && SIZE_CLASSES.includes(piece.size) ? piece.size : 'large');
+  // Darabok egyedi ferdítéssel külön def-et kapnak; a többi rétegenként + méretosztályonként közöset.
+  const defIdFor = (layer, piece) =>
+    (piece.patternTransform ? `fill${uid}-${layerIndex[layer.key]}-${piece.id}` : `fill${uid}-${layerIndex[layer.key]}-${sizeOf(layer, piece)}`);
 
   const activePieces = view.pieces.filter((p) => !disabledPieces?.has(p.id));
   const clipId = `clip${uid}`;
@@ -59,23 +56,31 @@ export default function PhotoCanvas({
 
   return (
     <svg
-      className="scooter-canvas photo"
+      className={`scooter-canvas photo${gesture?.active ? ' gesturing' : ''}`}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={`${modelName} fotó`}
       onMouseLeave={() => onHover?.(null)}
+      style={gesture ? { touchAction: 'none' } : undefined}
+      {...(gesture?.handlers ?? {})}
     >
       <defs>
-        {classes.map((size) => (
-          <PatternDefs key={size} pattern={pattern} defId={`fill${uid}-${size}`}
-            transform={transform} viewBox={view.viewBox}
-            scale={sizeAwareTiling ? (patternScale?.[size] ?? 1) : 1} />
-        ))}
-        {view.pieces.filter((p) => p.patternTransform).map((piece) => (
-          <PatternDefs key={piece.id} pattern={pattern} defId={defIdFor(piece)}
-            transform={withTransform(piece)} viewBox={view.viewBox}
-            scale={sizeAwareTiling ? (patternScale?.[sizeOf(piece)] ?? 1) : 1} />
-        ))}
+        {layers.map((layer, li) => {
+          const classes = isTiled(layer.pattern) && sizeAwareTiling ? SIZE_CLASSES : ['large'];
+          const skewed = view.pieces.filter((p) => p.patternTransform && layerOfPiece[p.id] === layer.key);
+          return [
+            ...classes.map((size) => (
+              <PatternDefs key={`${layer.key}-${size}`} pattern={layer.pattern} defId={`fill${uid}-${li}-${size}`}
+                transform={layer.transform} viewBox={view.viewBox}
+                scale={sizeAwareTiling ? (layer.patternScale?.[size] ?? 1) : 1} />
+            )),
+            ...skewed.map((piece) => (
+              <PatternDefs key={`${layer.key}-${piece.id}`} pattern={layer.pattern} defId={`fill${uid}-${li}-${piece.id}`}
+                transform={{ ...layer.transform, pre: piece.patternTransform }} viewBox={view.viewBox}
+                scale={sizeAwareTiling ? (layer.patternScale?.[sizeOf(layer, piece)] ?? 1) : 1} />
+            )),
+          ];
+        })}
         {/* az összes aktív darab uniója – erre vágjuk az árnyalás-réteget */}
         <clipPath id={clipId}>
           {activePieces.map((p) => <path key={p.id} d={p.d} fillRule="evenodd" />)}
@@ -97,10 +102,13 @@ export default function PhotoCanvas({
 
       {/* 2. minta a maszkokban */}
       <g className="pieces">
-        {activePieces.map((piece) => (
-          <path key={piece.id} d={piece.d} fill={fillFor(pattern, defIdFor(piece))}
-            fillRule="evenodd" stroke="none" />
-        ))}
+        {activePieces.map((piece) => {
+          const layer = layers[layerIndex[layerOfPiece[piece.id]] ?? 0];
+          return layer ? (
+            <path key={piece.id} d={piece.d} fill={fillFor(layer.pattern, defIdFor(layer, piece))}
+              fillRule="evenodd" stroke="none" />
+          ) : null;
+        })}
       </g>
 
       {/* 3. árnyalás a fotóból */}
@@ -116,11 +124,15 @@ export default function PhotoCanvas({
         {view.pieces.map((piece) => {
           const disabled = disabledPieces?.has(piece.id);
           const hovered = hoveredId === piece.id;
+          const targeted = targetPieceIds?.has(piece.id);
           return (
             <path key={piece.id} d={piece.d} fillRule="evenodd"
+              data-piece={piece.id}
               fill="transparent"
-              stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
-              strokeWidth={hovered ? 2.5 : 1} vectorEffect="non-scaling-stroke"
+              stroke={hovered ? '#ffffff' : targeted ? '#19e6c1' : showCutLines ? 'rgba(255,255,255,0.5)' : 'none'}
+              strokeWidth={hovered ? 2.5 : targeted ? 2 : 1}
+              strokeDasharray={targeted && !hovered ? '6 4' : undefined}
+              vectorEffect="non-scaling-stroke"
               style={{ cursor: 'pointer' }}
               onMouseEnter={() => onHover?.(piece.id)}
               onClick={() => onTogglePiece?.(piece.id)}>

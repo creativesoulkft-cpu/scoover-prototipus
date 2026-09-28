@@ -129,6 +129,18 @@ export function hasPrice(modelId) {
   return Object.prototype.hasOwnProperty.call(MODEL_PRICES, modelId);
 }
 
+/** A szintek "erősorrendje" – kevert (zónánként eltérő szintű) tervnél a szett ára a legmagasabb szint szerint számít. */
+const TIER_RANK = { solid: 0, print: 1, custom: 2 };
+
+/**
+ * Több szint közül a legmagasabb (design-keverésnél: ha egy zóna EGYEDI, az
+ * egész rendelés EGYEDI-ként kezelendő – kézi jóváhagyás, szett-ár szerint).
+ * @param {string[]} tiers
+ */
+export function highestTier(tiers) {
+  return tiers.reduce((best, t) => ((TIER_RANK[t] ?? -1) > (TIER_RANK[best] ?? -1) ? t : best), tiers[0] ?? 'solid');
+}
+
 /** Egy zóna ára egy adott modell/szint kombinációra – a kanonikus arányból levezetve. */
 export function getZonePrice(model, tier, zoneId) {
   const canonical = ZONE_PRICES_HUF[zoneId];
@@ -143,10 +155,13 @@ export function getZonePrice(model, tier, zoneId) {
  * @param {string} tier
  * @param {string[]} [zoneIds] alapból az összes zóna
  */
-export function getZonePrices(model, tier, zoneIds = ZONE_IDS) {
+export function getZonePrices(model, tier, zoneIds = ZONE_IDS, zoneTiers = null) {
   return ZONES
     .filter((z) => zoneIds.includes(z.id))
-    .map((z) => ({ id: z.id, name: z.name, price: getZonePrice(model, tier, z.id) }));
+    .map((z) => {
+      const zt = zoneTiers?.[z.id] ?? tier;
+      return { id: z.id, name: z.name, tier: zt, price: getZonePrice(model, zt, z.id) };
+    });
 }
 
 /**
@@ -160,8 +175,8 @@ export function getZonePrices(model, tier, zoneIds = ZONE_IDS) {
  * @param {string} tier
  * @param {string[]} [availableZoneIds] a modellen ténylegesen létező zónák
  */
-export function getKitInfo(model, tier, availableZoneIds = ZONE_IDS) {
-  const zones = getZonePrices(model, tier, availableZoneIds);
+export function getKitInfo(model, tier, availableZoneIds = ZONE_IDS, zoneTiers = null) {
+  const zones = getZonePrices(model, tier, availableZoneIds, zoneTiers);
   const listSum = zones.reduce((s, z) => s + (z.price ?? 0), 0);
   const kitPrice = MODEL_PRICES[model]?.[tier] ?? null;
   return {
@@ -229,6 +244,22 @@ function validatePriceInputs(config) {
     const unknown = zoneIds.filter((id) => !ZONE_IDS.includes(id));
     if (unknown.length) errors.push(`Ismeretlen zóna: ${unknown.join(', ')}.`);
   }
+  // zónánként eltérő szint (design-keverés): minden érték létező szint, a
+  // modellnek van rá ára, és egyik sem magasabb a rendelés szintjénél
+  if (config.zoneTiers !== undefined && config.zoneTiers !== null) {
+    if (typeof config.zoneTiers !== 'object' || Array.isArray(config.zoneTiers)) {
+      errors.push('zoneTiers: zóna → szint objektum kell.');
+    } else {
+      for (const [z, t] of Object.entries(config.zoneTiers)) {
+        if (!ZONE_IDS.includes(z)) errors.push(`zoneTiers: ismeretlen zóna "${z}".`);
+        if (!TIER_IDS.includes(t)) errors.push(`zoneTiers.${z}: ismeretlen szint "${t}".`);
+        else if (model && typeof model[t] !== 'number') errors.push(`zoneTiers.${z}: ehhez a modellhez nincs ${t.toUpperCase()} ár.`);
+        else if (TIER_IDS.includes(config.tier) && (TIER_RANK[t] ?? 0) > (TIER_RANK[config.tier] ?? 0)) {
+          errors.push(`zoneTiers.${z}: a zóna szintje (${t}) magasabb a rendelés szintjénél (${config.tier}).`);
+        }
+      }
+    }
+  }
   return errors;
 }
 
@@ -243,16 +274,28 @@ export function validateConfigShape(config) {
   const errors = validatePriceInputs(config);
   if (!config || typeof config !== 'object') return errors;
 
-  if (config.tier === 'print') {
-    if (!config.category) errors.push('PRINT szinthez kötelező a minta-kategória.');
-    if (!config.colorway) errors.push('PRINT szinthez kötelező a színvariáns.');
-    if (!config.density) errors.push('PRINT szinthez kötelező a sűrűség (ritka | sűrű).');
-  }
-  if (config.tier === 'solid' && !config.colorway) {
-    errors.push('SOLID szinthez kötelező a szín.');
-  }
-  if (config.tier === 'custom' && !config.uploadedImageUrl) {
-    errors.push('FULL CUSTOM szinthez kötelező a feltöltött kép URL-je (uploadedImageUrl).');
+  const checkTierFields = (tier, src, path) => {
+    if (tier === 'print') {
+      if (!src.category) errors.push(`${path}PRINT szinthez kötelező a minta-kategória.`);
+      if (!src.colorway) errors.push(`${path}PRINT szinthez kötelező a színvariáns.`);
+      if (!src.density) errors.push(`${path}PRINT szinthez kötelező a sűrűség (ritka | sűrű).`);
+    }
+    if (tier === 'solid' && !src.colorway) errors.push(`${path}SOLID szinthez kötelező a szín.`);
+    if (tier === 'custom' && !src.uploadedImageUrl) {
+      errors.push(`${path}FULL CUSTOM szinthez kötelező a feltöltött kép URL-je (uploadedImageUrl).`);
+    }
+  };
+
+  if (Array.isArray(config.zones) && config.zones.length) {
+    // design-keverés: zónánként saját minta és szint – mindegyiket a saját szintje szerint ellenőrizzük
+    for (const z of config.zones) {
+      if (!z || !ZONE_IDS.includes(z.id)) { errors.push(`zones: ismeretlen zóna "${z?.id ?? ''}".`); continue; }
+      const t = z.tier ?? config.tier;
+      if (!TIER_IDS.includes(t)) { errors.push(`zones.${z.id}: ismeretlen szint.`); continue; }
+      checkTierFields(t, z, `zones.${z.id}: `);
+    }
+  } else {
+    checkTierFields(config.tier, config, '');
   }
   return errors;
 }
@@ -274,8 +317,12 @@ export function meetsMinResolution(width, height, min = MIN_CUSTOM_IMAGE_PX) {
  *
  * A taposófelület a szettnek SEM része: mindig külön tétel.
  *
+ * Design-keverés (zónánként eltérő minta/szint): `zoneTiers` = { zónaId → szint }.
+ * A zónák külön-külön ára a saját szintjük szerint számít; a teljes szett ára
+ * a rendelés (legmagasabb) szintje szerint – `tier` mindig a legmagasabb.
+ *
  * @param {{model:string, tier:string, includeFootboard?:boolean, installation?:string,
- *          selectedZoneIds?:string[], availableZoneIds?:string[]}} config
+ *          selectedZoneIds?:string[], availableZoneIds?:string[], zoneTiers?:Record<string,string>|null}} config
  * @returns {{currency:string, base:number, zones:Array<{id:string,name:string,price:number}>,
  *            footboard:number, installation:number, installationId:string, shipping:number, total:number,
  *            isFullKit:boolean, kit:{listSum:number, kitPrice:number|null, savings:number},
@@ -289,8 +336,9 @@ export function calculatePrice(config) {
   const requested = resolveZoneIds(config);
   const selected = requested === undefined ? available : requested.filter((id) => available.includes(id));
   const isFullKit = available.every((id) => selected.includes(id));
-  const kit = getKitInfo(config.model, config.tier, available);
-  const zones = getZonePrices(config.model, config.tier, selected);
+  const zoneTiers = config.zoneTiers ?? null;
+  const kit = getKitInfo(config.model, config.tier, available, zoneTiers);
+  const zones = getZonePrices(config.model, config.tier, selected, zoneTiers);
 
   const base = isFullKit
     ? MODEL_PRICES[config.model][config.tier]

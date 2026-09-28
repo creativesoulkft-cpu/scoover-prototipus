@@ -1,15 +1,22 @@
 /**
  * Roller-vázlat megjelenítő.
  *
- * Kap egy modellt (darabok SVG path-jai) és egy mintát, és minden darabot a
- * közös mintával tölt ki. A darabok külön <g> elemben ülnek, így "szétnyitott"
- * nézetben egyenként eltolhatók – és mivel a minta userSpaceOnUse, a kivágott
- * mintarészlet a darabbal együtt mozog, pont úgy, ahogy a valódi fólia.
+ * Kap egy modellt (darabok SVG path-jai) és RÉTEGEKET (src/design/layers.js):
+ * minden réteg egy minta + transzformáció, és a `layerOfPiece` mondja meg,
+ * melyik darab melyik réteget viseli. Egy réteg darabjai ugyanabból a
+ * userSpaceOnUse mintából kapják a kitöltést, ezért a minta a darabhatárokon
+ * folytonos – mintha egy nagy fóliaívből vágták volna ki. Két különböző réteg
+ * (design-keverés: zónánként más minta) között a folytonosság szándékosan
+ * megszakad, hiszen fizikailag is külön fóliadarabok.
  *
  * Csempézett mintáknál a darab méretosztálya (large/medium/small) szerint
  * három léptékű def készül (patternScale), hogy a mintázat a kis darabokon
- * (villaborítás) se tűnjön aránytalanul nagynak. Az azonos osztályú darabok
- * között a folytonosság megmarad.
+ * (villaborítás) se tűnjön aránytalanul nagynak.
+ *
+ * `targetPieceIds`: a Stílus kártyán épp szerkesztett zóna darabjai – ezeket
+ * finoman kiemeljük, hogy a vevő lássa, hova megy a választása.
+ * `gesture`: a képen való közvetlen mozgatás (húzás/csippentés/forgatás)
+ * eseménykezelői és állapota – src/hooks/usePatternGesture.js.
  */
 import { useId } from 'react';
 import PatternDefs, { fillFor } from './PatternDefs.jsx';
@@ -54,11 +61,12 @@ function Decor({ items }) {
   });
 }
 
+const isTiled = (pattern) => pattern?.type === 'image-tile' || pattern?.type === 'tile';
+
 export default function ScooterCanvas({
   model,
-  pattern,
-  transform,
-  patternScale,        // { large, medium, small } – kategória/minta szerinti csempe-lépték
+  layers,              // [{ key, pattern, transform, patternScale }]
+  layerOfPiece,        // { [pieceId]: layerKey }
   sizeAwareTiling = true,
   exploded = false,
   showCutLines = true,
@@ -68,36 +76,42 @@ export default function ScooterCanvas({
   onTogglePiece,
   labels = [],         // [{ id, enabled, text, pieceId, scale, dx, dy, rotate, font, color }]
   onLabelDrag,         // (id, { dx, dy }) => void
+  targetPieceIds = null, // Set<pieceId> | null – a szerkesztett zóna kiemelése
+  gesture = null,      // { handlers, active } – közvetlen mozgatás a képen
 }) {
   const uid = useId();
   const { width, height } = model.viewBox;
 
-  // Csak akkor kell méretosztályonként külön def, ha a minta csempézett és a
-  // kapcsoló be van kapcsolva; egyébként egyetlen közös def (teljes folytonosság).
-  const tiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
-  const classes = tiled && sizeAwareTiling ? SIZE_CLASSES : ['large'];
-  const defIdFor = (size) => `fill${uid}-${classes.includes(size) ? size : 'large'}`;
-
+  const defIdFor = (layerIdx, size, layer) => {
+    const s = isTiled(layer?.pattern) && sizeAwareTiling && SIZE_CLASSES.includes(size) ? size : 'large';
+    return `fill${uid}-${layerIdx}-${s}`;
+  };
+  const layerIndex = Object.fromEntries(layers.map((l, i) => [l.key, i]));
 
   return (
     <svg
-      className="scooter-canvas"
+      className={`scooter-canvas${gesture?.active ? ' gesturing' : ''}`}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={`${model.name} vázlat`}
       onMouseLeave={() => onHover?.(null)}
+      style={gesture ? { touchAction: 'none' } : undefined}
+      {...(gesture?.handlers ?? {})}
     >
       <defs>
-        {classes.map((size) => (
-          <PatternDefs
-            key={size}
-            pattern={pattern}
-            defId={defIdFor(size)}
-            transform={transform}
-            viewBox={model.viewBox}
-            scale={sizeAwareTiling ? (patternScale?.[size] ?? 1) : 1}
-          />
-        ))}
+        {layers.map((layer, li) => {
+          const classes = isTiled(layer.pattern) && sizeAwareTiling ? SIZE_CLASSES : ['large'];
+          return classes.map((size) => (
+            <PatternDefs
+              key={`${layer.key}-${size}`}
+              pattern={layer.pattern}
+              defId={`fill${uid}-${li}-${size}`}
+              transform={layer.transform}
+              viewBox={model.viewBox}
+              scale={sizeAwareTiling ? (layer.patternScale?.[size] ?? 1) : 1}
+            />
+          ));
+        })}
       </defs>
 
       <g className="decor"><Decor items={model.decor.filter((d) => !d.over)} /></g>
@@ -106,6 +120,8 @@ export default function ScooterCanvas({
         {model.pieces.map((piece) => {
           const disabled = disabledPieces?.has(piece.id);
           const hovered = hoveredId === piece.id;
+          const targeted = targetPieceIds?.has(piece.id);
+          const layer = layers[layerIndex[layerOfPiece[piece.id]] ?? 0];
           const [ex, ey] = piece.explode ?? [0, 0];
           return (
             <g
@@ -118,9 +134,11 @@ export default function ScooterCanvas({
             >
               <path
                 d={piece.d}
-                fill={disabled ? BARE_FILL : fillFor(pattern, defIdFor(piece.size))}
-                stroke={hovered ? '#ffffff' : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
-                strokeWidth={hovered ? 2.5 : 1}
+                data-piece={piece.id}
+                fill={disabled || !layer ? BARE_FILL : fillFor(layer.pattern, defIdFor(layerIndex[layer.key], piece.size, layer))}
+                stroke={hovered ? '#ffffff' : targeted ? '#19e6c1' : showCutLines ? 'rgba(255,255,255,0.35)' : 'none'}
+                strokeWidth={hovered ? 2.5 : targeted ? 2 : 1}
+                strokeDasharray={targeted && !hovered ? '6 4' : undefined}
                 strokeLinejoin="round"
                 vectorEffect="non-scaling-stroke"
                 style={{ cursor: 'pointer' }}

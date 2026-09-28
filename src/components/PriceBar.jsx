@@ -16,8 +16,8 @@
  * felrakás/postázás, végösszeg. Asztalin a konfigurátor-oszlop tetejére tapad,
  * mobilon a képernyő aljára rögzül (a bontás felfelé nyílik – styles.css).
  * A saját magasságát `--price-bar-h`-ba írja, hogy semmi ne csússzon alá, és
- * kinyitáskor annyival görgeti az oldalt, amennyivel nőtt – így a bontás
- * TOLJA a szekciókat, nem fedi őket.
+ * ha a magassága változik, annyival görgeti az oldalt, amennyivel nőtt – így
+ * a bontás TOLJA a szekciókat, nem fedi őket.
  *
  * Minden összeg a központi src/pricing.js-ből; itt nincs árazási logika.
  */
@@ -36,7 +36,8 @@ function Row({ label, amount, muted }) {
 }
 
 export default function PriceBar({
-  modelId, modelName, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds,
+  modelId, modelName, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds, zoneTiers,
+  onGoToCart,
 }) {
   const [open, setOpen] = useState(false);
   const barRef = useRef(null);
@@ -47,7 +48,6 @@ export default function PriceBar({
   // "Egyben" sor vagy magyarázat megjelenése), a különbséggel görgetjük az
   // oldalt, hogy a sáv alatt/fölött lévő tartalom ugyanott maradjon a
   // képernyőn. Felül tapadó sáv: felfelé; alul rögzített (mobil): lefelé.
-  // Az oldal tetején (scrollY = 0) a felső sáv egyszerűen a folyásban tol.
   useLayoutEffect(() => {
     const el = barRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return undefined;
@@ -57,8 +57,6 @@ export default function PriceBar({
       prev = el.offsetHeight;
       if (!delta) return;
       const bottomFixed = getComputedStyle(el).position === 'fixed';
-      // a --price-bar-h-t egy másik figyelő írja – a lap alsó paddingja addig
-      // nem nő, ezért egy képkockával később görgetünk
       requestAnimationFrame(() => window.scrollBy({ top: bottomFixed ? delta : -delta, behavior: 'instant' }));
     });
     ro.observe(el);
@@ -66,13 +64,10 @@ export default function PriceBar({
   }, [priced]);
   const toggleOpen = () => setOpen((o) => !o);
 
-  const price = priced
-    ? calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds })
-    : null;
+  const common = { model: modelId, tier, includeFootboard, installation, availableZoneIds, zoneTiers };
+  const price = priced ? calculatePrice({ ...common, selectedZoneIds }) : null;
   // Ugyanez a választás, de a teljes szettel – az "Egyben" számhoz.
-  const kitPrice = priced
-    ? calculatePrice({ model: modelId, tier, includeFootboard, installation, availableZoneIds })
-    : null;
+  const kitPrice = priced ? calculatePrice(common) : null;
 
   if (!priced) {
     return (
@@ -90,48 +85,56 @@ export default function PriceBar({
   // összehasonlítás csak akkor, ha van mivel: legalább egy, de nem minden zóna
   const showCompare = !price.isFullKit && hasZones;
   const diff = price.total - kitPrice.total;
+  const mixed = new Set(price.zones.map((z) => z.tier)).size > 1;
 
   return (
     <div className="price-bar" ref={barRef}>
       <div className="pb-summary">
-      <div className="pb-main">
-        <button type="button" className="pb-numbers" aria-expanded={open} onClick={toggleOpen}
-          title={open ? 'Bontás elrejtése' : 'Tételes bontás'}>
-          <span className="pb-num">
-            <span className="pb-label">Kiválasztva:</span>
-            <strong className="pb-amount">{formatHuf(price.total)}</strong>
-          </span>
-          {showCompare && (
-            <span className="pb-num pb-kit">
-              <span className="pb-sep" aria-hidden="true">·</span>
-              <span className="pb-label">Egyben:</span>
-              <strong>{formatHuf(kitPrice.total)}</strong>
-              <span className="pb-savings-tag" title="A szett kedvezménye a zónák külön-árához képest">(−{formatHuf(price.kit.savings)})</span>
+        <div className="pb-main">
+          <button type="button" className="pb-numbers" aria-expanded={open} onClick={toggleOpen}
+            title={open ? 'Bontás elrejtése' : 'Tételes bontás'}>
+            <span className="pb-num">
+              <span className="pb-label">Kiválasztva:</span>
+              <strong className="pb-amount">{formatHuf(price.total)}</strong>
             </span>
+            {showCompare && (
+              <span className="pb-num pb-kit">
+                <span className="pb-sep" aria-hidden="true">·</span>
+                <span className="pb-label">Egyben:</span>
+                <strong>{formatHuf(kitPrice.total)}</strong>
+                <span className="pb-savings-tag" title="A szett kedvezménye a zónák külön-árához képest">(−{formatHuf(price.kit.savings)})</span>
+              </span>
+            )}
+            <span className="pb-chevron" aria-hidden="true">{open ? '▾' : '▴'}</span>
+          </button>
+          {onGoToCart && (
+            <button type="button" className="btn btn-primary pb-cart-btn" onClick={onGoToCart}>
+              Tovább a kosárhoz
+            </button>
           )}
-          <span className="pb-chevron" aria-hidden="true">{open ? '▾' : '▴'}</span>
-        </button>
-      </div>
+        </div>
 
-      {showCompare && diff !== 0 && (
-        <p className={`pb-compare small${diff > 0 ? ' more' : ' less'}`}>
-          {formatHuf(Math.abs(diff))}-tal {diff > 0 ? 'több' : 'kevesebb'}, mint egyben
-        </p>
-      )}
+        {showCompare && diff !== 0 && (
+          <p className={`pb-compare small${diff > 0 ? ' more' : ' less'}`}>
+            {formatHuf(Math.abs(diff))}-tal {diff > 0 ? 'több' : 'kevesebb'}, mint egyben
+          </p>
+        )}
 
-      {!price.minimumOrder.ok && (
-        <p className="error small pb-min-warning">{price.minimumOrder.message}</p>
-      )}
+        {!price.minimumOrder.ok && (
+          <p className="error small pb-min-warning">{price.minimumOrder.message}</p>
+        )}
       </div>
 
       {open && (
         <div className="pb-details">
-          <p className="muted small pb-context">{modelName} · {tierName}</p>
+          <p className="muted small pb-context">{modelName} · {mixed ? 'kevert szintek' : tierName}</p>
           {price.isFullKit ? (
-            <Row label="Teljes fólia szett (minden zóna)" amount={formatHuf(price.base)} />
+            <Row label={`Teljes fólia szett (minden zóna${mixed ? ', kevert design' : ''})`} amount={formatHuf(price.base)} />
           ) : (
             hasZones
-              ? price.zones.map((z) => <Row key={z.id} label={z.name} amount={formatHuf(z.price)} />)
+              ? price.zones.map((z) => (
+                <Row key={z.id} label={mixed ? `${z.name} · ${getTier(z.tier)?.name ?? z.tier}` : z.name} amount={formatHuf(z.price)} />
+              ))
               : <Row label="Nincs kiválasztott zóna" amount="–" muted />
           )}
           <Row label="Taposófelület (csúszásgátló)" amount={includeFootboard ? `+${formatHuf(price.footboard)}` : '–'} muted={!includeFootboard} />
@@ -147,6 +150,7 @@ export default function PriceBar({
           {showCompare && price.kit.savings > 0 && (
             <p className="muted small">Egyben (teljes szett + ugyanezek az extrák): {formatHuf(kitPrice.total)} – a szett {formatHuf(price.kit.savings)}-tal olcsóbb, mint a zónák külön-külön.</p>
           )}
+          {mixed && <p className="muted small">Kevert designnál a teljes szett ára a legmagasabb szint ({tierName}) szerint számít.</p>}
           <p className="muted small">Az árak bruttó, forintos árak.</p>
         </div>
       )}

@@ -65,6 +65,7 @@ export default function LabelLayer({ piece, label, font, color, exploded, onDrag
   const onPointerDown = (e) => {
     if (!onDrag) return;
     e.preventDefault();
+    e.stopPropagation(); // a felirat húzása nem a minta mozgatása (usePatternGesture)
     e.currentTarget.setPointerCapture(e.pointerId);
     const [x, y] = toSvg(e.currentTarget, e.clientX, e.clientY);
     drag.current = { x, y, dx: label.dx ?? 0, dy: label.dy ?? 0 };

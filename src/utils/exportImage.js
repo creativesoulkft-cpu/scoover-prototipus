@@ -237,6 +237,37 @@ export async function renderConfigToPng(svgEl, info) {
   if (typeof document.fonts?.ready?.then === 'function') {
     await document.fonts.ready;
   }
+  return renderWatermarkedPng(svgEl, info);
+}
+
+/**
+ * Vízjel és lábléc NÉLKÜLI, kisebb előnézet – a mentett terv bélyegképe a
+ * fiókban ("Terveim") és a nyomdai munkalapon. Nem kerül a vevőhöz
+ * letöltésként, ezért itt nem kell a védelem.
+ * @param {SVGSVGElement} svgEl
+ * @param {number} [maxWidth]
+ * @returns {Promise<Blob>}
+ */
+export async function renderPreviewPng(svgEl, maxWidth = 900) {
+  if (typeof document.fonts?.ready?.then === 'function') await document.fonts.ready;
+  const sceneImg = await serializeSvgToImage(svgEl);
+  const vb = svgEl.viewBox.baseVal;
+  const w0 = vb?.width || sceneImg.naturalWidth;
+  const h0 = vb?.height || sceneImg.naturalHeight;
+  const k = Math.min(1, maxWidth / w0);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(w0 * k);
+  canvas.height = Math.round(h0 * k);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0f1114';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(sceneImg, 0, 0, canvas.width, canvas.height);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Az előnézet nem készült el.'))), 'image/png');
+  });
+}
+
+async function renderWatermarkedPng(svgEl, info) {
   const [sceneImg, logoImg] = await Promise.all([
     serializeSvgToImage(svgEl),
     loadLogoImage().catch((e) => { console.error(e); return null; }), // eslint-disable-line no-console

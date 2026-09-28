@@ -2,10 +2,11 @@
  * "Kosárba teszem" panel: a köztes híd szerveren (server/) keresztül valódi
  * WooCommerce kosártételt hoz létre, és megjeleníti a hiba-/sikervisszajelzést.
  *
- * Az árbontás nem itt, hanem az állandóan látható ársávban (PriceBar) van –
- * itt csak a fizetendő végösszeg ismétlődik meg a gomb mellett. Az összeg
- * ugyanabból a központi modulból jön (src/pricing.js), amit a szerver is
- * használ az ár hitelesítéséhez.
+ * A kosár-csomag a TERV-DOKUMENTUMBÓL épül (src/utils/cartConfig.js) – a
+ * rendelés így a teljes receptet hordozza, amiből a nyomdai fájl szerver
+ * oldalon újragyártható. Az árbontás az állandóan látható ársávban (PriceBar)
+ * van, itt csak a fizetendő végösszeg ismétlődik a gomb mellett; az összeg
+ * ugyanabból a központi modulból jön (src/pricing.js), amit a szerver is használ.
  */
 import { useState } from 'react';
 import { calculatePrice, requiresManualApproval } from '../pricing.js';
@@ -13,45 +14,45 @@ import { formatHuf } from '../utils/format.js';
 import { buildCartConfig } from '../utils/cartConfig.js';
 import { addToCart } from '../api/cartBridge.js';
 import { trackAddToCart } from '../utils/analytics.js';
+import { hasUnuploadedImage } from '../design/schema.js';
+import { UPLOAD_PATTERN_ID } from '../data/patterns/index.js';
 
 export default function CartPanel({
-  modelId, modelName, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
-  selectedZoneIds, availableZoneIds, year, footboardDesign,
+  doc, modelName, tier, availableZoneIds, zoneTiers, uploadsPending, onSaved,
 }) {
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState([]);
   const [result, setResult] = useState(null);
 
+  const selectedZoneIds = doc.selection.zones ?? availableZoneIds;
   let price = null;
   let priceError = null;
   try {
-    price = calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds });
+    price = calculatePrice({
+      model: doc.model, tier, includeFootboard: doc.selection.footboard, installation: doc.installation,
+      selectedZoneIds, availableZoneIds, zoneTiers,
+    });
   } catch (e) {
     priceError = e.message;
   }
 
-  const customImageMissing = tier === 'custom' && !remoteImage?.url;
-  const customImageUploading = tier === 'custom' && remoteImage?.uploading;
-  const customImageError = tier === 'custom' ? remoteImage?.error : null;
-  const footboardImageUploading = includeFootboard && footboardDesign?.uploading;
+  const imageMissing = hasUnuploadedImage(doc, UPLOAD_PATTERN_ID) && !uploadsPending;
   const belowMinimum = price ? !price.minimumOrder.ok : false;
-  const canSubmit = status !== 'submitting' && !customImageMissing && !customImageUploading
-    && !footboardImageUploading && !priceError && !belowMinimum;
+  const nothingSelected = selectedZoneIds.length === 0 && !doc.selection.footboard;
+  const canSubmit = status !== 'submitting' && !imageMissing && !uploadsPending && !priceError && !belowMinimum && !nothingSelected;
 
   async function handleSubmit() {
     setStatus('submitting');
     setMessage(null);
     setErrors([]);
     try {
-      const config = buildCartConfig({
-        modelId, tier, pattern, transform, labels, includeFootboard, installation, remoteImage,
-        selectedZoneIds, availableZoneIds, year, footboardDesign,
-      });
+      const config = buildCartConfig({ doc, availableZoneIds });
       const res = await addToCart(config);
+      if (res.designId && res.designId !== doc.id) onSaved?.(res.designId);
       trackAddToCart({
         modelName, tier, total: price?.total,
-        isFullKit: price?.isFullKit, pieceCount: selectedZoneIds?.length,
+        isFullKit: price?.isFullKit, pieceCount: selectedZoneIds.length,
       });
       setResult(res);
       setStatus('success');
@@ -72,18 +73,13 @@ export default function CartPanel({
 
   return (
     <div className="controls cart-panel">
-      {tier === 'custom' && (
-        <p className={`muted small${customImageError ? ' error' : ''}`}>
-          {customImageUploading && 'Kép feltöltése a szerverre…'}
-          {!customImageUploading && customImageError}
-          {!customImageUploading && !customImageError && remoteImage?.url &&
-            `Kép feltöltve: ${remoteImage.width}×${remoteImage.height} px`}
-          {!customImageUploading && !customImageError && !remoteImage?.url &&
-            'Tölts fel egy képet a Minta szekció "EGYEDI" fülén a kosárba tételhez.'}
+      {uploadsPending && <p className="muted small">Kép feltöltése a szerverre…</p>}
+      {imageMissing && (
+        <p className="muted small error">
+          Egy saját képes réteg képe nincs a szerveren – töltsd fel újra a Stílus kártyán, vagy válassz beépített mintát.
         </p>
       )}
-
-      {footboardImageUploading && <p className="muted small">Taposó-kép feltöltése a szerverre…</p>}
+      {nothingSelected && <p className="muted small">Válassz legalább egy zónát vagy a taposófelületet.</p>}
 
       <div className="price-row price-total">
         <strong>Fizetendő</strong>

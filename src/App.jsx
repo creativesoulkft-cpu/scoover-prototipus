@@ -3,20 +3,21 @@
  *
  * A felület ÖT, jól elkülönülő szekcióra tagolt kártya (egyszerre egy nyitva):
  *   1. A rollered      – modell + évjárat
- *   2. Stílus          – SOLID / PRINT / saját kép, minta-illesztés, feliratok
- *   3. Mit fóliázunk   – ZÓNÁS választás (nem darabonkénti), teljes szett alapból
+ *   2. Stílus          – melyik részre? · SOLID / PRINT / saját kép · igazítás · feliratok
+ *   3. Mit fóliázunk   – ZÓNÁS választás, teljes szett alapból
  *   4. Taposófelület   – külön tétel, saját tervezőnézettel
- *   5. Felrakás vagy postázás
+ *   5. Felrakás vagy postázás + Kosárba teszem
  *
- * Állapot: kiválasztott modell/évjárat, minta (beépített vagy feltöltött),
- * minta-transzformáció, nézeti kapcsolók, kiválasztott ZÓNÁK (ebből származik,
- * mely darabok kapnak fóliát), taposó, felrakás, feliratok. Az adat (modellek,
- * minták, zónák, árak) a src/data és src/pricing.js alatt él; a komponensek
- * csak megjelenítenek.
+ * ÁLLAPOT: a teljes terv EGY dokumentumban él (src/design/schema.js), amit
+ * a useDesign reducer kezel – ebből épül a megosztható link, a szerveres
+ * mentés (SCV-… azonosító), a kosár-csomag és a nyomdai fájl. Itt csak
+ * felületi állapot van (nyitott szekció, kiemelés, igazítás mód, felosztás).
+ * Az adat (modellek, minták, zónák, árak) a src/data és src/pricing.js alatt
+ * él; a komponensek csak megjelenítenek.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_MODEL_ID, defaultYearFor } from './data/models/index.js';
-import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getPattern, getCategory } from './data/patterns/index.js';
+import { DEFAULT_PATTERN_ID, UPLOAD_PATTERN_ID, getCategory } from './data/patterns/index.js';
 import { zonesForPieces, zoneOfPiece } from './data/zones.js';
 import { useScooterModel } from './hooks/useScooterModel.js';
 import { labelColorFor } from './utils/color.js';
@@ -24,11 +25,13 @@ import { assetUrl } from './utils/assets.js';
 import ScooterCanvas from './components/ScooterCanvas.jsx';
 import PhotoCanvas from './components/PhotoCanvas.jsx';
 import PatternGallery from './components/PatternGallery.jsx';
-import PatternControls, { DEFAULT_TRANSFORM } from './components/PatternControls.jsx';
+import FineTuneBar from './components/FineTuneBar.jsx';
+import ZoneTargetChips, { TARGET_ALL } from './components/ZoneTargetChips.jsx';
 import LabelControls from './components/LabelControls.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import PriceBar from './components/PriceBar.jsx';
 import ShareExportPanel from './components/ShareExportPanel.jsx';
+import SaveSharePanel from './components/SaveSharePanel.jsx';
 import QuickNav, { SECTIONS } from './components/QuickNav.jsx';
 import Section from './components/Section.jsx';
 import ZoneSelector from './components/ZoneSelector.jsx';
@@ -39,9 +42,18 @@ import HelpLine from './components/HelpLine.jsx';
 import FootboardEditor from './components/FootboardEditor.jsx';
 import FullscreenPreview from './components/FullscreenPreview.jsx';
 import SplitHandle from './components/SplitHandle.jsx';
+import CanvasCoach, { coachSeen, markCoachSeen } from './components/CanvasCoach.jsx';
+import AccountPanel from './account/AccountPanel.jsx';
+import { useAccount } from './account/useAccount.js';
 import { useMediaQuery, NARROW_QUERY } from './hooks/useMediaQuery.js';
 import { useReportHeight } from './hooks/useReportHeight.js';
-import { piecesCenter } from './utils/pathBox.js';
+import { usePatternGesture } from './hooks/usePatternGesture.js';
+import { useDesign, LAYER_BASE, LAYER_FOOTBOARD, zoneLayerKey, readLayer } from './design/useDesign.js';
+import { renderLayers, zoneTiersOf, patternForLayer } from './design/layers.js';
+import { newLabel, emptyDesign, DEFAULT_TRANSFORM } from './design/schema.js';
+import { parseLocationHash, replaceLocationHash, hashForShare } from './design/share.js';
+import { loadDesign } from './api/designs.js';
+import { renderPreviewPng } from './utils/exportImage.js';
 import {
   trackConfiguratorOpened, trackTierSelected, trackPatternSelected,
   trackImageUploaded, trackFootboardToggled, trackZoneToggled, trackKitToggled,
@@ -52,7 +64,7 @@ import { useIsTouch } from './hooks/useIsTouch.js';
 import { uploadCustomImage } from './api/cartBridge.js';
 import { logDevPriceTable } from './utils/devPriceTable.js';
 import {
-  calculatePrice, getTier, hasPrice, getZonePrices, getKitInfo,
+  calculatePrice, getTier, hasPrice, getZonePrices, getKitInfo, highestTier,
   FOOTBOARD_EXTRA_HUF, INSTALLATION_OPTIONS,
 } from './pricing.js';
 import { formatHuf } from './utils/format.js';
@@ -60,30 +72,14 @@ import { resolveLabelFont, resolveLabelColor } from './utils/labelStyle.js';
 
 if (import.meta.env.DEV) logDevPriceTable();
 
-/** Egy felirat alapértelmezett beállításai; a pieceId modellváltáskor töltődik ki. */
-const newLabel = (text = 'SCOOVER') => ({
-  id: `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-  enabled: true, text, pieceId: null, scale: 1, dx: 0, dy: 0, rotate: 0,
-  fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
-});
-
-/**
- * Saját kép feltöltésénél a kép a roller darabjaira oszlik szét. A "fő darab"
- * az, amelyikre a kép LÉNYEGE (középpontja) essen – alapból a dekk oldala, mert
- * az a legnagyobb és a legjobban látható felület.
- */
+/** Saját kép feltöltésénél a kép LÉNYEGE (középpontja) alapból erre a darabra kerül. */
 const DEFAULT_FOCUS_PIECE_ID = 'deck-side';
-
 /** Osztott nézet: a kép magassága %-ban csúszka-húzás közben (a legnagyobb előnézet). */
 const SLIDER_PREVIEW_PCT = 70;
 /** Ennyi idő után áll vissza a felosztás, miután a felhasználó elengedte a csúszkát. */
 const SLIDER_RESTORE_MS = 1000;
-
-/** A taposófelület saját, egyetlen felirata – nincs pieceId-je, mindig a taposóra kerül. */
-const newFootboardLabel = () => ({
-  enabled: false, text: 'SCOOVER', scale: 1, dx: 0, dy: 0, rotate: 0,
-  fontId: 'auto', colorMode: 'auto', customColor: '#ff6a1a',
-});
+/** Első mintaválasztáskor a Méret csúszka is kinyílik – utána már csak a chipsor. */
+const FINETUNE_SEEN_KEY = 'scoover-finetune-seen-v1';
 
 /**
  * A szekciók fejléc-szövegei: egysoros magyarázat (mindig látszik) és a ⓘ
@@ -99,7 +95,7 @@ const SECTION_TEXT = {
   'section-style': {
     title: 'Stílus',
     blurb: 'Egyszínű, kész grafika vagy saját kép — itt dől el a fólia jellege.',
-    info: 'A SOLID egyszínű, nyomtatás nélküli fólia a legkedvezőbb áron. A PRINT kész Scoover-grafika, azonnal választható. Az EGYEDI a te képedet teszi a rollerre – ez kézi ellenőrzéssel, drágábban készül. A feliratok minden szinten ingyenesek.',
+    info: 'A SOLID egyszínű, nyomtatás nélküli fólia a legkedvezőbb áron. A PRINT kész Scoover-grafika, azonnal választható. Az EGYEDI a te képedet teszi a rollerre – ez kézi ellenőrzéssel, drágábban készül. Zónánként más mintát is választhatsz („Melyik részre?”). A feliratok minden szinten ingyenesek.',
   },
   'section-zones': {
     title: 'Mit fóliázunk',
@@ -119,117 +115,120 @@ const SECTION_TEXT = {
 };
 
 export default function App() {
-  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
-  /** A roller évjárata – csak a rendelésbe kerül (lásd src/data/models/index.js). */
-  const [year, setYear] = useState(() => defaultYearFor(DEFAULT_MODEL_ID));
-  const [patternId, setPatternId] = useState(DEFAULT_PATTERN_ID);
-  const [uploadedPattern, setUploadedPattern] = useState(null);
-  const [transform, setTransform] = useState(DEFAULT_TRANSFORM);
-  const [sizeAwareTiling, setSizeAwareTiling] = useState(true);
-  const [exploded, setExploded] = useState(false);
-  const [showCutLines, setShowCutLines] = useState(true);
-  const [hoveredId, setHoveredId] = useState(null);
-  const [labels, setLabels] = useState(() => [newLabel()]);
-  /** 'none' | 'normal' | 'complex' – felrakás mint szolgáltatás (lásd pricing.js) */
-  const [installation, setInstallation] = useState('none');
-  /** A CUSTOM mintához a szerverre (híd) feltöltött kép állapota – a helyi
-   * dataURL-es előnézettől (uploadedPattern) függetlenül, mert a kosárnak
-   * egy valódi, szerver oldali URL kell (uploadedImageUrl). */
-  const [remoteImage, setRemoteImage] = useState(null);
-  /** 'schematic' | 'photo' – alapértelmezetten a fotó (ha a modellnek van photoView-ja;
-   *  ha nincs, az activeView lentebb úgyis vázlatra esik vissza). */
-  const [view, setView] = useState('photo');
-  /**
-   * ZÓNÁS választás modellenként: { [modelId]: Set<zoneId> }. Ha egy modellhez
-   * nincs bejegyzés, MINDEN zónája ki van választva (teljes fólia szett) – ez
-   * az alapállapot, ezért nem is tároljuk, amíg a vevő nem nyúl hozzá.
-   */
-  const [zonesByModel, setZonesByModel] = useState({});
-  /** Taposófelület modellenként: { [modelId]: boolean } – alapból KI (külön anyag, külön tétel). */
-  const [footboardByModel, setFootboardByModel] = useState({});
-  /** Az éppen nyitott főszekció (egyszerre csak egy) – lásd SECTIONS. */
-  const [openSection, setOpenSection] = useState(SECTIONS[0].id);
-  /** Teljes képernyős, csippentéssel nagyítható előnézet (FullscreenPreview.jsx). */
-  const [fullscreen, setFullscreen] = useState(false);
-  /** Az érintős "koppints egy darabra" súgó csak egyszer, az elején kell – utána ⓘ ikon. */
-  const [hintDismissed, setHintDismissed] = useState(false);
-  /** Saját képnél: melyik darabra essen a kép lényege (lásd DEFAULT_FOCUS_PIECE_ID). */
-  const [focusPieceId, setFocusPieceId] = useState(DEFAULT_FOCUS_PIECE_ID);
+  // ---------------------------------------------------------------------
+  // A TERV – egyetlen dokumentum (schema.js), reducerrel (useDesign.js)
+  // ---------------------------------------------------------------------
+  const design = useDesign({ model: DEFAULT_MODEL_ID, year: defaultYearFor(DEFAULT_MODEL_ID), patternId: DEFAULT_PATTERN_ID });
+  const { doc, localImages, uploads, actions } = design;
+  const modelId = doc.model;
+  const year = doc.year;
 
-  // --- Osztott nézet (keskeny képernyő): fent a rögzített előnézet, lent a
-  // saját görgetésű vezérlőpanel. A kettő aránya húzható, és csúszka-húzás
-  // közben automatikusan a legnagyobb előnézetre vált. ---
+  // --- felületi állapot ---
+  const [hoveredId, setHoveredId] = useState(null);
+  const [openSection, setOpenSection] = useState(SECTIONS[0].id);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const [exploded, setExploded] = useState(false);
+  /** Melyik részre megy a Stílus-választás: 'all' (az egész roller) vagy zónaId. */
+  const [editTarget, setEditTarget] = useState(TARGET_ALL);
+  /** Igazítás mód: a képen közvetlenül mozgatható a minta (usePatternGesture). */
+  const [gestureMode, setGestureMode] = useState(false);
+  const [finetunePanel, setFinetunePanel] = useState(null);
+  const [coachVisible, setCoachVisible] = useState(false);
+  const [footboardEditMode, setFootboardEditMode] = useState(false);
+  /** Link/mentett terv betöltése indításkor: null | 'loading' | { error } */
+  const [loadState, setLoadState] = useState(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  /** E-mailből jövő jelszó-visszaállító token (#reset=…) – a fiók-panel kéri be az új jelszót. */
+  const [resetToken, setResetToken] = useState(null);
+  /** Rövid, felül megjelenő üzenet (pl. "e-mail megerősítve"). */
+  const [notice, setNotice] = useState(null);
+  const account = useAccount();
+
+  // --- Osztott nézet (keskeny képernyő): fent a tapadó előnézet ---
   const isNarrow = useMediaQuery(NARROW_QUERY);
-  /** A KÉP magassága a nézet százalékában (a maradék a vezérlőpanelé). */
   const [splitPct, setSplitPct] = useState(45);
   const [splitDragging, setSplitDragging] = useState(false);
   const layoutRef = useRef(null);
   const topbarRef = useRef(null);
-  // asztalin a fejléc a lap tetejére tapad, alá sorakozik a kép és az ársáv
   useReportHeight(topbarRef, '--topbar-h');
-  /** Csúszka-húzás előtti felosztás, hogy elengedés után vissza tudjunk állni. */
   const splitBeforeSlider = useRef(null);
   const restoreTimer = useRef(null);
-  /** A megjelenített <svg>-t tartalmazó doboz – innen olvassa ki a kép-export (ShareExportPanel). */
   const canvasWrapRef = useRef(null);
-
-  // --- Taposófelület tervezése: teljesen önálló minta/kép/transzformáció/felirat,
-  // független a roller többi részének mintájától (lásd FootboardEditor.jsx). ---
-  const [footboardEditMode, setFootboardEditMode] = useState(false);
-  const [footboardPatternId, setFootboardPatternId] = useState(DEFAULT_PATTERN_ID);
-  const [footboardUploadedPattern, setFootboardUploadedPattern] = useState(null);
-  const [footboardTransform, setFootboardTransform] = useState(DEFAULT_TRANSFORM);
-  const [footboardRemoteImage, setFootboardRemoteImage] = useState(null);
-  const [footboardLabel, setFootboardLabel] = useState(newFootboardLabel);
 
   const { model, loading, error } = useScooterModel(modelId);
   const isTouch = useIsTouch();
 
-  // Az aktív minta: a feltöltött kép, vagy a regiszterből a kiválasztott.
-  const pattern = useMemo(
-    () => (patternId === UPLOAD_PATTERN_ID ? uploadedPattern : getPattern(patternId)),
-    [patternId, uploadedPattern],
-  );
-  const category = getCategory(pattern?.category ?? 'solid');
-  const patternScale = pattern?.patternScale ?? category.patternScale ?? { large: 1, medium: 1, small: 1 };
+  // ---------------------------------------------------------------------
+  // Indítás: link (#id= / #d=) betöltése
+  // ---------------------------------------------------------------------
+  useEffect(() => {
+    // e-mailes linkek: #verify=<token> / #reset=<token>
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const verify = params.get('verify');
+    const reset = params.get('reset');
+    if (verify) {
+      account.verifyEmail(verify)
+        .then((r) => setNotice(r.message ?? 'Az e-mail címed megerősítve.'))
+        .catch((e) => setNotice(e.message));
+      replaceLocationHash('');
+      return;
+    }
+    if (reset) { setResetToken(reset); setAccountOpen(true); replaceLocationHash(''); return; }
 
-  // Modellváltáskor a felirat a modell alapértelmezett darabjára kerül
-  // (defaultLabel), ha az aktuális céldarab nem létezik az új modellen.
+    const parsed = parseLocationHash();
+    if (!parsed) return;
+    if (parsed.error) { setLoadState({ error: parsed.error }); return; }
+    if (parsed.doc) { actions.load(parsed.doc); return; }
+    if (parsed.id) {
+      setLoadState('loading');
+      loadDesign(parsed.id)
+        .then((r) => { actions.load({ ...r.design, id: r.id, title: r.title ?? r.design.title ?? null }); setLoadState(null); })
+        .catch((e) => setLoadState({ error: `A(z) ${parsed.id} terv nem tölthető be: ${e.message}` }));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ha a címsorban link van, tartsuk frissen a terv változásával (a linket
+  // frissítéskor is ugyanaz a terv nyílik meg). Csak akkor, ha a felhasználó
+  // már kért linket / linkről jött – enélkül a címsor tiszta marad.
+  useEffect(() => {
+    if (!design.dirty || !location.hash) return undefined;
+    const t = setTimeout(() => {
+      const parsed = parseLocationHash();
+      if (parsed?.id && doc.id === parsed.id) return; // mentett terv: a link az azonosítóra mutat, azt a Mentés frissíti
+      if (parsed?.doc || (parsed?.id && !doc.id)) replaceLocationHash(hashForShare({ doc }));
+    }, 600);
+    return () => clearTimeout(t);
+  }, [doc, design.dirty]);
+
+  // Modellváltáskor a felirat a modell alapértelmezett darabjára kerül, ha az
+  // aktuális céldarab nem létezik az új modellen.
   useEffect(() => {
     if (!model) return;
     const def = model.pieces.find((p) => p.defaultLabel) ?? model.pieces[0];
-    setLabels((ls) => ls.map((l) =>
-      l.pieceId && model.pieces.some((p) => p.id === l.pieceId) ? l : { ...l, pieceId: def.id, dx: 0, dy: 0 },
-    ));
-  }, [model]);
+    const fixed = doc.labels.map((l) =>
+      (l.pieceId && model.pieces.some((p) => p.id === l.pieceId) ? l : { ...l, pieceId: def.id, dx: 0, dy: 0 }));
+    if (fixed.some((l, i) => l !== doc.labels[i])) actions.setLabels(fixed);
+  }, [model]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A "koppints egy darabra" súgó csak az első pillanatokban kell: magától
-  // eltűnik, utána egy ⓘ ikon hozza vissza (lásd stage-footer).
   useEffect(() => {
     const t = setTimeout(() => setHintDismissed(true), 8000);
     return () => clearTimeout(t);
   }, []);
-
-  // --- Mérés (lásd utils/analytics.js – egyelőre csak konzolra logol) ---
   useEffect(() => { trackConfiguratorOpened({ model: DEFAULT_MODEL_ID }); }, []);
 
   /** Modellváltás: az évjárat a modell legfrissebbjére áll, a taposó-szerkesztő bezárul. */
   const changeModel = useCallback((id) => {
-    setModelId(id);
-    setYear(defaultYearFor(id));
+    actions.setModel(id, defaultYearFor(id));
     setFootboardEditMode(false);
-  }, []);
+    setEditTarget(TARGET_ALL);
+  }, [actions]);
 
-  /**
-   * Csúszka megfogásakor a panel automatikusan lecsúszik, hogy a lehető
-   * legtöbb látszódjon az előnézetből, elengedés után 1 mp-cel visszaáll.
-   * Globális pointer-figyelő, mert csúszka több szekcióban is van – így
-   * egyikbe sem kell külön propot fűzni (bármely natív `input[type=range]`-re működik).
-   */
+  // Csúszka megfogásakor a panel automatikusan lecsúszik (a legtöbb látszódjon
+  // az előnézetből), elengedés után 1 mp-cel visszaáll.
   useEffect(() => {
     if (!isNarrow) return undefined;
     const isSlider = (t) => t instanceof HTMLInputElement && t.type === 'range';
-
     const onDown = (e) => {
       if (!isSlider(e.target)) return;
       clearTimeout(restoreTimer.current);
@@ -246,7 +245,6 @@ export default function App() {
         splitBeforeSlider.current = null;
       }, SLIDER_RESTORE_MS);
     };
-
     document.addEventListener('pointerdown', onDown);
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
@@ -258,10 +256,6 @@ export default function App() {
     };
   }, [isNarrow]);
 
-  /**
-   * Melyik csúszkát húzza épp a felhasználó és milyen értéken – ezt írjuk ki a
-   * kép fölé, hogy a felnagyított előnézet magyarázatot is kapjon.
-   */
   const [sliderHint, setSliderHint] = useState(null);
   useEffect(() => {
     const onSlider = (e) => setSliderHint(e.detail.active ? { label: e.detail.label, text: e.detail.text } : null);
@@ -269,36 +263,25 @@ export default function App() {
     return () => window.removeEventListener('scoover:slider', onSlider);
   }, []);
 
-  /** Kézi átméretezés: felülírja a csúszka-automatika függőben lévő visszaállítását. */
   const setSplitManually = useCallback((pct) => {
     clearTimeout(restoreTimer.current);
     splitBeforeSlider.current = null;
     setSplitPct(pct);
   }, []);
 
-  const updateLabel = useCallback((id, patch) =>
-    setLabels((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l))), []);
-  const removeLabel = useCallback((id) => setLabels((ls) => ls.filter((l) => l.id !== id)), []);
-  const addLabel = useCallback(() => {
-    const def = model?.pieces.find((p) => p.defaultLabel) ?? model?.pieces[0];
-    setLabels((ls) => [...ls, { ...newLabel(ls.length ? 'G2' : 'SCOOVER'), pieceId: def?.id ?? null }]);
-  }, [model]);
-
   // ---------------------------------------------------------------------
   // Zónák és taposó – ebből SZÁRMAZIK, mely darabok kapnak fóliát.
   // ---------------------------------------------------------------------
   const hasPhoto = Boolean(model?.photoView);
-  const activeView = view === 'photo' && hasPhoto ? 'photo' : 'schematic';
-  // az aktív nézet darablistája (a fotós nézet darabjai ugyanazokat az id-kat használják)
+  const activeView = doc.view === 'photo' && hasPhoto ? 'photo' : 'schematic';
   const activePieces = activeView === 'photo' ? model.photoView.pieces : model?.pieces ?? [];
+  const activeViewBox = activeView === 'photo' ? model?.photoView?.viewBox : model?.viewBox;
 
-  /** Az ezen a modellen/nézeten létező zónák, a darabjaikkal (ZONES sorrendjében). */
   const zones = useMemo(() => zonesForPieces(activePieces), [activePieces]);
   const availableZoneIds = useMemo(() => zones.map((z) => z.id), [zones]);
-  /** A kiválasztott zónák – bejegyzés nélkül (alapállapot) az összes. */
   const selectedZoneSet = useMemo(
-    () => zonesByModel[modelId] ?? new Set(availableZoneIds),
-    [zonesByModel, modelId, availableZoneIds],
+    () => new Set(doc.selection.zones ?? availableZoneIds),
+    [doc.selection.zones, availableZoneIds],
   );
   const selectedZoneIds = useMemo(
     () => availableZoneIds.filter((id) => selectedZoneSet.has(id)),
@@ -308,13 +291,8 @@ export default function App() {
 
   const footboardPiece = activePieces.find((p) => p.footboard) ?? null;
   const footboardPieceId = footboardPiece?.id ?? null;
-  const includeFootboard = Boolean(footboardPieceId) && Boolean(footboardByModel[modelId]);
+  const includeFootboard = Boolean(footboardPieceId) && doc.selection.footboard;
 
-  /**
-   * Fólia nélkül maradó darabok: a ki nem választott zónák darabjai, plusz a
-   * taposó, ha az extra nincs bekapcsolva. A vásznon ezek csupasz feketék –
-   * a vevő azonnal LÁTJA, mit rendel, nem kell olvasnia hozzá.
-   */
   const disabledPieces = useMemo(() => {
     const off = new Set();
     for (const z of zones) if (!selectedZoneSet.has(z.id)) z.pieceIds.forEach((id) => off.add(id));
@@ -325,34 +303,18 @@ export default function App() {
   const setFootboard = useCallback((on) => {
     if (!footboardPieceId) return;
     trackFootboardToggled(on);
-    setFootboardByModel((prev) => ({ ...prev, [modelId]: Boolean(on) }));
+    actions.setFootboard(on);
     if (!on) setFootboardEditMode(false);
-  }, [footboardPieceId, modelId]);
+  }, [footboardPieceId, actions]);
 
   const toggleZone = useCallback((zoneId) => {
-    setZonesByModel((prev) => {
-      const cur = prev[modelId] ?? new Set(availableZoneIds);
-      const next = new Set(cur);
-      const turningOn = !next.has(zoneId);
-      if (turningOn) next.add(zoneId); else next.delete(zoneId);
-      trackZoneToggled(zoneId, turningOn);
-      return { ...prev, [modelId]: next };
-    });
-  }, [modelId, availableZoneIds]);
+    trackZoneToggled(zoneId, !selectedZoneSet.has(zoneId));
+    actions.toggleZone(zoneId, availableZoneIds);
+  }, [actions, availableZoneIds, selectedZoneSet]);
+  const selectAllZones = useCallback(() => { trackKitToggled(true); actions.setZones(null); }, [actions]);
+  const clearAllZones = useCallback(() => { trackKitToggled(false); actions.setZones([]); }, [actions]);
 
-  /** "Teljes fólia szett" / "Kérem egyben": minden zóna vissza (a taposót nem érinti). */
-  const selectAllZones = useCallback(() => {
-    trackKitToggled(true);
-    setZonesByModel((prev) => ({ ...prev, [modelId]: new Set(availableZoneIds) }));
-  }, [modelId, availableZoneIds]);
-
-  /** "Törlés mind": nulláról indulás annak, aki csak egy dolgot akar. */
-  const clearAllZones = useCallback(() => {
-    trackKitToggled(false);
-    setZonesByModel((prev) => ({ ...prev, [modelId]: new Set() }));
-  }, [modelId]);
-
-  /** Vászon-kattintás: a darab zónáját kapcsolja (a taposó a saját extráját). */
+  /** Vászon-koppintás: a darab zónáját kapcsolja (a taposó a saját extráját). */
   const togglePiece = useCallback((pieceId) => {
     const piece = activePieces.find((p) => p.id === pieceId);
     setHintDismissed(true);
@@ -364,57 +326,99 @@ export default function App() {
 
   const hoveredPiece = activePieces.find((p) => p.id === hoveredId);
 
-  // A taposó saját mintája/felirata – teljesen független a roller fő mintájától.
-  const footboardPattern = useMemo(
-    () => (footboardPatternId === UPLOAD_PATTERN_ID ? footboardUploadedPattern : getPattern(footboardPatternId)),
-    [footboardPatternId, footboardUploadedPattern],
+  // ---------------------------------------------------------------------
+  // Stílus: melyik rétegre megy a választás, minta, feltöltés, igazítás
+  // ---------------------------------------------------------------------
+  const editLayerKey = editTarget === TARGET_ALL ? LAYER_BASE : zoneLayerKey(editTarget);
+  const editLayer = readLayer(doc, editLayerKey);
+  const editPattern = patternForLayer(editLayer, localImages[editLayerKey]);
+  const editCategory = getCategory(editPattern?.category ?? 'solid');
+  const overriddenZoneIds = useMemo(() => new Set(Object.keys(doc.style.zones)), [doc.style.zones]);
+  const targetZone = editTarget === TARGET_ALL ? null : zones.find((z) => z.id === editTarget);
+  const targetPieceIds = useMemo(
+    () => (targetZone ? new Set(targetZone.pieceIds) : null),
+    [targetZone],
   );
-  const footboardCategory = getCategory(footboardPattern?.category ?? 'solid');
-  const footboardAutoColor = labelColorFor(footboardPattern);
-  const renderFootboardLabel = {
-    ...footboardLabel,
-    font: resolveLabelFont(footboardLabel, footboardCategory.labelFont),
-    color: resolveLabelColor(footboardLabel, footboardAutoColor),
-  };
+  // ha a modellen nincs meg a célzóna (modellváltás), vissza az egészre
+  useEffect(() => {
+    if (editTarget !== TARGET_ALL && zones.length && !zones.some((z) => z.id === editTarget)) setEditTarget(TARGET_ALL);
+  }, [zones, editTarget]);
 
-  function handleFootboardUpload(img, file) {
-    setFootboardUploadedPattern(img);
-    setFootboardPatternId(UPLOAD_PATTERN_ID);
-    setFootboardTransform(DEFAULT_TRANSFORM);
-    setFootboardRemoteImage({ url: null, width: null, height: null, uploading: true, error: null });
-    uploadCustomImage(file)
-      .then(({ url, width, height }) => setFootboardRemoteImage({ url, width, height, uploading: false, error: null }))
-      .catch((e) => setFootboardRemoteImage({ url: null, width: null, height: null, uploading: false, error: e.message }));
-  }
-  function handleFootboardClearUpload() {
-    setFootboardUploadedPattern(null);
-    setFootboardRemoteImage(null);
-    if (footboardPatternId === UPLOAD_PATTERN_ID) setFootboardPatternId(DEFAULT_PATTERN_ID);
-  }
+  /** Mintaválasztás után a finomhangolás "felugrik": igazítás mód + tanító buborék + (először) a Méret csúszka. */
+  const revealFineTune = useCallback(() => {
+    setGestureMode(true);
+    if (!coachSeen()) setCoachVisible(true);
+    let seen = false;
+    try { seen = localStorage.getItem(FINETUNE_SEEN_KEY) === '1'; } catch { /* privát mód */ }
+    if (!seen) {
+      setFinetunePanel('scale');
+      try { localStorage.setItem(FINETUNE_SEEN_KEY, '1'); } catch { /* privát mód */ }
+    }
+  }, []);
 
-  function handleUpload(img, file) {
-    setUploadedPattern(img);
-    setPatternId(UPLOAD_PATTERN_ID);
-    setTransform(DEFAULT_TRANSFORM);
-    // a kép lényege alapból a legnagyobb, legjobban látható darabra kerül
-    setFocusPieceId(DEFAULT_FOCUS_PIECE_ID);
+  const selectPattern = useCallback((patternId) => {
+    if (editTarget === TARGET_ALL) {
+      // "Az egész roller": a zónánkénti eltérések törlődnek, minden egyforma lesz
+      if (Object.keys(doc.style.zones).length) actions.clearZoneOverrides();
+      actions.setLayerPattern(LAYER_BASE, patternId);
+    } else {
+      actions.setLayerPattern(zoneLayerKey(editTarget), patternId);
+    }
+    revealFineTune();
+  }, [editTarget, actions, doc.style.zones, revealFineTune]);
+
+  /** Saját kép egy rétegre: helyi előnézet azonnal, az EREDETI fájl a szerverre. */
+  const uploadToLayer = useCallback((layerKey, img, file) => {
+    actions.setLayerImage(layerKey, {
+      uploadPatternId: UPLOAD_PATTERN_ID, preview: img, image: null,
+      focusPieceId: layerKey === LAYER_FOOTBOARD ? null : DEFAULT_FOCUS_PIECE_ID,
+    });
     trackImageUploaded({ width: img?.originalWidth, height: img?.originalHeight, focusPieceId: DEFAULT_FOCUS_PIECE_ID });
-    setRemoteImage({ url: null, width: null, height: null, uploading: true, error: null });
     uploadCustomImage(file)
-      .then(({ url, width, height }) => setRemoteImage({ url, width, height, uploading: false, error: null }))
-      .catch((e) => setRemoteImage({ url: null, width: null, height: null, uploading: false, error: e.message }));
-  }
-  function handleClearUpload() {
-    setUploadedPattern(null);
-    setRemoteImage(null);
-    if (patternId === UPLOAD_PATTERN_ID) setPatternId(DEFAULT_PATTERN_ID);
-  }
-  // A tier a kiválasztott mintából/feltöltésből adódik: feltöltött kép = custom,
-  // egyébként a minta termékvonala (solid | print).
-  const tier = patternId === UPLOAD_PATTERN_ID ? 'custom' : (pattern?.line ?? 'solid');
+      .then(({ url, width, height }) => actions.layerUploaded(layerKey, { url, width, height }))
+      .catch((e) => actions.layerUploadFailed(layerKey, e.message));
+  }, [actions]);
 
-  // A szint és a minta is a kiválasztásból ADÓDIK, ezért a derived értéket
-  // figyeljük; az első renderelés nem "váltás", azt kihagyjuk.
+  const handleUpload = useCallback((img, file) => {
+    if (editTarget === TARGET_ALL && Object.keys(doc.style.zones).length) actions.clearZoneOverrides();
+    uploadToLayer(editLayerKey, img, file);
+    revealFineTune();
+  }, [editTarget, editLayerKey, doc.style.zones, actions, uploadToLayer, revealFineTune]);
+  const handleClearUpload = useCallback(() => actions.clearLayerImage(editLayerKey, DEFAULT_PATTERN_ID), [actions, editLayerKey]);
+
+  const setEditTransform = useCallback((patch) => actions.setLayerTransform(editLayerKey, patch), [actions, editLayerKey]);
+
+  const gesture = usePatternGesture({
+    enabled: gestureMode && !footboardEditMode && Boolean(model),
+    transform: editLayer.transform,
+    onChange: setEditTransform,
+    onGestureStart: () => { setCoachVisible(false); markCoachSeen(); },
+    wheelRef: canvasWrapRef,
+  });
+  const dismissCoach = useCallback(() => { setCoachVisible(false); markCoachSeen(); }, []);
+
+  /** A fő darab választható értékei: darab-csoportonként EGY sor, a taposó nélkül. */
+  const focusPieceOptions = useMemo(() => {
+    const seen = new Set();
+    return activePieces
+      .filter((p) => !p.footboard)
+      .filter((p) => { const key = p.priceGroup ?? p.id; if (seen.has(key)) return false; seen.add(key); return true; })
+      .map((p) => ({ id: p.id, name: p.name }));
+  }, [activePieces]);
+
+  // ---------------------------------------------------------------------
+  // Rétegek a vászonnak, szintek, feliratok
+  // ---------------------------------------------------------------------
+  const { layers, layerOfPiece } = useMemo(
+    () => renderLayers(doc, activePieces, activeViewBox, localImages, { includeFootboard }),
+    [doc, activePieces, activeViewBox, localImages, includeFootboard],
+  );
+  const zoneTiers = useMemo(() => zoneTiersOf(doc, selectedZoneIds), [doc, selectedZoneIds]);
+  const baseTier = layers.find((l) => l.key === LAYER_BASE)?.tier ?? 'solid';
+  /** A rendelés szintje: a kiválasztott zónák legmagasabbja (kevert designnál a szett ára is eszerint). */
+  const tier = highestTier(selectedZoneIds.length ? selectedZoneIds.map((z) => zoneTiers[z]) : [baseTier]);
+  const isMixed = overriddenZoneIds.size > 0;
+
   const firstTier = useRef(true);
   useEffect(() => {
     if (firstTier.current) { firstTier.current = false; return; }
@@ -423,102 +427,64 @@ export default function App() {
   const firstPattern = useRef(true);
   useEffect(() => {
     if (firstPattern.current) { firstPattern.current = false; return; }
-    if (pattern && patternId !== UPLOAD_PATTERN_ID) trackPatternSelected(pattern);
-  }, [patternId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (editPattern && editLayer.patternId !== UPLOAD_PATTERN_ID) trackPatternSelected(editPattern);
+  }, [editLayer.patternId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Egy forrás a darabszámhoz: a fejléc ugyanezt mutatja.
-  const enabledCount = activePieces.filter((p) => !disabledPieces.has(p.id)).length;
+  // A felirat színe/betűje a darab ALATTI réteg mintájából jön.
+  const renderLabels = useMemo(() => doc.labels.map((l) => {
+    const layer = layers.find((x) => x.key === layerOfPiece[l.pieceId]) ?? layers[0];
+    const cat = layer?.category ?? getCategory('solid');
+    return {
+      ...l,
+      font: resolveLabelFont(l, cat.labelFont),
+      color: resolveLabelColor(l, labelColorFor(layer?.pattern)),
+    };
+  }), [doc.labels, layers, layerOfPiece]);
 
-  /**
-   * "Fő darab": a feltöltött kép a darabok között oszlik szét, és a lényege
-   * (a kép közepe) alapból a vászon közepére esne – ami gyakran két darab közé
-   * vagy egy alig látható részre kerül. Ez az eltolás viszi a kép közepét a
-   * kiválasztott darab közepére. NEM a transform state-be írjuk, hanem
-   * rendereléskor adjuk hozzá: így a felhasználói csúszkák tartománya és az
-   * "Alaphelyzet" gomb változatlan marad, a finomhangolás pedig a fókuszhoz
-   * képest értendő.
-   */
-  const imageFocus = useMemo(() => {
-    const vb = activeView === 'photo' ? model?.photoView?.viewBox : model?.viewBox;
-    if (tier !== 'custom' || !focusPieceId || !vb) return { fx: 0, fy: 0 };
-    const target = activePieces.find((p) => p.id === focusPieceId);
-    if (!target) return { fx: 0, fy: 0 };
-    const members = target.priceGroup
-      ? activePieces.filter((p) => p.priceGroup === target.priceGroup)
-      : [target];
-    const c = piecesCenter(members);
-    if (!c) return { fx: 0, fy: 0 };
-    const s = transform.scale ?? 1;
-    const r = ((transform.rotate ?? 0) * Math.PI) / 180;
-    const hx = vb.width / 2, hy = vb.height / 2;
-    const px = s * hx, py = s * hy;
-    const rx = hx + (px - hx) * Math.cos(r) - (py - hy) * Math.sin(r);
-    const ry = hy + (px - hx) * Math.sin(r) + (py - hy) * Math.cos(r);
-    return { fx: Math.round(c.cx - rx), fy: Math.round(c.cy - ry) };
-  }, [tier, focusPieceId, model, activeView, activePieces, transform.scale, transform.rotate]);
+  const addLabel = useCallback(() => {
+    const def = model?.pieces.find((p) => p.defaultLabel) ?? model?.pieces[0];
+    actions.addLabel(newLabel(doc.labels.length ? 'G2' : 'SCOOVER', def?.id ?? null));
+  }, [model, actions, doc.labels.length]);
 
-  /**
-   * A fő darab választható értékei: darab-csoportonként EGY sor (a több
-   * fizikai darabból álló csoportok – pl. "Dekk oldala" – egyként viselkednek),
-   * a taposófelület nélkül (annak saját, önálló szerkesztője van).
-   */
-  const focusPieceOptions = useMemo(() => {
-    const seen = new Set();
-    return activePieces
-      .filter((p) => !p.footboard)
-      .filter((p) => {
-        const key = p.priceGroup ?? p.id;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .map((p) => ({ id: p.id, name: p.name }));
-  }, [activePieces]);
+  // --- Taposó saját rétege ---
+  const footboardLayer = doc.footboard;
+  const footboardPattern = patternForLayer(footboardLayer, localImages[LAYER_FOOTBOARD]);
+  const footboardCategory = getCategory(footboardPattern?.category ?? 'solid');
+  const footboardAutoColor = labelColorFor(footboardPattern);
+  const footboardLabel = doc.footboard.label;
+  const renderFootboardLabel = {
+    ...footboardLabel,
+    font: resolveLabelFont(footboardLabel, footboardCategory.labelFont),
+    color: resolveLabelColor(footboardLabel, footboardAutoColor),
+  };
+  const uploadsPending = Object.values(uploads).some((u) => u?.uploading);
 
-  useEffect(() => {
-    if (!focusPieceOptions.length) return;
-    if (focusPieceOptions.some((p) => p.id === focusPieceId)) return;
-    const fallback = focusPieceOptions.find((p) => p.id === DEFAULT_FOCUS_PIECE_ID) ?? focusPieceOptions[0];
-    setFocusPieceId(fallback.id);
-  }, [focusPieceOptions, focusPieceId]);
-
-  /** A ténylegesen kirajzolt (és a rendelésbe kerülő) minta-transzformáció. */
-  const renderTransform = imageFocus.fx || imageFocus.fy
-    ? { ...transform, dx: transform.dx + imageFocus.fx, dy: transform.dy + imageFocus.fy }
-    : transform;
-
-  const autoColor = labelColorFor(pattern);
-  const renderLabels = labels.map((l) => ({
-    ...l,
-    font: resolveLabelFont(l, category.labelFont),
-    color: resolveLabelColor(l, autoColor),
-  }));
-  const isTiled = pattern?.type === 'image-tile' || pattern?.type === 'tile';
-
-  // --- Árak: MINDEN a központi src/pricing.js-ből ---
+  // ---------------------------------------------------------------------
+  // Árak: MINDEN a központi src/pricing.js-ből
+  // ---------------------------------------------------------------------
   const priced = Boolean(model) && hasPrice(modelId);
   const exportPrice = priced
-    ? calculatePrice({ model: modelId, tier, includeFootboard, installation, selectedZoneIds, availableZoneIds })
+    ? calculatePrice({ model: modelId, tier, includeFootboard, installation: doc.installation, selectedZoneIds, availableZoneIds, zoneTiers })
     : null;
+  const allZoneTiers = useMemo(() => zoneTiersOf(doc, availableZoneIds), [doc, availableZoneIds]);
   const zonePrices = useMemo(
-    () => (priced ? Object.fromEntries(getZonePrices(modelId, tier, availableZoneIds).map((z) => [z.id, z.price])) : {}),
-    [priced, modelId, tier, availableZoneIds],
+    () => (priced ? Object.fromEntries(getZonePrices(modelId, tier, availableZoneIds, allZoneTiers).map((z) => [z.id, z.price])) : {}),
+    [priced, modelId, tier, availableZoneIds, allZoneTiers],
   );
-  const kitInfo = priced ? getKitInfo(modelId, tier, availableZoneIds) : { listSum: 0, kitPrice: 0, savings: 0 };
+  const kitInfo = priced ? getKitInfo(modelId, tier, availableZoneIds, allZoneTiers) : { listSum: 0, kitPrice: 0, savings: 0 };
   const minimumOrder = exportPrice ? exportPrice.minimumOrder : { ok: true };
 
-  // --- Szekciók: egyszerre egy nyitva; a gyorsnavigáció nyit ÉS odagörget ---
+  // ---------------------------------------------------------------------
+  // Szekciók
+  // ---------------------------------------------------------------------
   const showSection = useCallback((id) => {
     setFootboardEditMode(false);
     setOpenSection(id);
-    // a görgetés a nyitás utáni layoutra vár
     requestAnimationFrame(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, []);
-  const toggleSection = useCallback((id) => {
-    setOpenSection((cur) => (cur === id ? null : id));
-  }, []);
+  const toggleSection = useCallback((id) => setOpenSection((cur) => (cur === id ? null : id)), []);
   const nextSectionId = (id) => SECTIONS[SECTIONS.findIndex((s) => s.id === id) + 1]?.id ?? null;
   const nextButton = (id) => {
     const next = nextSectionId(id);
@@ -528,61 +494,97 @@ export default function App() {
       </button>
     ) : null;
   };
+  const goToCart = useCallback(() => {
+    showSection('section-delivery');
+    setTimeout(() => document.querySelector('.cart-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+  }, [showSection]);
 
-  /** A "Taposófelület tervezése" gomb: a nagy előnézet a taposó felülnézetére vált. */
   const startFootboardDesign = useCallback(() => {
     if (!includeFootboard) setFootboard(true);
     setFootboardEditMode(true);
+    setGestureMode(false);
     if (isNarrow) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [includeFootboard, setFootboard, isNarrow]);
 
-  // Ugyanaz a vászon kell a beágyazott előnézetbe ÉS a teljes képernyős
-  // nagyításba (FullscreenPreview) – egy helyen írjuk le, két helyen rendereljük.
+  /** A mentett terv bélyegképe (fiók, munkalap) – az aktuális vászonból. */
+  const renderPreview = useCallback(async () => {
+    const svgEl = canvasWrapRef.current?.querySelector('svg.scooter-canvas');
+    return svgEl ? renderPreviewPng(svgEl) : null;
+  }, []);
+
+  /** Új, üres terv (a fiókból vagy a "Terveim"-ből nyitott terv helyett). */
+  const startNewDesign = useCallback(() => {
+    actions.reset(emptyDesign({ model: DEFAULT_MODEL_ID, year: defaultYearFor(DEFAULT_MODEL_ID), patternId: DEFAULT_PATTERN_ID }));
+    replaceLocationHash('');
+    setEditTarget(TARGET_ALL);
+    setFootboardEditMode(false);
+  }, [actions]);
+  const openSavedDesign = useCallback((saved) => {
+    actions.load({ ...saved.design, id: saved.id, title: saved.title ?? null });
+    replaceLocationHash(hashForShare({ id: saved.id }));
+    setEditTarget(TARGET_ALL);
+    setFootboardEditMode(false);
+    setAccountOpen(false);
+  }, [actions]);
+
+  // ---------------------------------------------------------------------
+  // Vászon
+  // ---------------------------------------------------------------------
   const canvasEl = !model ? null : activeView === 'photo' ? (
     <PhotoCanvas
       view={model.photoView}
       modelName={model.name}
-      pattern={pattern}
-      transform={renderTransform}
-      patternScale={patternScale}
-      sizeAwareTiling={sizeAwareTiling}
-      showCutLines={showCutLines}
+      layers={layers}
+      layerOfPiece={layerOfPiece}
+      sizeAwareTiling={doc.options.sizeAwareTiling}
+      showCutLines={doc.options.showCutLines}
       disabledPieces={disabledPieces}
       hoveredId={hoveredId}
       onHover={setHoveredId}
       onTogglePiece={togglePiece}
       labels={renderLabels}
-      onLabelDrag={updateLabel}
+      onLabelDrag={actions.updateLabel}
+      targetPieceIds={targetPieceIds}
+      gesture={gesture}
     />
   ) : (
     <ScooterCanvas
       model={model}
-      pattern={pattern}
-      transform={renderTransform}
-      patternScale={patternScale}
-      sizeAwareTiling={sizeAwareTiling}
+      layers={layers}
+      layerOfPiece={layerOfPiece}
+      sizeAwareTiling={doc.options.sizeAwareTiling}
       exploded={exploded}
-      showCutLines={showCutLines}
+      showCutLines={doc.options.showCutLines}
       disabledPieces={disabledPieces}
       hoveredId={hoveredId}
       onHover={setHoveredId}
       onTogglePiece={togglePiece}
       labels={renderLabels}
-      onLabelDrag={updateLabel}
+      onLabelDrag={actions.updateLabel}
+      targetPieceIds={targetPieceIds}
+      gesture={gesture}
     />
   );
 
-  // A kép alatti sáv (képaláírás/súgó + mentés-gomb): asztalin a kép alá, keskeny
-  // nézetben a görgethető panel tetejére kerül – ezért külön változó.
+  const tierName = getTier(tier)?.name ?? tier;
+  const editPatternName = editLayer.patternId === UPLOAD_PATTERN_ID ? 'Saját kép' : (editPattern?.name ?? '–');
+  const styleSummary = isMixed
+    ? `Kevert · ${overriddenZoneIds.size} zóna eltér`
+    : editPatternName;
+
   const belowCanvasEl = !model ? null : (
     <>
       <div className="stage-footer">
         <div>
           <strong>{model.name}</strong>
-          <span className="muted"> · {year} · {enabledCount} / {activePieces.length} darab · {pattern?.name ?? 'nincs minta'}</span>
+          <span className="muted"> · {year} · {selectedZoneIds.length} / {zones.length} zóna fóliázva{includeFootboard ? ' + taposó' : ''}</span>
         </div>
         {hoveredPiece ? (
           <div className="hover-label">{hoveredPiece.name}</div>
+        ) : gestureMode && !footboardEditMode ? (
+          <div className="hover-label gesture">
+            {isTouch ? 'Húzd · csippentsd · forgasd a mintát a képen' : 'Húzd a mintát · görgő = méret · Shift+görgő = forgatás'}
+          </div>
         ) : isTouch && hintDismissed ? (
           <button type="button" className="hint-icon" title="Hogyan használd?"
             aria-label="Súgó" onClick={() => setHintDismissed(false)}>ⓘ</button>
@@ -593,29 +595,36 @@ export default function App() {
         )}
       </div>
 
-      {/* Saját képnél a minta "neve" a nyers fájlnév (pl. egy uuid.jpg), az
-          exportált képre az nem való – ott a semleges "Saját kép" áll. */}
       {exportPrice && (
-        <ShareExportPanel
-          canvasWrapRef={canvasWrapRef}
-          modelName={model.name}
-          tierLabel={getTier(tier)?.name ?? tier}
-          patternName={patternId === UPLOAD_PATTERN_ID ? 'Saját kép' : pattern?.name}
-          priceText={formatHuf(exportPrice.total)}
-        />
+        <div className="below-actions">
+          <ShareExportPanel
+            canvasWrapRef={canvasWrapRef}
+            modelName={model.name}
+            tierLabel={tierName}
+            patternName={isMixed ? 'Kevert design' : editPatternName}
+            priceText={formatHuf(exportPrice.total)}
+          />
+          <SaveSharePanel
+            doc={doc}
+            onSaved={actions.setId}
+            renderPreview={renderPreview}
+            user={account.user}
+            onRequireLogin={() => setAccountOpen(true)}
+            modelName={model.name}
+            tierLabel={tierName}
+          />
+        </div>
       )}
     </>
   );
 
-  const tierName = getTier(tier)?.name ?? tier;
-  const installationName = INSTALLATION_OPTIONS.find((o) => o.id === installation)?.name ?? '';
-  /** A kártyák fejlécén látszó, egyszavas összefoglaló az aktuális választásról. */
+  const installationName = INSTALLATION_OPTIONS.find((o) => o.id === doc.installation)?.name ?? '';
   const summaries = {
     'section-model': model ? `${model.name} · ${year ?? ''}` : '…',
-    'section-style': `${tierName} · ${patternId === UPLOAD_PATTERN_ID ? 'Saját kép' : (pattern?.name ?? '–')}`,
+    'section-style': styleSummary,
     'section-zones': isFullKit ? 'Teljes szett' : `${selectedZoneIds.length}/${zones.length} zóna`,
     'section-footboard': includeFootboard ? `+${formatHuf(FOOTBOARD_EXTRA_HUF)}` : 'Nincs',
-    'section-delivery': installation === 'none' ? 'Postázás' : `Felrakás · ${installationName}`,
+    'section-delivery': doc.installation === 'none' ? 'Postázás' : `Felrakás · ${installationName}`,
   };
   const sectionProps = (id) => ({
     id,
@@ -634,13 +643,35 @@ export default function App() {
           <img src={assetUrl('brand/scoover-logo.svg')} alt="Scoover" className="brand-logo" />
           <h1>Scoover fólia-konfigurátor</h1>
         </div>
-        {model && <span className="topbar-model muted small">{model.name} · {year}</span>}
+        <div className="topbar-right">
+          {model && <span className="topbar-model muted small">{model.name} · {year}{doc.id ? ` · ${doc.id}` : ''}</span>}
+          <button type="button" className={`btn btn-secondary account-btn${account.user ? ' logged' : ''}`}
+            onClick={() => setAccountOpen(true)} title={account.user ? account.user.email : 'Belépés vagy regisztráció'}>
+            {account.user ? `👤 ${account.user.name?.split(' ')[0] || 'Fiókom'}` : '👤 Belépés'}
+          </button>
+        </div>
       </header>
 
-      {/* Az OLDAL görög egyben – nincs belső görgetősáv. A kép (stage) a nézet
-          tetejére tapad (sticky), a vezérlőpanel alatta folyik. Keskeny
-          képernyőn a kép magassága a nézet --split-pct százaléka, így a roller
-          SOSEM fut ki a képernyőről, miközben a vevő lent a csúszkákat állítja. */}
+      {notice && (
+        <div className="notice-bar" role="status">
+          <span>{notice}</span>
+          <button type="button" className="link" onClick={() => setNotice(null)}>✕</button>
+        </div>
+      )}
+
+      {accountOpen && (
+        <AccountPanel
+          account={account}
+          resetToken={resetToken}
+          onResetDone={() => setResetToken(null)}
+          onClose={() => { setAccountOpen(false); setResetToken(null); }}
+          currentDoc={doc}
+          onOpenDesign={openSavedDesign}
+          onNewDesign={() => { startNewDesign(); setAccountOpen(false); }}
+          onPickScooter={(s) => { changeModel(s.modelId); if (s.year) actions.setYear(s.year); setAccountOpen(false); }}
+        />
+      )}
+
       <main
         className={`layout${splitDragging ? ' dragging' : ''}`}
         ref={layoutRef}
@@ -649,21 +680,32 @@ export default function App() {
         <section className="stage">
           {error && <p className="error">Hiba a modell betöltésekor: {error.message}</p>}
           {!model && loading && <p className="muted">Modell betöltése…</p>}
+          {loadState === 'loading' && <p className="muted small">Mentett terv betöltése…</p>}
+          {loadState?.error && <p className="error small">{loadState.error}</p>}
           {model && (
             <>
               {!footboardEditMode && (
-                <div className="canvas-wrap" ref={canvasWrapRef}>
+                <div className={`canvas-wrap${gestureMode ? ' adjust' : ''}`} ref={canvasWrapRef}>
                   {canvasEl}
                   {hasPhoto && (
                     <div className="view-switch" role="tablist">
                       <button type="button" role="tab" aria-selected={activeView === 'schematic'}
-                        className={activeView === 'schematic' ? 'active' : ''} onClick={() => setView('schematic')}>Vázlat</button>
+                        className={activeView === 'schematic' ? 'active' : ''} onClick={() => actions.setView('schematic')}>Vázlat</button>
                       <button type="button" role="tab" aria-selected={activeView === 'photo'}
-                        className={activeView === 'photo' ? 'active' : ''} onClick={() => setView('photo')}>Fotó</button>
+                        className={activeView === 'photo' ? 'active' : ''} onClick={() => actions.setView('photo')}>Fotó</button>
                     </div>
                   )}
                   <button type="button" className="canvas-icon-btn" title="Teljes képernyős előnézet"
                     aria-label="Teljes képernyős előnézet" onClick={() => setFullscreen(true)}>⛶</button>
+
+                  {gestureMode && (
+                    <div className="canvas-adjust-bar">
+                      <span className="cab-title">✋ Igazítás{targetZone ? ` · ${targetZone.name}` : ''}</span>
+                      <button type="button" className="link" onClick={() => setEditTransform({ ...DEFAULT_TRANSFORM })}>Alaphelyzet</button>
+                      <button type="button" className="btn cab-done" onClick={() => setGestureMode(false)}>Kész</button>
+                    </div>
+                  )}
+                  {gestureMode && coachVisible && <CanvasCoach onDismiss={dismissCoach} />}
 
                   {sliderHint && (
                     <div className="canvas-slider-hint" aria-live="polite">
@@ -676,7 +718,7 @@ export default function App() {
               )}
 
               {fullscreen && (
-                <FullscreenPreview title={`${model.name} · ${pattern?.name ?? 'nincs minta'}`} onClose={() => setFullscreen(false)}>
+                <FullscreenPreview title={`${model.name} · ${isMixed ? 'kevert design' : editPatternName}`} onClose={() => setFullscreen(false)}>
                   {canvasEl}
                 </FullscreenPreview>
               )}
@@ -686,15 +728,13 @@ export default function App() {
                   model={model}
                   piece={footboardPiece}
                   pattern={footboardPattern}
-                  transform={footboardTransform}
+                  transform={footboardLayer.transform}
                   label={renderFootboardLabel}
-                  onLabelDrag={(d) => setFootboardLabel((l) => ({ ...l, ...d }))}
+                  onLabelDrag={(d) => actions.setFootboardLabel(d)}
                   price={FOOTBOARD_EXTRA_HUF}
                   onBack={() => setFootboardEditMode(false)}
                 />
               ) : (
-                /* Keskeny nézetben ezek a görgethető panel tetejére kerülnek –
-                   a felső régió csak a képnek van fenntartva. */
                 !isNarrow && belowCanvasEl
               )}
             </>
@@ -702,11 +742,7 @@ export default function App() {
         </section>
 
         {isNarrow && model && (
-          <SplitHandle
-            pct={splitPct}
-            onChange={setSplitManually}
-            onDragStateChange={setSplitDragging}
-          />
+          <SplitHandle pct={splitPct} onChange={setSplitManually} onDragStateChange={setSplitDragging} />
         )}
 
         <aside className="sidebar">
@@ -716,9 +752,11 @@ export default function App() {
               modelName={model.name}
               tier={tier}
               includeFootboard={includeFootboard}
-              installation={installation}
+              installation={doc.installation}
               selectedZoneIds={selectedZoneIds}
               availableZoneIds={availableZoneIds}
+              zoneTiers={zoneTiers}
+              onGoToCart={isNarrow && openSection !== 'section-delivery' ? goToCart : null}
             />
           )}
 
@@ -730,7 +768,6 @@ export default function App() {
 
           {footboardEditMode ? (
             <div className="footboard-tools">
-              {/* Mindig látható visszalépés a teljes rollernézetre – a panel tetejére tapad. */}
               <div className="footboard-backbar">
                 <button type="button" className="btn btn-outline" onClick={() => setFootboardEditMode(false)}>
                   ← Vissza a teljes rollerhez
@@ -742,12 +779,12 @@ export default function App() {
                 <div className="card-head static"><span className="card-title">Taposó – minta vagy saját kép</span></div>
                 <div className="card-body">
                   <PatternGallery
-                    selectedId={footboardPatternId}
-                    onSelect={setFootboardPatternId}
-                    uploadedPattern={footboardUploadedPattern}
-                    onUpload={handleFootboardUpload}
-                    onClear={handleFootboardClearUpload}
-                    uploadStatus={footboardRemoteImage}
+                    selectedId={footboardLayer.patternId}
+                    onSelect={(id) => actions.setLayerPattern(LAYER_FOOTBOARD, id)}
+                    uploadedPattern={localImages[LAYER_FOOTBOARD] ?? (footboardLayer.image ? footboardPattern : null)}
+                    onUpload={(img, file) => uploadToLayer(LAYER_FOOTBOARD, img, file)}
+                    onClear={() => actions.clearLayerImage(LAYER_FOOTBOARD, DEFAULT_PATTERN_ID)}
+                    uploadStatus={uploads[LAYER_FOOTBOARD]}
                   />
                 </div>
               </section>
@@ -755,16 +792,16 @@ export default function App() {
               <section className="card open">
                 <div className="card-head static"><span className="card-title">Taposó – nagyítás, forgatás, eltolás</span></div>
                 <div className="card-body controls">
-                  <Slider label="Méret" value={footboardTransform.scale} min={0.25} max={3} step={0.05}
-                    onChange={(v) => setFootboardTransform({ ...footboardTransform, scale: v })} format={(v) => `${v.toFixed(2)}×`} />
-                  <Slider label="Forgatás" value={footboardTransform.rotate} min={0} max={360} step={1}
-                    onChange={(v) => setFootboardTransform({ ...footboardTransform, rotate: v })} format={(v) => `${v}°`} />
-                  <Slider label="Eltolás X" value={footboardTransform.dx} min={-300} max={300} step={1}
-                    onChange={(v) => setFootboardTransform({ ...footboardTransform, dx: v })} />
-                  <Slider label="Eltolás Y" value={footboardTransform.dy} min={-300} max={300} step={1}
-                    onChange={(v) => setFootboardTransform({ ...footboardTransform, dy: v })} />
+                  <Slider label="Méret" value={footboardLayer.transform.scale} min={0.25} max={3} step={0.05}
+                    onChange={(v) => actions.setLayerTransform(LAYER_FOOTBOARD, { scale: v })} format={(v) => `${v.toFixed(2)}×`} />
+                  <Slider label="Forgatás" value={footboardLayer.transform.rotate} min={0} max={360} step={1}
+                    onChange={(v) => actions.setLayerTransform(LAYER_FOOTBOARD, { rotate: v })} format={(v) => `${v}°`} />
+                  <Slider label="Eltolás X" value={footboardLayer.transform.dx} min={-300} max={300} step={1}
+                    onChange={(v) => actions.setLayerTransform(LAYER_FOOTBOARD, { dx: v })} />
+                  <Slider label="Eltolás Y" value={footboardLayer.transform.dy} min={-300} max={300} step={1}
+                    onChange={(v) => actions.setLayerTransform(LAYER_FOOTBOARD, { dy: v })} />
                   <div className="control-row">
-                    <button type="button" className="link" onClick={() => setFootboardTransform(DEFAULT_TRANSFORM)}>Alaphelyzet</button>
+                    <button type="button" className="link" onClick={() => actions.setLayerTransform(LAYER_FOOTBOARD, { ...DEFAULT_TRANSFORM })}>Alaphelyzet</button>
                   </div>
                 </div>
               </section>
@@ -774,27 +811,27 @@ export default function App() {
                 <div className="card-body controls">
                   <label className="check">
                     <input type="checkbox" checked={footboardLabel.enabled}
-                      onChange={(e) => setFootboardLabel((l) => ({ ...l, enabled: e.target.checked }))} />
+                      onChange={(e) => actions.setFootboardLabel({ enabled: e.target.checked })} />
                     Felirat a taposón
                   </label>
                   <label className="field">
                     <span>Szöveg</span>
                     <input type="text" value={footboardLabel.text} maxLength={24} placeholder="SCOOVER"
-                      onChange={(e) => setFootboardLabel((l) => ({ ...l, text: e.target.value }))} />
+                      onChange={(e) => actions.setFootboardLabel({ text: e.target.value })} />
                   </label>
                   <Slider label="Méret" value={footboardLabel.scale} min={0.3} max={2} step={0.05}
-                    onChange={(v) => setFootboardLabel((l) => ({ ...l, scale: v }))} format={(v) => `${Math.round(v * 100)}%`} />
+                    onChange={(v) => actions.setFootboardLabel({ scale: v })} format={(v) => `${Math.round(v * 100)}%`} />
                   <Slider label="Eltolás X" value={footboardLabel.dx} min={-150} max={150} step={1}
-                    onChange={(v) => setFootboardLabel((l) => ({ ...l, dx: v }))} />
+                    onChange={(v) => actions.setFootboardLabel({ dx: v })} />
                   <Slider label="Eltolás Y" value={footboardLabel.dy} min={-100} max={100} step={1}
-                    onChange={(v) => setFootboardLabel((l) => ({ ...l, dy: v }))} />
+                    onChange={(v) => actions.setFootboardLabel({ dy: v })} />
                   <Slider label="Forgatás" value={footboardLabel.rotate} min={-90} max={90} step={1}
-                    onChange={(v) => setFootboardLabel((l) => ({ ...l, rotate: v }))} format={(v) => `${v}°`} />
+                    onChange={(v) => actions.setFootboardLabel({ rotate: v })} format={(v) => `${v}°`} />
                   <FontColorPicker
                     label={footboardLabel}
                     categoryFont={footboardCategory.labelFont}
                     autoColor={footboardAutoColor}
-                    onChange={(patch) => setFootboardLabel((l) => ({ ...l, ...patch }))}
+                    onChange={(patch) => actions.setFootboardLabel(patch)}
                   />
                 </div>
               </section>
@@ -806,46 +843,59 @@ export default function App() {
           ) : model && (
             <div className="cards">
               <Section {...sectionProps('section-model')} footer={nextButton('section-model')}>
-                <ModelSection modelId={modelId} onModelChange={changeModel} year={year} onYearChange={setYear} />
+                <ModelSection modelId={modelId} onModelChange={changeModel} year={year} onYearChange={actions.setYear} />
               </Section>
 
               <Section {...sectionProps('section-style')} footer={nextButton('section-style')}>
+                {zones.length > 1 && (
+                  <ZoneTargetChips
+                    zones={zones}
+                    target={editTarget}
+                    onTarget={setEditTarget}
+                    overriddenIds={overriddenZoneIds}
+                    onResetZone={(zoneId) => { actions.removeZoneOverride(zoneId); if (editTarget === zoneId) setEditTarget(TARGET_ALL); }}
+                    onHover={setHoveredId}
+                  />
+                )}
                 <PatternGallery
-                  selectedId={patternId}
-                  onSelect={setPatternId}
-                  uploadedPattern={uploadedPattern}
+                  key={editLayerKey}
+                  selectedId={editLayer.patternId}
+                  onSelect={selectPattern}
+                  uploadedPattern={localImages[editLayerKey] ?? (editLayer.image ? editPattern : null)}
                   onUpload={handleUpload}
                   onClear={handleClearUpload}
-                  uploadStatus={remoteImage}
-                  focusPieceId={focusPieceId}
-                  onFocusPieceChange={setFocusPieceId}
+                  uploadStatus={uploads[editLayerKey]}
+                  focusPieceId={editLayer.focusPieceId ?? DEFAULT_FOCUS_PIECE_ID}
+                  onFocusPieceChange={(id) => actions.setLayerFocus(editLayerKey, id)}
                   focusPieceOptions={focusPieceOptions}
                 />
+                <FineTuneBar
+                  transform={editLayer.transform}
+                  onTransformChange={setEditTransform}
+                  gestureMode={gestureMode}
+                  onGestureModeChange={(on) => { setGestureMode(on); if (on && !coachSeen()) setCoachVisible(true); }}
+                  openPanel={finetunePanel}
+                  onOpenPanelChange={setFinetunePanel}
+                  isTiled={editPattern?.type === 'image-tile' || editPattern?.type === 'tile'}
+                  sizeAwareTiling={doc.options.sizeAwareTiling}
+                  onSizeAwareTilingChange={(v) => actions.setOptions({ sizeAwareTiling: v })}
+                  exploded={exploded}
+                  onExplodedChange={setExploded}
+                  canExplode={activeView === 'schematic'}
+                  showCutLines={doc.options.showCutLines}
+                  onShowCutLinesChange={(v) => actions.setOptions({ showCutLines: v })}
+                  targetName={targetZone?.name ?? null}
+                />
                 <details className="sub">
-                  <summary>Minta illesztése és nézet</summary>
-                  <PatternControls
-                    transform={transform}
-                    onTransformChange={setTransform}
-                    exploded={exploded}
-                    onExplodedChange={setExploded}
-                    showCutLines={showCutLines}
-                    onShowCutLinesChange={setShowCutLines}
-                    isImage={pattern?.type === 'image'}
-                    isTiled={isTiled}
-                    sizeAwareTiling={sizeAwareTiling}
-                    onSizeAwareTilingChange={setSizeAwareTiling}
-                  />
-                </details>
-                <details className="sub">
-                  <summary>Feliratok ({labels.length})</summary>
+                  <summary>Feliratok ({doc.labels.length})</summary>
                   <LabelControls
-                    labels={labels}
-                    onChange={updateLabel}
+                    labels={doc.labels}
+                    onChange={actions.updateLabel}
                     onAdd={addLabel}
-                    onRemove={removeLabel}
+                    onRemove={actions.removeLabel}
                     pieces={activePieces.filter((p) => !disabledPieces.has(p.id))}
-                    font={category.labelFont}
-                    autoColor={autoColor}
+                    font={editCategory.labelFont}
+                    autoColor={labelColorFor(editPattern)}
                   />
                 </details>
               </Section>
@@ -883,36 +933,23 @@ export default function App() {
               </Section>
 
               <Section {...sectionProps('section-delivery')}>
-                <DeliverySection installation={installation} onInstallationChange={setInstallation} />
+                <DeliverySection installation={doc.installation} onInstallationChange={actions.setInstallation} />
                 <div className="cart-box">
                   <h4>Kosárba teszem</h4>
                   <CartPanel
-                    modelId={modelId}
+                    doc={doc}
                     modelName={model.name}
                     tier={tier}
-                    pattern={pattern}
-                    transform={renderTransform}
-                    labels={labels}
-                    includeFootboard={includeFootboard}
-                    installation={installation}
-                    remoteImage={remoteImage}
-                    selectedZoneIds={selectedZoneIds}
                     availableZoneIds={availableZoneIds}
-                    year={year}
-                    footboardDesign={{
-                      pattern: footboardPattern,
-                      uploadedImageUrl: footboardRemoteImage?.url ?? null,
-                      uploading: footboardRemoteImage?.uploading ?? false,
-                      transform: footboardTransform,
-                      label: footboardLabel,
-                    }}
+                    zoneTiers={zoneTiers}
+                    uploadsPending={uploadsPending}
+                    onSaved={actions.setId}
                   />
                 </div>
               </Section>
             </div>
           )}
 
-          {/* A legalján, minden szekció után – nem tapad, nem szakít meg semmit. */}
           <div className="help-line-wrap"><HelpLine /></div>
         </aside>
       </main>

@@ -507,3 +507,99 @@ details.sub > summary { padding: 6px 0; }
 .success { color: var(--accent-2); }
 .error-box { display: flex; flex-direction: column; gap: 4px; }
 .error-list { margin: 0; padding-left: 18px; color: #ff7b7b; font-size: 12px; }
+
+/* =========================================================================
+   STÍLUS KÁRTYA: "Melyik részre?" chipsor (design-keverés), finomhangolás
+   sáv, igazítás mód a vásznon, mentés/megosztás, fiók gomb.
+   ========================================================================= */
+.zone-target { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--border); }
+.zone-target-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; }
+.chip-zone { padding: 0; overflow: hidden; }
+.chip-zone-btn, .chip-x { background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 6px 10px; }
+.chip-zone.own .chip-zone-btn { color: var(--text); }
+.chip-dot { color: var(--accent-2); margin-left: 4px; font-size: 16px; line-height: 0; }
+.chip-x { padding: 6px 8px 6px 4px; color: var(--muted); font-size: 11px; border-left: 1px solid var(--border); }
+.chip-x:hover { color: var(--accent); }
+
+/* A finomhangolás sáv a képernyő aljához TAPAD, amíg a Stílus kártya látszik:
+   bárhol jár a vevő a hosszú galériában, az "Igazítás" mindig kéznél van
+   (mobilon a rögzített ársáv fölött). A kinyitott csúszkák felfelé nőnek. */
+.finetune { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--border);
+  position: sticky; bottom: 8px; z-index: 4; box-shadow: 0 -8px 18px -12px rgba(0, 0, 0, .9); }
+@media (max-width: 1023px) { .finetune { bottom: calc(var(--price-bar-h, 0px) + 8px); } }
+.finetune-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }
+.finetune-reset { font-size: 12px; }
+.finetune-reset:disabled { opacity: .4; cursor: default; text-decoration: none; }
+.finetune-chips .chip { padding: 7px 12px; font-size: 12.5px; }
+.chip-gesture { border-color: rgba(25, 230, 193, .45); color: var(--text); }
+.chip-gesture.active { background: rgba(25, 230, 193, .14); border-color: var(--accent-2); }
+.finetune-panel { display: flex; flex-direction: column; gap: 10px; padding-top: 2px; }
+
+/* igazítás mód a vásznon */
+.canvas-wrap.adjust .scooter-canvas { cursor: grab; outline: 2px solid rgba(25, 230, 193, .55); outline-offset: -2px; }
+.canvas-wrap.adjust .scooter-canvas.gesturing { cursor: grabbing; }
+.canvas-adjust-bar { position: absolute; left: 10px; bottom: 12px; z-index: 3; display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px 6px 12px; border-radius: 999px; background: rgba(23, 26, 31, .9); border: 1px solid rgba(25, 230, 193, .5);
+  backdrop-filter: blur(6px); font-size: 12.5px; }
+.cab-title { font-weight: 700; color: var(--accent-2); white-space: nowrap; }
+.cab-done { padding: 4px 12px; font-size: 12.5px; border-radius: 999px; }
+.canvas-coach { position: absolute; left: 50%; top: 56px; transform: translateX(-50%); z-index: 4; max-width: min(92%, 360px);
+  display: flex; flex-direction: column; gap: 4px; padding: 10px 34px 10px 14px; border-radius: 12px;
+  background: rgba(25, 230, 193, .96); color: #062b25; font-size: 13px; line-height: 1.35;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .45); animation: csh-in .2s ease; }
+.canvas-coach strong { font-size: 14px; }
+.canvas-coach-x { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; border: none;
+  background: rgba(0, 0, 0, .12); color: #062b25; font: inherit; cursor: pointer; }
+.hover-label.gesture { color: var(--accent-2); border-color: rgba(25, 230, 193, .45); }
+
+/* a kép alatti gombsor: PNG export + link/mentés */
+.below-actions { display: flex; flex-direction: column; gap: 8px; }
+.save-share { display: flex; flex-direction: column; gap: 6px; }
+.save-share-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.save-share-row .btn { flex: 1 1 160px; }
+.save-share-msg { margin: 0; color: var(--muted); word-break: break-all; }
+.save-share-link { color: var(--accent-2); text-decoration: none; }
+
+/* fejléc jobb oldala: modell · azonosító + fiók */
+.topbar-right { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.account-btn { white-space: nowrap; }
+.account-btn.logged { border-color: rgba(25, 230, 193, .5); color: var(--text); }
+@media (max-width: 1023px) { .topbar-right .topbar-model { display: none; } }
+
+/* mobil: "Tovább a kosárhoz" az ársávban */
+.pb-cart-btn { width: auto; padding: 8px 12px; font-size: 13px; flex: none; }
+@media (min-width: 1024px) { .pb-cart-btn { display: none; } }
+
+/* =========================================================================
+   FIÓK: modális panel, űrlapok, Terveim / Rollereim listák, értesítő sáv
+   ========================================================================= */
+.modal-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-start;
+  justify-content: center; padding: 24px 12px; overflow-y: auto; backdrop-filter: blur(2px); }
+.modal { width: 100%; max-width: 520px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 16px; box-shadow: 0 24px 60px rgba(0, 0, 0, .6); animation: csh-in .18s ease; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.modal-x { position: static; width: 32px; height: 32px; font-size: 14px; }
+.auth-form .tabs { margin-top: 0; }
+.auth-links { display: flex; justify-content: space-between; gap: 8px; }
+.field textarea { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font: inherit; resize: vertical; }
+.field input[type=email], .field input[type=password], .field input[type=tel] { background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.design-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.design-item { display: grid; grid-template-columns: 96px 1fr auto; gap: 10px; align-items: center; padding: 8px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid var(--border); }
+.design-item.current { border-color: var(--accent-2); }
+.design-item:not(:has(.design-thumb)) { grid-template-columns: 1fr auto; }
+.design-thumb { width: 96px; height: 64px; border-radius: 6px; overflow: hidden; background: var(--bg); display: grid; place-items: center; }
+.design-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.design-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.design-meta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.design-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.design-actions .btn { padding: 6px 10px; font-size: 12.5px; }
+.scooter-form { padding-top: 6px; border-top: 1px solid var(--border); }
+.link.danger { color: #ff7b7b; }
+.notice-bar { position: sticky; top: 0; z-index: 12; display: flex; justify-content: space-between; gap: 12px; align-items: center;
+  padding: 8px 16px; background: rgba(25, 230, 193, .14); border-bottom: 1px solid rgba(25, 230, 193, .4); font-size: 13px; }
+@media (max-width: 1023px) { .design-item { grid-template-columns: 72px 1fr auto; } .design-thumb { width: 72px; height: 48px; } }

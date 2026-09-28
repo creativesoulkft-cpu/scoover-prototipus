@@ -48,6 +48,8 @@ function buildScooverPayload(cartConfig, unitPriceHuf) {
     // hiányzó/undefined = teljes fólia szett (minden zóna); egyébként a
     // ténylegesen kiválasztott zónák id-listája (src/data/zones.js).
     selectedZoneIds: cartConfig.selectedZoneIds ?? null,
+    designId: cartConfig.designId ?? null,
+    zones: cartConfig.zones ?? null,
     year: cartConfig.year ?? null,
     unitPriceHuf,
     currency: 'HUF',
