@@ -74,6 +74,10 @@ export const trackKitToggled = (fullKit) => track('kit_toggled', { full_kit: Boo
 export const trackFootboardToggled = (included) => track('footboard_toggled', { included: Boolean(included) });
 
 /** Terv mentése képként. */
+/** Kívánságlista: melyik rollerre kérnek fóliát (a modellnév a keresletet mutatja). */
+export const trackWishAdded = ({ brand, model, loggedIn } = {}) =>
+  track('wish_added', { brand, model, logged_in: Boolean(loggedIn) });
+
 export const trackDesignSaved = ({ modelName, tier, method = 'download' } = {}) =>
   track('design_saved', { model: modelName ?? null, tier: tier ?? null, method });
 

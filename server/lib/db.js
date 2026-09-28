@@ -85,6 +85,32 @@ const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS scooters_user ON scooters(user_id);
     `,
   },
+  {
+    version: 2,
+    sql: `
+      CREATE TABLE IF NOT EXISTS wishes (
+        id            TEXT PRIMARY KEY,
+        user_id       TEXT,
+        email         TEXT NOT NULL,
+        name          TEXT,
+        phone         TEXT,
+        brand         TEXT NOT NULL,
+        model_name    TEXT NOT NULL,
+        model_key     TEXT NOT NULL,
+        year          INTEGER,
+        note          TEXT,
+        status        TEXT NOT NULL DEFAULT 'open',
+        consent       INTEGER NOT NULL DEFAULT 0,
+        source        TEXT,
+        created_at    TEXT NOT NULL,
+        updated_at    TEXT NOT NULL,
+        notified_at   TEXT
+      );
+      CREATE INDEX IF NOT EXISTS wishes_key ON wishes(model_key, status);
+      CREATE INDEX IF NOT EXISTS wishes_email ON wishes(email);
+      CREATE INDEX IF NOT EXISTS wishes_user ON wishes(user_id);
+    `,
+  },
 ];
 
 let db = null;

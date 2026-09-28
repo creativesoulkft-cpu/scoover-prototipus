@@ -4,7 +4,7 @@
  */
 import { CONTACT_PHONE, CONTACT_PHONE_HREF, CONTACT_PLACE } from '../data/contact.js';
 
-export default function HelpLine() {
+export default function HelpLine({ onWishlist }) {
   return (
     <p className="help-line">
       Nem boldogulsz? Hívj:{' '}
@@ -12,6 +12,12 @@ export default function HelpLine() {
         ? <a href={CONTACT_PHONE_HREF}><strong>{CONTACT_PHONE}</strong></a>
         : <strong>{CONTACT_PHONE}</strong>}
       {' '}— vagy gyere be hozzánk {CONTACT_PLACE}.
+      {onWishlist && (
+        <>
+          {' '}Nem találod a rollered?{' '}
+          <button type="button" className="link" onClick={onWishlist}>Kívánságlista</button>
+        </>
+      )}
     </p>
   );
 }

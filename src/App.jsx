@@ -45,6 +45,7 @@ import SplitHandle from './components/SplitHandle.jsx';
 import CanvasCoach, { coachSeen, markCoachSeen } from './components/CanvasCoach.jsx';
 import AccountPanel from './account/AccountPanel.jsx';
 import AdminView from './admin/AdminView.jsx';
+import WishlistDialog from './components/WishlistDialog.jsx';
 import { effectiveDpi, dpiVerdict } from './utils/printQuality.js';
 import { getModelMeta } from './data/models/index.js';
 import { useAccount } from './account/useAccount.js';
@@ -142,6 +143,10 @@ export default function App() {
   /** Link/mentett terv betöltése indításkor: null | 'loading' | { error } */
   const [loadState, setLoadState] = useState(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  /** A fiók-panel előtöltése (kívánságlistából "Fiók létrehozása": e-mail, név, regisztráció fül). */
+  const [accountPrefill, setAccountPrefill] = useState(null);
+  /** Kívánságlista párbeszéd: "melyik rollerre kérnél fóliát?" */
+  const [wishlistOpen, setWishlistOpen] = useState(false);
   /** Ügyfélszolgálati nézet (#admin) – a konfigurátor helyett. */
   const [adminMode, setAdminMode] = useState(() => typeof location !== 'undefined' && /^#admin\b/.test(location.hash));
   /** E-mailből jövő jelszó-visszaállító token (#reset=…) – a fiók-panel kéri be az új jelszót. */
@@ -167,6 +172,11 @@ export default function App() {
   // ---------------------------------------------------------------------
   // Indítás: link (#id= / #d=) betöltése
   // ---------------------------------------------------------------------
+  // a felosztás a <html>-en is kell (scroll-padding a tapadó sávokhoz – styles.css)
+  useEffect(() => {
+    document.documentElement.style.setProperty('--split-pct', String(splitPct));
+  }, [splitPct]);
+
   useEffect(() => {
     const onHash = () => setAdminMode(/^#admin\b/.test(location.hash));
     window.addEventListener('hashchange', onHash);
@@ -694,12 +704,22 @@ export default function App() {
         </div>
       )}
 
+      {wishlistOpen && (
+        <WishlistDialog
+          user={account.user}
+          onClose={() => setWishlistOpen(false)}
+          onRegister={(prefill) => { setWishlistOpen(false); setAccountPrefill({ ...prefill, mode: 'register', tab: 'scooters' }); setAccountOpen(true); }}
+        />
+      )}
+
       {accountOpen && (
         <AccountPanel
           account={account}
+          prefill={accountPrefill}
+          onWishlist={() => { setAccountOpen(false); setWishlistOpen(true); }}
           resetToken={resetToken}
           onResetDone={() => setResetToken(null)}
-          onClose={() => { setAccountOpen(false); setResetToken(null); }}
+          onClose={() => { setAccountOpen(false); setResetToken(null); setAccountPrefill(null); }}
           currentDoc={doc}
           onOpenDesign={openSavedDesign}
           onNewDesign={() => { startNewDesign(); setAccountOpen(false); }}
@@ -878,7 +898,8 @@ export default function App() {
           ) : model && (
             <div className="cards">
               <Section {...sectionProps('section-model')} footer={nextButton('section-model')}>
-                <ModelSection modelId={modelId} onModelChange={changeModel} year={year} onYearChange={actions.setYear} />
+                <ModelSection modelId={modelId} onModelChange={changeModel} year={year} onYearChange={actions.setYear}
+                  onWishlist={() => setWishlistOpen(true)} />
               </Section>
 
               <Section {...sectionProps('section-style')} footer={nextButton('section-style')}>
@@ -986,7 +1007,7 @@ export default function App() {
             </div>
           )}
 
-          <div className="help-line-wrap"><HelpLine /></div>
+          <div className="help-line-wrap"><HelpLine onWishlist={() => setWishlistOpen(true)} /></div>
         </aside>
       </main>
     </div>

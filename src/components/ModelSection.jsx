@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { MODEL_REGISTRY, getModelMeta } from '../data/models/index.js';
 
-export default function ModelSection({ modelId, onModelChange, year, onYearChange }) {
+export default function ModelSection({ modelId, onModelChange, year, onYearChange, onWishlist }) {
   const [yearHelp, setYearHelp] = useState(false);
   const meta = getModelMeta(modelId);
   const years = meta?.years ?? [];
@@ -31,6 +31,13 @@ export default function ModelSection({ modelId, onModelChange, year, onYearChang
         </label>
       )}
 
+      {/* KÍVÁNSÁGLISTA – aki nem találja a modelljét, egy e-maillel kérheti; nem kell regisztrálnia. */}
+      {onWishlist && (
+        <div className="wish-entry">
+          <span>Nem találod a rollered?</span>
+          <button type="button" className="link" onClick={onWishlist}>Kérd a kívánságlistára – szólunk, ha elkészül</button>
+        </div>
+      )}
       <button type="button" className="link year-help-toggle" aria-expanded={yearHelp}
         onClick={() => setYearHelp((v) => !v)}>
         {yearHelp ? 'Bezárás' : 'Nem tudod, melyik évjárat?'}

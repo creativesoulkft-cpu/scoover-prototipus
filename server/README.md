@@ -3,7 +3,9 @@
 Node/Express + SQLite (`node:sqlite`, Node 22.13+) szerver a React
 konfigurátor (`src/`) mögött. Feladata:
 
-0. **mentett tervek** (`/api/designs`, `SCV-…` azonosító, előnézeti kép),
+0. **kívánságlista** (`POST /api/wishes` nyilvános; `/api/account/wishes`;
+   admin: `/api/admin/wishes` összesítés, `.csv`, `/notify` e-mail a várakozóknak),
+   **mentett tervek** (`/api/designs`, `SCV-…` azonosító, előnézeti kép),
    **fiókok** (`/api/account/*`: regisztráció, belépés, jelszó-visszaállítás,
    Terveim, Rollereim) és a **nyomdai feladatok** (`/api/print-jobs`, csak
    adminnak – lásd `docs/print-pipeline.md`),

@@ -637,3 +637,32 @@ details.sub > summary { padding: 6px 0; }
 .job-files .btn-primary { width: auto; padding: 8px 14px; font-size: 14px; }
 .job-warnings { margin: 0; padding-left: 18px; color: #ffb27b; font-size: 12.5px; }
 .job-sheet-preview { width: 100%; max-width: 620px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+
+/* =========================================================================
+   KÍVÁNSÁGLISTA – párbeszéd, belépési pont, admin táblázat
+   ========================================================================= */
+.wish-entry { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 13px; padding: 10px 12px;
+  border-radius: 10px; background: rgba(25, 230, 193, .07); border: 1px solid rgba(25, 230, 193, .3); }
+.wish-entry .link { font-weight: 600; }
+.help-line .link { font-size: inherit; }
+.modal.wishlist .field input[type=text] { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.modal.wishlist .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.wish-done .success { font-size: 15px; font-weight: 700; }
+.wishes-list { padding-top: 8px; border-top: 1px solid var(--border); }
+.admin-tabs { max-width: 520px; }
+.wish-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.wish-table th { text-align: left; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.wish-table td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.wish-table tr.open td { background: rgba(255, 106, 26, .06); }
+.wish-table .btn { padding: 5px 10px; font-size: 12.5px; white-space: nowrap; }
+.wish-entries ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 1023px) { .wish-table th:nth-child(4), .wish-table td:nth-child(4) { display: none; } }
+
+/* Görgetési tartomány: ha egy elemre görgetünk (scrollIntoView, #horgony,
+   fókusz), a tapadó sávok (fejléc, ársáv, gyorsnav, mobilon a kép + fogantyú)
+   alá/fölé ne kerüljön – a látható sávba essen. */
+html { scroll-padding-top: calc(var(--topbar-h, 0px) + var(--price-bar-h, 0px) + var(--quick-nav-h, 0px) + 8px); }
+@media (max-width: 1023px) {
+  html { scroll-padding-top: calc(var(--split-pct, 45) * 1dvh + 22px + var(--quick-nav-h, 0px) + 8px);
+    scroll-padding-bottom: calc(var(--price-bar-h, 0px) + 8px); }
+}

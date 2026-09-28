@@ -38,6 +38,16 @@ export function verificationMail(user, token) {
   };
 }
 
+/** "Elkészült a fólia a rolleredhez" – a kívánságlistán várakozóknak. */
+export function wishAvailableMail(wish, { link = null, message = null } = {}) {
+  const model = `${wish.brand} ${wish.modelName}${wish.year ? ` (${wish.year})` : ''}`;
+  return {
+    to: wish.email,
+    subject: `Scoover – elérhető a fólia: ${model}`,
+    text: `Szia${wish.name ? ` ${wish.name}` : ''}!\n\nJó hír: elkészült a Scoover fóliaszett ehhez a modellhez: ${model}.\n${message ? `\n${message}\n` : ''}\nTervezd meg a sajátodat a konfigurátorban:\n${link ?? config.appUrl}\n\nEzt a levelet azért kaptad, mert a kívánságlistánkon kérted az értesítést. Több levelet nem küldünk erről a modellről.\n\nScoover · Veszprém`,
+  };
+}
+
 export function passwordResetMail(user, token) {
   return {
     to: user.email,

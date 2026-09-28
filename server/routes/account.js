@@ -17,6 +17,7 @@ import {
 } from '../lib/auth.js';
 import { sendMail, verificationMail, passwordResetMail } from '../lib/mailer.js';
 import { listDesignsByOwner } from '../lib/designStore.js';
+import { attachToUser as attachWishes } from '../lib/wishStore.js';
 import { MODEL_REGISTRY, getModelMeta } from '../../src/data/models/index.js';
 
 const router = Router();
@@ -33,6 +34,7 @@ router.post('/api/account/register', authLimit, async (req, res) => {
   if (findUserByEmail(em)) return res.status(409).json({ ok: false, message: 'Ezzel az e-mail címmel már van fiók – lépj be, vagy kérj új jelszót.' });
   const user = createUser({ email: em, password, name, phone });
   createSession(res, user.id, req.headers['user-agent']);
+  attachWishes(em, user.id); // a fiók nélkül leadott kívánságok a fiókhoz kerülnek
   const token = issueToken(user.id, 'verify', 24 * 60);
   const mail = await sendMail(verificationMail(user, token)).catch((e) => ({ error: e.message }));
   return res.status(201).json({
@@ -48,6 +50,7 @@ router.post('/api/account/login', authLimit, (req, res) => {
     return res.status(401).json({ ok: false, message: 'Hibás e-mail cím vagy jelszó.' });
   }
   createSession(res, user.id, req.headers['user-agent']);
+  attachWishes(user.email, user.id);
   return res.json({ ok: true, user: publicUser(user) });
 });
 

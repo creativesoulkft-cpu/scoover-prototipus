@@ -91,6 +91,14 @@ npm run build    # dist/ – statikusan hosztolható
   szerver oldalon 300 dpi-s darabok + PDF **CutContour** vágóvonallal,
   munkalap PNG és manifest – lásd **[docs/print-pipeline.md](docs/print-pipeline.md)**
   (vágófájl-követelmények a plotteres kollégának is ott)
+- **kívánságlista** (`WishlistDialog`, `src/data/wishlistModels.js`): „Nem találod
+  a rollered?” – a vevő regisztráció NÉLKÜL, egy e-mail címmel kéri, melyik
+  modellre szeretne fóliát (márka, modell, évjárat, hozzájárulás); beküldés
+  után egy lépésben fiókot ajánlunk (előtöltött e-mail), bejelentkezve e-mail
+  sem kell; a fiókban „Rollereim és kívánságaim”; az `#admin` nézet
+  modellenként összesít (hányan várnak, évjáratok), CSV-t exportál, és
+  „Elérhető → értesítés” gombbal e-mailt küld a várakozóknak – ebből dől el,
+  melyik modell vágófájlja legyen a következő
 - **saját kép minősége**: az EGYEDI fülön élő dpi-becslés
   (`src/utils/printQuality.js`); a szerver ugyanezt írja a manifestbe
 - **"Mentsd le a tervedet!"**: a látható konfiguráció (minta/saját kép, felirat,
@@ -136,6 +144,7 @@ src/
     FineTuneBar.jsx     # igazítás chipsor (Méret/Forgatás/Eltolás/Nézet) + "Igazítás a képen"
     ZoneTargetChips.jsx # "Melyik részre?" – design-keverés zónánként
     SaveSharePanel.jsx  # Link a tervhez / Mentés fiókba
+    WishlistDialog.jsx  # kívánságlista: melyik rollerre kérnek fóliát (fiók nélkül is)
     CanvasCoach.jsx     # egyszeri tanító buborék az igazításhoz
     PatternDefs.jsx     # minta → SVG <defs> (pattern / gradient / image-tile / image), fill-érték
     LabelLayer.jsx      # vektoros felirat a textúra fölött (getBBox-alapú méretezés, clipPath)

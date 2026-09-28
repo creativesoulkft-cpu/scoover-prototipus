@@ -8,7 +8,7 @@
  * Belépés: admin szerepű fiók (ADMIN_EMAILS) VAGY az ADMIN_TOKEN beírása
  * (a böngésző sessionStorage-ban marad, a fájl-linkekhez ?token= kerül).
  */
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { bridgeFetch, BRIDGE_URL } from '../api/cartBridge.js';
 import { getModelMeta } from '../data/models/index.js';
 
@@ -110,11 +110,85 @@ function DesignRow({ d, api }) {
   );
 }
 
+/** Kívánságlista: melyik modellre hányan várnak – ebből dől el, mi legyen a következő vágófájl. */
+function WishesTab({ api }) {
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null);
+  const [openKey, setOpenKey] = useState(null);
+  const [entries, setEntries] = useState({});
+  const [notice, setNotice] = useState(null);
+  const load = useCallback(() => api.call('/api/admin/wishes').then((r) => setSummary(r.summary)).catch((e) => setError(e.message)), [api]);
+  useEffect(() => { load(); }, [load]);
+  async function toggle(key) {
+    if (openKey === key) { setOpenKey(null); return; }
+    setOpenKey(key);
+    if (!entries[key]) {
+      try { const r = await api.call(`/api/admin/wishes?key=${encodeURIComponent(key)}`); setEntries((e) => ({ ...e, [key]: r.wishes })); }
+      catch (e) { setError(e.message); }
+    }
+  }
+  async function notify(row) {
+    if (!window.confirm(`Értesítő e-mail ${row.open} címre: "${row.brand} ${row.modelName}" elérhető. Küldjük?`)) return;
+    try {
+      const r = await api.call('/api/admin/wishes/notify', { method: 'POST', body: { modelKey: row.modelKey } });
+      setNotice(`${row.brand} ${row.modelName}: ${r.sent} e-mail elküldve${r.failed.length ? `, ${r.failed.length} sikertelen` : ''}.`);
+      setEntries((e) => ({ ...e, [row.modelKey]: undefined }));
+      load();
+    } catch (e) { setError(e.message); }
+  }
+  const total = summary?.reduce((s, r) => s + r.total, 0) ?? 0;
+  return (
+    <div className="admin-wishes">
+      <div className="admin-actions">
+        <span className="muted small">{summary ? `${summary.length} modell · ${total} kívánság` : 'Betöltés…'}</span>
+        <a className="btn" href={`${BRIDGE_URL}/api/admin/wishes.csv${api.token ? `?token=${encodeURIComponent(api.token)}` : ''}`}>⬇ CSV export</a>
+      </div>
+      {error && <p className="error small">{error}</p>}
+      {notice && <p className="success small">{notice}</p>}
+      {summary?.length === 0 && <p className="muted small">Még nincs kívánság.</p>}
+      {summary?.length > 0 && (
+        <table className="wish-table">
+          <thead><tr><th>Modell</th><th>Vár rá</th><th>Nyitott</th><th>Évjáratok</th><th>Utolsó</th><th></th></tr></thead>
+          <tbody>
+            {summary.map((row) => (
+              <React.Fragment key={row.modelKey}>
+                <tr className={openKey === row.modelKey ? 'open' : ''}>
+                  <td><button type="button" className="link" onClick={() => toggle(row.modelKey)}>{row.brand} {row.modelName}</button></td>
+                  <td><strong>{row.total}</strong></td>
+                  <td>{row.open}</td>
+                  <td className="muted small">{Object.entries(row.years).map(([y, n]) => `${y}×${n}`).join(' ') || '–'}</td>
+                  <td className="muted small">{new Date(row.latest).toLocaleDateString('hu-HU')}</td>
+                  <td><button type="button" className="btn" disabled={!row.open} onClick={() => notify(row)} title="Elkészült a fólia – e-mail a várakozóknak">Elérhető → értesítés</button></td>
+                </tr>
+                {openKey === row.modelKey && (
+                  <tr className="wish-entries"><td colSpan={6}>
+                    {!entries[row.modelKey] ? <span className="muted small">Betöltés…</span> : (
+                      <ul>
+                        {entries[row.modelKey].map((w) => (
+                          <li key={w.id}>
+                            <span>{w.email}{w.name ? ` · ${w.name}` : ''}{w.phone ? ` · ${w.phone}` : ''}{w.year ? ` · ${w.year}` : ''}</span>
+                            <span className="muted small"> · {w.status} · {new Date(w.createdAt).toLocaleDateString('hu-HU')}{w.note ? ` · „${w.note}”` : ''}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </td></tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 export default function AdminView({ user, onExit }) {
   const api = useAdminApi();
   const [designs, setDesigns] = useState(null);
   const [error, setError] = useState(null);
   const [tokenInput, setTokenInput] = useState('');
+  const [tab, setTab] = useState('designs');
   const authorized = Boolean(api.token) || user?.role === 'admin';
 
   const load = useCallback(() => {
@@ -140,13 +214,21 @@ export default function AdminView({ user, onExit }) {
         </form>
       ) : (
         <>
+          <div className="tabs admin-tabs" role="tablist">
+            <button type="button" role="tab" className={`tab${tab === 'designs' ? ' active' : ''}`} onClick={() => setTab('designs')}>Tervek és nyomdai fájlok</button>
+            <button type="button" role="tab" className={`tab${tab === 'wishes' ? ' active' : ''}`} onClick={() => setTab('wishes')}>Kívánságlista</button>
+          </div>
           {error && <p className="error small">{error} {api.token && <button type="button" className="link" onClick={() => api.setToken('')}>token törlése</button>}</p>}
-          {designs === null && !error && <p className="muted small">Betöltés…</p>}
-          {designs?.length === 0 && <p className="muted small">Még nincs mentett terv.</p>}
-          {designs?.length > 0 && (
-            <ul className="admin-list">
-              {designs.map((d) => <DesignRow key={d.id} d={d} api={api} />)}
-            </ul>
+          {tab === 'wishes' ? <WishesTab api={api} /> : (
+            <>
+              {designs === null && !error && <p className="muted small">Betöltés…</p>}
+              {designs?.length === 0 && <p className="muted small">Még nincs mentett terv.</p>}
+              {designs?.length > 0 && (
+                <ul className="admin-list">
+                  {designs.map((d) => <DesignRow key={d.id} d={d} api={api} />)}
+                </ul>
+              )}
+            </>
           )}
         </>
       )}

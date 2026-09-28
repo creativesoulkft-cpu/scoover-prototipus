@@ -13,7 +13,7 @@ import { editKeyFor } from '../api/designs.js';
 
 const TABS = [
   { id: 'designs', label: 'Terveim' },
-  { id: 'scooters', label: 'Rollereim' },
+  { id: 'scooters', label: 'Rollereim és kívánságaim' },
   { id: 'profile', label: 'Adataim' },
 ];
 
@@ -27,11 +27,11 @@ function Field({ label, type = 'text', value, onChange, autoComplete, required, 
   );
 }
 
-function AuthForms({ account, onDone }) {
-  const [mode, setMode] = useState('login'); // login | register | forgot
-  const [email, setEmail] = useState('');
+function AuthForms({ account, onDone, prefill }) {
+  const [mode, setMode] = useState(prefill?.mode ?? 'login'); // login | register | forgot
+  const [email, setEmail] = useState(prefill?.email ?? '');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(prefill?.name ?? '');
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
@@ -162,7 +162,44 @@ function DesignsTab({ account, currentDoc, onOpenDesign, onNewDesign }) {
   );
 }
 
-function ScootersTab({ account, onPickScooter }) {
+function WishesList({ account, onWishlist }) {
+  const [items, setItems] = useState(null);
+  const [error, setError] = useState(null);
+  const reload = () => account.listWishes().then((r) => setItems(r.wishes)).catch((e) => setError(e.message));
+  useEffect(() => { reload(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  async function remove(id) {
+    try { await account.deleteWish(id); reload(); } catch (e) { setError(e.message); }
+  }
+  return (
+    <div className="controls wishes-list">
+      <h4>Kívánságlistám – erre várok fóliát</h4>
+      {error && <p className="error small">{error}</p>}
+      {items?.length === 0 && <p className="muted small">Még nincs kívánságod. Ha a rollered nincs a listán, itt kérheted.</p>}
+      {items?.length > 0 && (
+        <ul className="design-list">
+          {items.map((w) => (
+            <li key={w.id} className="design-item">
+              <div className="design-meta">
+                <strong>{w.brand} {w.modelName}{w.year ? ` · ${w.year}` : ''}</strong>
+                <span className="muted small">
+                  {w.status === 'notified' ? 'elérhető – értesítettünk' : 'várólistán'} · {new Date(w.createdAt).toLocaleDateString('hu-HU')}
+                </span>
+              </div>
+              <div className="design-actions">
+                <button type="button" className="link danger" onClick={() => remove(w.id)}>Visszavonás</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="control-row">
+        <button type="button" className="btn" onClick={onWishlist}>+ Új kívánság</button>
+      </div>
+    </div>
+  );
+}
+
+function ScootersTab({ account, onPickScooter, onWishlist }) {
   const [items, setItems] = useState(null);
   const [error, setError] = useState(null);
   const [modelId, setModelId] = useState(MODEL_REGISTRY[0].id);
@@ -217,6 +254,7 @@ function ScootersTab({ account, onPickScooter }) {
         <Field label="Becenév (opcionális)" value={nickname} onChange={setNickname} placeholder="pl. a piros G2" />
         <div className="control-row"><button type="submit" className="btn">+ Hozzáadás</button></div>
       </form>
+      <WishesList account={account} onWishlist={onWishlist} />
     </div>
   );
 }
@@ -265,8 +303,8 @@ function ProfileTab({ account }) {
   );
 }
 
-export default function AccountPanel({ account, onClose, currentDoc, onOpenDesign, onNewDesign, onPickScooter, resetToken, onResetDone }) {
-  const [tab, setTab] = useState('designs');
+export default function AccountPanel({ account, onClose, currentDoc, onOpenDesign, onNewDesign, onPickScooter, resetToken, onResetDone, prefill, onWishlist }) {
+  const [tab, setTab] = useState(prefill?.tab ?? 'designs');
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -283,7 +321,7 @@ export default function AccountPanel({ account, onClose, currentDoc, onOpenDesig
         {resetToken ? (
           <ResetForm account={account} token={resetToken} onDone={() => { onResetDone?.(); setTab('designs'); }} />
         ) : !account.user ? (
-          <AuthForms account={account} onDone={() => setTab('designs')} />
+          <AuthForms account={account} onDone={() => setTab(prefill?.tab ?? 'designs')} prefill={prefill} />
         ) : (
           <>
             <div className="tabs" role="tablist">
@@ -292,7 +330,7 @@ export default function AccountPanel({ account, onClose, currentDoc, onOpenDesig
               ))}
             </div>
             {tab === 'designs' && <DesignsTab account={account} currentDoc={currentDoc} onOpenDesign={onOpenDesign} onNewDesign={onNewDesign} />}
-            {tab === 'scooters' && <ScootersTab account={account} onPickScooter={onPickScooter} />}
+            {tab === 'scooters' && <ScootersTab account={account} onPickScooter={onPickScooter} onWishlist={onWishlist} />}
             {tab === 'profile' && <ProfileTab account={account} />}
           </>
         )}

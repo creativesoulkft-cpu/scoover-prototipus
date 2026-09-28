@@ -62,6 +62,8 @@ export function useAccount() {
   const deleteDesign = useCallback((id) => bridgeFetch(`/api/designs/${encodeURIComponent(id)}`, { method: 'DELETE' }), []);
   const claimDesign = useCallback((id, editKey) =>
     bridgeFetch(`/api/designs/${encodeURIComponent(id)}/claim`, { method: 'POST', body: { editKey } }), []);
+  const listWishes = useCallback(() => bridgeFetch('/api/account/wishes'), []);
+  const deleteWish = useCallback((id) => bridgeFetch(`/api/account/wishes/${encodeURIComponent(id)}`, { method: 'DELETE' }), []);
   const listScooters = useCallback(() => bridgeFetch('/api/account/scooters'), []);
   const addScooter = useCallback((s) => bridgeFetch('/api/account/scooters', { method: 'POST', body: s }), []);
   const removeScooter = useCallback((id) => bridgeFetch(`/api/account/scooters/${encodeURIComponent(id)}`, { method: 'DELETE' }), []);
@@ -69,6 +71,6 @@ export function useAccount() {
   return {
     user, ready, refresh, register, login, logout, updateProfile,
     requestPasswordReset, resetPassword, verifyEmail, resendVerification,
-    listDesigns, deleteDesign, claimDesign, listScooters, addScooter, removeScooter,
+    listDesigns, deleteDesign, claimDesign, listScooters, addScooter, removeScooter, listWishes, deleteWish,
   };
 }

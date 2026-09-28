@@ -16,6 +16,7 @@ import uploadRouter from './routes/upload.js';
 import designsRouter from './routes/designs.js';
 import accountRouter from './routes/account.js';
 import printRouter from './routes/print.js';
+import wishesRouter from './routes/wishes.js';
 
 openDb(config.dbPath);
 
@@ -35,13 +36,14 @@ app.use(csrfGuard);
 app.use(attachUser);
 app.use('/uploads', express.static(config.uploadDir));
 
-app.get('/api/health', (req, res) => res.json({ ok: true, wooMode: config.wooMode, accounts: true, designs: true, print: true }));
+app.get('/api/health', (req, res) => res.json({ ok: true, wooMode: config.wooMode, accounts: true, designs: true, print: true, wishlist: true }));
 
 app.use(cartRouter);
 app.use(uploadRouter);
 app.use(designsRouter);
 app.use(accountRouter);
 app.use(printRouter);
+app.use(wishesRouter);
 
 app.use((req, res) => {
   res.status(404).json({ ok: false, message: 'Ismeretlen végpont.' });
