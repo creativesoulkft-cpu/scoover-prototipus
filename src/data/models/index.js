@@ -13,6 +13,9 @@
  *      zónába soroláshoz `priceGroup`, lásd src/data/zones.js).
  *   2. Vegyél fel egy bejegyzést az alábbi tömbbe (id, name, brand, years, load).
  *   3. Adj neki árat: src/pricing.js → MODEL_PRICES (ugyanezzel az id-val).
+ *   4. Nyomdai geometria: a vágófájlból `node tools/import-cutfile.js <id> <fájl.svg>`
+ *      (amíg nincs: `node tools/derive-print-placeholder.js` helyőrzőt készít),
+ *      és a `loadPrint` + `printScale` mezők a bejegyzésbe (lásd a meglévőket).
  *   Ennyi, kódot nem kell írni.
  *
  * ÚJ ÉVJÁRAT: az adott modell `years` listájába egy új szám. Az évjárat
@@ -30,6 +33,10 @@ export const MODEL_REGISTRY = [
     brand: 'Kukirin',
     years: [2022, 2023, 2024, 2025],
     load: () => import('./kukirin-g2.js'),
+    /** nyomdai geometria (mm) – CSAK a szerver tölti be (server/print) */
+    loadPrint: () => import('./kukirin-g2.print.js'),
+    /** egy nézet-egység milliméterben – a saját kép dpi-becsléséhez (utils/printQuality.js) */
+    printScale: { schematic: 1.2, photo: 1.18 },
   },
   {
     id: 'kukirin-g2-master',
@@ -37,6 +44,8 @@ export const MODEL_REGISTRY = [
     brand: 'Kukirin',
     years: [2023, 2024, 2025],
     load: () => import('./kukirin-g2-master.js'),
+    loadPrint: () => import('./kukirin-g2-master.print.js'),
+    printScale: { schematic: 1.2, photo: 1.26 },
   },
 ];
 

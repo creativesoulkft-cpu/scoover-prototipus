@@ -1,7 +1,12 @@
-# Scoover kosár-híd
+# Scoover híd szerver
 
-Köztes Node/Express szerver a React konfigurátor (`src/`) és a WooCommerce
-Store API között. Feladata:
+Node/Express + SQLite (`node:sqlite`, Node 22.13+) szerver a React
+konfigurátor (`src/`) mögött. Feladata:
+
+0. **mentett tervek** (`/api/designs`, `SCV-…` azonosító, előnézeti kép),
+   **fiókok** (`/api/account/*`: regisztráció, belépés, jelszó-visszaállítás,
+   Terveim, Rollereim) és a **nyomdai feladatok** (`/api/print-jobs`, csak
+   adminnak – lásd `docs/print-pipeline.md`),
 
 1. fogadja a konfigurátor JSON-csomagját (`src/utils/cartConfig.js` építi fel),
 2. `tier === 'custom'` esetén letölti és ellenőrzi a feltöltött kép valódi
@@ -38,7 +43,15 @@ Másold `server/.env.example` → `server/.env`, és töltsd ki:
 | Változó | Jelentés |
 |---|---|
 | `PORT` | A híd szerver portja (alapértelmezett 8787) |
-| `CORS_ORIGIN` | A frontend origója, amit a híd CORS-on beenged |
+| `CORS_ORIGIN` | A frontend origói (vesszővel elválasztva) – sütis kérésekhez pontos egyezés kell |
+| `APP_URL` | A konfigurátor nyilvános URL-je – az e-mailekben küldött linkek (megerősítés, jelszó) ide mutatnak |
+| `DATA_DIR` / `DB_PATH` | Adatmappa (SQLite, előnézetek, nyomdai feladatok) – **rendszeres mentés alá vonandó** |
+| `SESSION_SAMESITE` | `Lax` (alap); `None`, ha a frontend és a híd más site-on fut (HTTPS kötelező) |
+| `COOKIE_SECURE` | `1` élesben (HTTPS); `https://` PUBLIC_BASE_URL esetén automatikus |
+| `ADMIN_TOKEN` | Titok az ügyfélszolgálati nézethez (`#admin`) és a nyomdai végpontokhoz (x-admin-token fejléc) |
+| `ADMIN_EMAILS` | Admin szerepű fiókok e-mail címei (vesszővel) – regisztrációkor kapják a szerepet |
+| `SMTP_URL` / `MAIL_FROM` | Levelezés; SMTP_URL nélkül a levelek a konzolra íródnak (fejlesztés) |
+| `PRINT_*` | Nyomdai render: tekercsszélesség, dpi, kifutó, hézag, dpi-figyelmeztetés – lásd docs/print-pipeline.md |
 | `WOO_MODE` | `mock` (nincs valódi WooCommerce, szimulált válasz) vagy `live` |
 | `WOO_BASE_URL` | A WooCommerce site URL-je (csak `live` módban kötelező) |
 | `WOO_CUSTOM_PRODUCT_ID` | Az "Egyedi roller-fólia" termék WooCommerce ID-ja |

@@ -47,7 +47,7 @@ function Chip({ active, onClick, children, swatch }) {
 
 export default function PatternGallery({
   selectedId, onSelect, uploadedPattern, onUpload, onClear, uploadStatus,
-  focusPieceId, onFocusPieceChange, focusPieceOptions,
+  focusPieceId, onFocusPieceChange, focusPieceOptions, dpiInfo,
 }) {
   const [line, setLine] = useState(selectedId === UPLOAD_PATTERN_ID ? 'custom' : 'print');
   const [density, setDensity] = useState('all');
@@ -93,6 +93,12 @@ export default function PatternGallery({
           <UploadPanel onUpload={onUpload} onClear={onClear} uploadedPattern={uploadedPattern} />
           {uploadStatus?.uploading && <p className="muted small">Kép feltöltése a szerverre…</p>}
           {uploadStatus?.error && <p className="error small">{uploadStatus.error}</p>}
+          {/* Élő nyomtatási minőség: a kép pixelmérete a roller valós méretére vetítve (utils/printQuality.js). */}
+          {dpiInfo && (
+            <p className={`dpi-note small ${dpiInfo.level}`} title="Effektív felbontás a fólián – a nagyítással változik">
+              Nyomtatási minőség: <strong>{dpiInfo.text}</strong>
+            </p>
+          )}
 
           {focusPieceOptions?.length > 0 && (
             <label className="field focus-piece">

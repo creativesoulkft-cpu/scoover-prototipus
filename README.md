@@ -72,6 +72,27 @@ npm run build    # dist/ – statikusan hosztolható
   a felrakás normál / komplex, csak személyes átvétellel
 - **kosárba teszem**: valódi WooCommerce kosártétel dinamikus, szerver oldalon
   hitelesített árral – lásd `server/README.md`
+- **terv-dokumentum** (`src/design/schema.js`): a teljes terv EGY verziózott
+  JSON-ban (`useDesign` reducer) – ebből épül a link, a mentés, a kosár és a
+  nyomdai fájl; a kliens sosem gyárt gyártási fájlt, csak receptet
+- **design-keverés**: a Stílus kártya „Melyik részre?” chipsorával zónánként
+  más minta/kép/igazítás; kevert szinteknél a szett ára a legmagasabb szint
+  szerint (`pricing.js` `zoneTiers`, `highestTier`)
+- **igazítás a képen** (`usePatternGesture`): mintaválasztáskor automatikusan
+  bekapcsol – húzás = eltolás, csippentés/görgő = méret, két ujj / Shift+görgő
+  = forgatás; tanító buborék az első alkalommal; a finomhangolás sáv
+  (`FineTuneBar`: Méret/Forgatás/Eltolás/Nézet) a képernyő aljához tapad
+- **megosztható link** (`SaveSharePanel`, `src/design/share.js`): szerverrel
+  `#id=SCV-…` (mentett terv), szerver nélkül a teljes terv az URL-ben (`#d=…`)
+- **fiók** (`src/account/`): regisztráció, belépés, e-mail megerősítés,
+  jelszó-visszaállítás; Terveim (bélyegképpel), Rollereim, Adataim – a híd
+  szerver SQLite adatbázisában (`server/lib/db.js`)
+- **nyomdai pipeline** (`server/print/`, `#admin` nézet): a mentett tervből
+  szerver oldalon 300 dpi-s darabok + PDF **CutContour** vágóvonallal,
+  munkalap PNG és manifest – lásd **[docs/print-pipeline.md](docs/print-pipeline.md)**
+  (vágófájl-követelmények a plotteres kollégának is ott)
+- **saját kép minősége**: az EGYEDI fülön élő dpi-becslés
+  (`src/utils/printQuality.js`); a szerver ugyanezt írja a manifestbe
 - **"Mentsd le a tervedet!"**: a látható konfiguráció (minta/saját kép, felirat,
   darabválasztás) éles, vízjelezett PNG-ként letölthető (modell, szint, ár a
   képen), plusz Web Share API gyorsgombok (WhatsApp, Instagram) mobilon –
@@ -101,8 +122,21 @@ src/
       _helpers.js     #   procedurális csempe-segédek
       solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js
     fonts.js          # felirat-betűtípus regiszter (6 Google Fonts) – kategóriák és feliratok innen választanak
+    <id>.print.js     #   NYOMDAI geometria (mm) – tools/import-cutfile.js (vagy helyőrző: derive-print-placeholder.js)
+  design/
+    schema.js         # a terv-dokumentum sémája (v1), ellenőrzés, migráció – kliens ÉS szerver
+    useDesign.js      # reducer: minden tervmódosítás; rétegek (base / zone:<id> / footboard)
+    layers.js         # terv → vászon-rétegek (melyik darab melyik mintát viseli), fő darab eltolás
+    share.js          # link: #id=SCV-… / #d=<tömörített terv> (lz-string)
+  print/pathTransform.js   # SVG path affin transzformáció, befoglaló doboz – DOM nélkül (nyomdai geometria)
+  account/            # fiók: useAccount hook + AccountPanel (belépés, Terveim, Rollereim, Adataim)
+  admin/AdminView.jsx # ügyfélszolgálat (#admin): mentett tervek, nyomdai fájl generálás/letöltés
   components/
-    ScooterCanvas.jsx   # roller-vázlat: darabok + közös minta-fill + szétnyitás
+    ScooterCanvas.jsx   # roller-vázlat: darabok RÉTEGENKÉNT mintázva + szétnyitás
+    FineTuneBar.jsx     # igazítás chipsor (Méret/Forgatás/Eltolás/Nézet) + "Igazítás a képen"
+    ZoneTargetChips.jsx # "Melyik részre?" – design-keverés zónánként
+    SaveSharePanel.jsx  # Link a tervhez / Mentés fiókba
+    CanvasCoach.jsx     # egyszeri tanító buborék az igazításhoz
     PatternDefs.jsx     # minta → SVG <defs> (pattern / gradient / image-tile / image), fill-érték
     LabelLayer.jsx      # vektoros felirat a textúra fölött (getBBox-alapú méretezés, clipPath)
     LabelControls.jsx   # felirat ki/be, szöveg, céldarab
@@ -141,7 +175,11 @@ src/
   utils/exportImage.js      # SVG → vízjelezett, megosztható PNG (natív szerializálás + Canvas)
   api/cartBridge.js         # kliens a köztes híd szerverhez (feltöltés + kosárba helyezés)
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
-server/                     # köztes híd szerver (Node/Express) → WooCommerce Store API; lásd server/README.md
+server/                     # híd szerver (Node/Express + SQLite): kosár, tervek, fiók, nyomdai render; lásd server/README.md
+server/print/               #   render.js (recept → darabok → PDF+CutContour → munkalap), assets/ (mesterek), fonts/
+tools/import-cutfile.js     # valódi vágófájl (SVG, mm) → <id>.print.js
+tools/derive-print-placeholder.js # helyőrző nyomdai geometria a vázlatból
+docs/print-pipeline.md      # A NYOMDAI FOLYAMAT LEÍRÁSA + vágófájl-követelmények
 public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
 public/brand/               # Scoover logó (SVG a fejlécben, PNG a mentett PNG vízjelén)
 tools/generate-schematic.js # sematikus vázlat-generátor (fejlesztői segéd, nem fut az appban)

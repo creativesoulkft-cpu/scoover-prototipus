@@ -5,3 +5,11 @@ dist
 dist-single
 .env
 server/uploads
+
+# szerver adatok: SQLite, terv-előnézetek, nyomdai feladatok (mentés alá vonandó, nem repóba)
+server/data/
+# nyomdai mesterek és betűk: nagy bináris márkaeszközök – csak a README marad a repóban
+server/print/assets/patterns/*
+!server/print/assets/patterns/.gitkeep
+server/print/fonts/*
+!server/print/fonts/README.md

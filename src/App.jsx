@@ -44,6 +44,9 @@ import FullscreenPreview from './components/FullscreenPreview.jsx';
 import SplitHandle from './components/SplitHandle.jsx';
 import CanvasCoach, { coachSeen, markCoachSeen } from './components/CanvasCoach.jsx';
 import AccountPanel from './account/AccountPanel.jsx';
+import AdminView from './admin/AdminView.jsx';
+import { effectiveDpi, dpiVerdict } from './utils/printQuality.js';
+import { getModelMeta } from './data/models/index.js';
 import { useAccount } from './account/useAccount.js';
 import { useMediaQuery, NARROW_QUERY } from './hooks/useMediaQuery.js';
 import { useReportHeight } from './hooks/useReportHeight.js';
@@ -139,6 +142,8 @@ export default function App() {
   /** Link/mentett terv betöltése indításkor: null | 'loading' | { error } */
   const [loadState, setLoadState] = useState(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  /** Ügyfélszolgálati nézet (#admin) – a konfigurátor helyett. */
+  const [adminMode, setAdminMode] = useState(() => typeof location !== 'undefined' && /^#admin\b/.test(location.hash));
   /** E-mailből jövő jelszó-visszaállító token (#reset=…) – a fiók-panel kéri be az új jelszót. */
   const [resetToken, setResetToken] = useState(null);
   /** Rövid, felül megjelenő üzenet (pl. "e-mail megerősítve"). */
@@ -163,6 +168,13 @@ export default function App() {
   // Indítás: link (#id= / #d=) betöltése
   // ---------------------------------------------------------------------
   useEffect(() => {
+    const onHash = () => setAdminMode(/^#admin\b/.test(location.hash));
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  useEffect(() => {
+    if (adminMode) return;
     // e-mailes linkek: #verify=<token> / #reset=<token>
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
     const verify = params.get('verify');
@@ -396,6 +408,15 @@ export default function App() {
     wheelRef: canvasWrapRef,
   });
   const dismissCoach = useCallback(() => { setCoachVisible(false); markCoachSeen(); }, []);
+
+  /** Saját kép nyomtatási minősége az aktuális nagyítással (a szerver ugyanezt számolja a manifestbe). */
+  const dpiInfo = useMemo(() => {
+    if (editLayer.patternId !== UPLOAD_PATTERN_ID) return null;
+    const local = localImages[editLayerKey];
+    const px = editLayer.image ?? (local ? { width: local.originalWidth ?? local.width, height: local.originalHeight ?? local.height } : null);
+    const mmPerUnit = getModelMeta(modelId)?.printScale?.[activeView];
+    return dpiVerdict(effectiveDpi(px, activeViewBox, editLayer.transform.scale, mmPerUnit));
+  }, [editLayer, localImages, editLayerKey, modelId, activeView, activeViewBox]);
 
   /** A fő darab választható értékei: darab-csoportonként EGY sor, a taposó nélkül. */
   const focusPieceOptions = useMemo(() => {
@@ -636,6 +657,20 @@ export default function App() {
     onToggle: () => toggleSection(id),
   });
 
+  if (adminMode) {
+    return (
+      <div className="app">
+        <header className="topbar" ref={topbarRef}>
+          <div className="brand">
+            <img src={assetUrl('brand/scoover-logo.svg')} alt="Scoover" className="brand-logo" />
+            <h1>Scoover · ügyfélszolgálat</h1>
+          </div>
+        </header>
+        <AdminView user={account.user} onExit={() => { replaceLocationHash(''); setAdminMode(false); }} />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="topbar" ref={topbarRef}>
@@ -868,6 +903,7 @@ export default function App() {
                   focusPieceId={editLayer.focusPieceId ?? DEFAULT_FOCUS_PIECE_ID}
                   onFocusPieceChange={(id) => actions.setLayerFocus(editLayerKey, id)}
                   focusPieceOptions={focusPieceOptions}
+                  dpiInfo={dpiInfo}
                 />
                 <FineTuneBar
                   transform={editLayer.transform}

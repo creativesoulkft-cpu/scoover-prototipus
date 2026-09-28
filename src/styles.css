@@ -603,3 +603,37 @@ details.sub > summary { padding: 6px 0; }
 .notice-bar { position: sticky; top: 0; z-index: 12; display: flex; justify-content: space-between; gap: 12px; align-items: center;
   padding: 8px 16px; background: rgba(25, 230, 193, .14); border-bottom: 1px solid rgba(25, 230, 193, .4); font-size: 13px; }
 @media (max-width: 1023px) { .design-item { grid-template-columns: 72px 1fr auto; } .design-thumb { width: 72px; height: 48px; } }
+
+/* =========================================================================
+   ÜGYFÉLSZOLGÁLATI NÉZET (#admin) + dpi-jelzés az EGYEDI fülön
+   ========================================================================= */
+.dpi-note { margin: 4px 0 0; padding: 6px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--border); }
+.dpi-note.good { border-color: rgba(25, 230, 193, .5); }
+.dpi-note.ok { border-color: rgba(255, 106, 26, .5); }
+.dpi-note.low { border-color: #ff7b7b; color: #ff9b9b; }
+.admin { padding: 16px 20px 40px; max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+.admin-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.admin-bar-right { display: flex; gap: 8px; }
+.admin-login { max-width: 420px; }
+.admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.admin-design { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.admin-design.open { border-color: var(--accent); }
+.admin-design-head { display: grid; grid-template-columns: 96px 1fr auto; gap: 12px; align-items: center; width: 100%; padding: 10px;
+  background: none; border: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.admin-design-body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border); }
+.admin-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 10px; }
+.admin-actions input[type=text] { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font: inherit; flex: 1 1 200px; }
+.admin-actions .btn-primary { width: auto; flex: none; }
+.job-card { padding: 10px 12px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.job-card.status-done { border-color: rgba(25, 230, 193, .45); }
+.job-card.status-failed { border-color: #ff7b7b; }
+.job-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+.job-status { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--panel); }
+.job-status.done { color: var(--accent-2); }
+.job-status.running, .job-status.queued { color: var(--accent); }
+.job-status.failed { color: #ff7b7b; }
+.job-files { display: flex; flex-wrap: wrap; gap: 8px; }
+.job-files .btn { text-decoration: none; display: inline-flex; align-items: center; }
+.job-files .btn-primary { width: auto; padding: 8px 14px; font-size: 14px; }
+.job-warnings { margin: 0; padding-left: 18px; color: #ffb27b; font-size: 12.5px; }
+.job-sheet-preview { width: 100%; max-width: 620px; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
