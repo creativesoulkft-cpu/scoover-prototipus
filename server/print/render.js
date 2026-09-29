@@ -1,10 +1,13 @@
 /**
  * NYOMDAI RENDER – a terv-dokumentumból (recept) determinisztikusan:
  *
- *   terv (SCV-…) + modell nyomdai geometriája (mm)
- *     → darabonként SVG (minta a nézetből mm-be leképezve, kifutó, feliratok)
- *     → 300 dpi PNG (resvg)
- *     → elrendezés a tekercsen (nest.js)
+ *   terv (SCV-…) + modell nyomdai geometriája (geometry.js)
+ *     → darab-példányonként SVG a saját terében (minta a nézetből leképezve,
+ *       kifutó, feliratok) → 300 dpi PNG (resvg)
+ *     → elrendezés:
+ *         'sheet' (valódi vágóív): a darabok az EREDETI vágóív helyén, a lap
+ *                  mérete a vágóívé – a vágóvonal pontosan az eredeti
+ *         'nest'  (helyőrző): polcos elrendezés a tekercsre (nest.js)
  *     → PDF: raszterek + CutContour vágóvonal (pdf.js)
  *     → munkalap PNG (jobSheet.js) + manifest.json
  *
@@ -18,28 +21,50 @@ import { loadModel } from '../lib/designValidate.js';
 import { getModelMeta } from '../../src/data/models/index.js';
 import { getPattern, getCategory, UPLOAD_PATTERN_ID } from '../../src/data/patterns/index.js';
 import { ZONES, zoneOfPiece } from '../../src/data/zones.js';
+import { getFootboardFlat } from '../../src/data/footboardFlat.js';
 import { readLayer, zoneLayerKey, LAYER_BASE, LAYER_FOOTBOARD } from '../../src/design/useDesign.js';
 import { tierForLayer, focusOffset } from '../../src/design/layers.js';
 import { highestTier } from '../../src/pricing.js';
 import { resolveLabelFont, resolveLabelColor } from '../../src/utils/labelStyle.js';
 import { labelColorFor } from '../../src/utils/color.js';
 import { effectiveDpi } from '../../src/utils/printQuality.js';
-import { transformPath, multiply, translateM } from '../../src/print/pathTransform.js';
+import { transformPath, multiply, translateM, rotateM, pathBounds } from '../../src/print/pathTransform.js';
 import { resolveTextureAsset, resolveUploadedImage } from './assets.js';
-import { patternDefs, labelSvg, buildPieceSvg } from './pieceSvg.js';
+import { patternDefs, labelSvg, buildCopySvg } from './pieceSvg.js';
+import { loadPrintGeometry } from './geometry.js';
 import { shelfPack } from './nest.js';
 import { composePdf } from './pdf.js';
 import { renderJobSheet } from './jobSheet.js';
 
-/** Melyik nézet térképe használandó a darabhoz: amiben a vevő tervezett; ha arra nincs, a vázlaté. */
-function pickPreview(piece, printPiece, doc, model) {
+const det = (m) => m[0] * m[3] - m[1] * m[2];
+
+/** A nézet, amiben a vevő tervezett (taposónál a felülnézet); ha arra nincs leképezés, az első elérhető. */
+function pickView(piece, copy, doc, model) {
   const wanted = piece.footboard ? 'footboard' : doc.view;
-  const view = printPiece.previewMaps[wanted] ? wanted : Object.keys(printPiece.previewMaps)[0];
+  const view = copy.previewMaps[wanted] ? wanted : Object.keys(copy.previewMaps)[0];
+  if (!view) return null;
+  if (view === 'footboard') {
+    const flat = getFootboardFlat(model);
+    return { view, map: copy.previewMaps.footboard, viewBox: flat.viewBox, previewPieces: [flat.piece], previewPiece: { d: flat.piece.d, labelAngle: 0 } };
+  }
   const previewPieces = view === 'photo' ? model.photoView.pieces : model.pieces;
-  const previewPiece = previewPieces.find((p) => p.id === piece.id) ?? piece;
-  const viewBox = view === 'photo' ? model.photoView.viewBox : view === 'footboard'
-    ? { width: printPiece.widthMm, height: printPiece.heightMm } : model.viewBox;
-  return { view, map: printPiece.previewMaps[view], previewPiece, viewBox, previewPieces };
+  const previewPiece = previewPieces.find((p) => p.id === piece.id)
+    ?? previewPieces.find((p) => piece.priceGroup && p.priceGroup === piece.priceGroup) ?? piece;
+  const viewBox = view === 'photo' ? model.photoView.viewBox : model.viewBox;
+  return { view, map: copy.previewMaps[view], viewBox, previewPieces, previewPiece };
+}
+
+/** 'nest' elrendezésnél a helyére tett példány: d és leképezés a lap terébe (eltolás + esetleg 90° forgatás). */
+function placeCopy(copy, pl, bleedMm) {
+  const W = copy.widthMm, H = copy.heightMm;
+  let P = translateM(pl.x + bleedMm, pl.y + bleedMm);
+  if (pl.rotated) P = multiply(P, multiply(translateM(H, 0), rotateM(90))); // (x,y) → (H − y, x)
+  const d = transformPath(copy.d, P);
+  const bb = pathBounds(d);
+  return {
+    ...copy, d, xMm: bb.x, yMm: bb.y, widthMm: bb.width, heightMm: bb.height, rotated: pl.rotated,
+    previewMaps: Object.fromEntries(Object.entries(copy.previewMaps).map(([v, m]) => [v, multiply(P, m)])),
+  };
 }
 
 /**
@@ -57,14 +82,13 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
   const warnings = [];
   const meta = getModelMeta(doc.model);
   if (!meta) throw new Error(`Ismeretlen modell: ${doc.model}`);
-  if (!meta.loadPrint) throw new Error(`A(z) ${meta.name} modellhez nincs nyomdai geometria (loadPrint).`);
-  const [model, print] = await Promise.all([loadModel(doc.model), meta.loadPrint().then((m) => m.default)]);
-  if (print.source === 'placeholder') {
-    warnings.push('A nyomdai geometria HELYŐRZŐ (a vázlatból közelítve) – a valódi vágófájl importja előtt NEM gyártható.');
+  const [model, geo] = await Promise.all([loadModel(doc.model), loadPrintGeometry(doc.model)]);
+  if (geo.source === 'placeholder') {
+    warnings.push('A nyomdai geometria HELYŐRZŐ (a vázlatból közelítve) – a valódi vágóív importja előtt NEM gyártható.');
   }
   mkdirSync(join(dir, 'pieces'), { recursive: true });
-  const { dpi, bleedMm: defaultBleed } = config.print;
-  const bleedMm = print.bleedMm ?? defaultBleed;
+  const { dpi } = config.print;
+  const bleedMm = geo.bleedMm;
 
   // --- mely darabok készülnek: kiválasztott zónák darabjai + taposó ---
   const availableZoneIds = ZONES.filter((z) => model.pieces.some((p) => z.groups.includes(p.priceGroup))).map((z) => z.id);
@@ -93,7 +117,8 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
       if (pattern.type === 'image-tile') {
         asset = await resolveTextureAsset(pattern);
         if (!asset) throw new Error(`A(z) ${pattern.id} textúra képe nem található.`);
-        if (!asset.isMaster) warnings.push(`"${pattern.name}": nincs nyomdai mester (server/print/assets/patterns/${pattern.id}.png), az előnézeti ${asset.width} px-es képből készült – ~${Math.round((asset.width / (pattern.tile * (print.mmPerUnit?.schematic ?? 1.2))) * 25.4)} dpi.`);
+        const mmPerUnit = geo.mmPerUnit?.[doc.view] ?? geo.mmPerUnit?.schematic ?? 1.2;
+        if (!asset.isMaster) warnings.push(`"${pattern.name}": nincs nyomdai mester (server/print/assets/patterns/${pattern.id}.png), az előnézeti ${asset.width} px-es képből készült – ~${Math.round((asset.width / (pattern.tile * mmPerUnit)) * 25.4)} dpi.`);
       }
     }
     const category = getCategory(pattern.category ?? 'solid');
@@ -102,26 +127,47 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
     return info;
   }
 
-  // --- darabonként SVG + PNG ---
-  onProgress('darabok renderelése');
-  const pieceEntries = [];
-  const nestItems = [];
+  // --- a gyártandó példányok ---
+  onProgress('darabok előkészítése');
+  const jobs = [];
   for (const piece of wanted) {
-    const printPiece = print.pieces.find((p) => p.id === piece.id);
-    if (!printPiece) { warnings.push(`A(z) ${piece.id} darabnak nincs nyomdai kontúrja – kihagyva.`); continue; }
+    const gp = geo.pieces.find((p) => p.id === piece.id);
+    if (!gp) { warnings.push(`A(z) ${piece.name} (${piece.id}) darab nincs a vágóíven / nincs hozzárendelve – kihagyva.`); continue; }
     const zone = zoneOfPiece(piece);
     const layerKey = piece.footboard ? LAYER_FOOTBOARD : (zone && doc.style.zones[zone.id] ? zoneLayerKey(zone.id) : LAYER_BASE);
     const info = await layerInfo(layerKey);
-    const pv = pickPreview(piece, printPiece, doc, model);
+    for (const copy of gp.copies) {
+      jobs.push({ piece, gp, copy, info });
+    }
+  }
+  if (!jobs.length) throw new Error('A kiválasztott zónákhoz egyetlen vágóív-darab sincs hozzárendelve.');
 
-    // a felhasználói transzformáció + a "fő darab" eltolás, ahogy az előnézet is számolja
+  // --- elrendezés: vágóív (eredeti hely) vagy polcos ---
+  let page;
+  if (geo.layout === 'sheet') {
+    page = { widthMm: geo.sheet.widthMm, heightMm: geo.sheet.heightMm, layout: 'sheet' };
+  } else {
+    onProgress('elrendezés a tekercsen');
+    const { placements, lengthMm } = shelfPack(jobs.map((j) => ({ key: j.copy.key, w: j.copy.widthMm + 2 * bleedMm, h: j.copy.heightMm + 2 * bleedMm })), config.print);
+    const at = Object.fromEntries(placements.map((p) => [p.key, p]));
+    for (const j of jobs) j.copy = placeCopy(j.copy, at[j.copy.key], bleedMm);
+    page = { widthMm: config.print.rollWidthMm, heightMm: lengthMm, layout: 'nest' };
+  }
+
+  // --- raszter + vágóvonal példányonként ---
+  onProgress('darabok renderelése');
+  const pdfItems = [];
+  const byPiece = new Map();
+  let fontWarned = false;
+  for (const { piece, copy, info } of jobs) {
+    const pv = pickView(piece, copy, doc, model);
+    if (!pv) { warnings.push(`${copy.key}: nincs nézet-leképezés – kihagyva.`); continue; }
     const { fx, fy } = piece.footboard ? { fx: 0, fy: 0 } : focusOffset(info.layer, pv.previewPieces, pv.viewBox);
     const transform = { ...info.layer.transform, dx: info.layer.transform.dx + fx, dy: info.layer.transform.dy + fy };
     const extraScale = doc.options.sizeAwareTiling && (info.pattern.type === 'image-tile' || info.pattern.type === 'tile')
       ? ((info.pattern.patternScale ?? info.category.patternScale)?.[piece.size] ?? 1) : 1;
-    const paint = patternDefs({ pattern: info.pattern, asset: info.asset, transform, viewBox: pv.viewBox, previewMap: pv.map, extraScale, id: `p_${piece.id}` });
+    const paint = patternDefs({ pattern: info.pattern, asset: info.asset, transform, viewBox: pv.viewBox, previewMap: pv.map, extraScale, id: `p_${copy.key}` });
 
-    // feliratok, amelyek erre a darabra kerülnek
     const labelSources = piece.footboard
       ? (doc.footboard.label?.enabled ? [doc.footboard.label] : [])
       : doc.labels.filter((l) => l.enabled && l.pieceId === piece.id);
@@ -129,74 +175,61 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
       label: l,
       font: resolveLabelFont(l, info.category.labelFont),
       color: resolveLabelColor(l, info.autoColor),
-      previewPiece: piece.footboard ? { d: printPiece.d, labelAngle: 0 } : pv.previewPiece,
-      uid: `t_${piece.id}_${i}`,
+      previewPiece: pv.previewPiece,
+      uid: `t_${copy.key}_${i}`,
+      unmirror: det(pv.map) < 0,
     }));
-    if (labels.length && !existsSync(config.print.fontsDir)) {
+    if (labels.length && !fontWarned && !existsSync(config.print.fontsDir)) {
+      fontWarned = true;
       warnings.push('Nincs server/print/fonts mappa – a feliratok tartalék betűtípussal készültek (lásd server/print/fonts/README.md).');
     }
 
     let dpiEffective = null;
     if (info.pattern.type === 'image') {
-      const mmPerUnit = pv.view === 'footboard' ? 1 : (print.mmPerUnit?.[pv.view] ?? null);
+      const mmPerUnit = pv.view === 'footboard' ? 1 : (geo.mmPerUnit?.[pv.view] ?? null);
       dpiEffective = effectiveDpi({ width: info.asset.width, height: info.asset.height }, pv.viewBox, info.layer.transform.scale, mmPerUnit);
       if (dpiEffective != null && dpiEffective < config.print.minDpiWarn) {
-        warnings.push(`${piece.name}: a saját kép effektív felbontása ${dpiEffective} dpi (< ${config.print.minDpiWarn}) – szemcsés lehet.`);
+        warnings.push(`${copy.key}: a saját kép effektív felbontása ${dpiEffective} dpi (< ${config.print.minDpiWarn}) – szemcsés lehet.`);
       }
     }
 
-    const copies = [];
-    for (let c = 0; c < (printPiece.quantity ?? 1); c++) {
-      const mirror = c === 1 && Boolean(printPiece.mirror);
-      const key = `${piece.id}${(printPiece.quantity ?? 1) > 1 ? (mirror ? '-R' : '-L') : ''}`;
-      copies.push({ key, mirror });
-      nestItems.push({ key, w: printPiece.widthMm + 2 * bleedMm, h: printPiece.heightMm + 2 * bleedMm });
+    const built = buildCopySvg({ copy, bleedMm, paint, labels, previewMap: pv.map, dpi });
+    let png = null;
+    if (paint.printable) {
+      png = new Resvg(built.svg, {
+        font: { fontDirs: [config.print.fontsDir], loadSystemFonts: true, defaultFontFamily: 'DejaVu Sans' },
+        imageRendering: 0, shapeRendering: 2, textRendering: 1,
+      }).render().asPng();
+      writeFileSync(join(dir, 'pieces', `${copy.key}.png`), png);
     }
-    pieceEntries.push({ piece, printPiece, info, pv, paint, labels, copies, dpiEffective });
+    writeFileSync(join(dir, 'pieces', `${copy.key}.svg`), built.svg);
+    // a vágóvonal a darab SAJÁT, változatlan kontúrja (vágóívnél: pontosan az eredeti)
+    pdfItems.push({ png, x: built.xMm, y: built.yMm, w: built.widthMm, h: built.heightMm, cutPathMm: copy.d, label: `${copy.key} · ${designId}` });
+
+    const entry = byPiece.get(piece.id) ?? {
+      id: piece.id, name: piece.name, footboard: Boolean(piece.footboard), zone: zoneOfPiece(piece)?.id ?? null,
+      widthMm: copy.widthMm, heightMm: copy.heightMm, bleedMm, mirror: false,
+      layer: info.key, tier: info.tier, patternId: info.layer.patternId, patternName: info.patternName,
+      printable: paint.printable, vinylColor: paint.vinylColor, dpiEffective, previewView: pv.view, copies: [], labels: labels.length,
+    };
+    if (copy.side === 'L') entry.mirror = true;
+    entry.copies.push({
+      key: copy.key, n: copy.n ?? null, side: copy.side ?? null, confidence: copy.confidence ?? null, rotated: Boolean(copy.rotated),
+      xMm: Math.round(copy.xMm * 10) / 10, yMm: Math.round(copy.yMm * 10) / 10,
+      wMm: Math.round(copy.widthMm * 10) / 10, hMm: Math.round(copy.heightMm * 10) / 10,
+      png: png ? `pieces/${copy.key}.png` : null, svg: `pieces/${copy.key}.svg`,
+    });
+    byPiece.set(piece.id, entry);
   }
 
-  // --- elrendezés ---
-  onProgress('elrendezés a tekercsen');
-  const { placements, lengthMm } = shelfPack(nestItems, config.print);
-  const placementOf = Object.fromEntries(placements.map((p) => [p.key, p]));
+  // a kérdéses hozzárendelések egy sorban
+  const uncertain = jobs.filter((j) => j.copy.confidence === 'kérdéses').map((j) => `#${j.copy.n ?? '?'} ${j.copy.key}`);
+  if (uncertain.length) warnings.push(`KÉRDÉSES vágóív-hozzárendelés (${uncertain.length}): ${uncertain.join(', ')} – gyártás előtt megerősítendő (tools/cutfile/${doc.model}/mapping.json).`);
 
-  // --- raszter + vágóvonal darabonként (a forgatás az elrendezésből jön) ---
-  const pdfItems = [];
-  const manifestPieces = [];
-  for (const e of pieceEntries) {
-    const copiesOut = [];
-    for (const copy of e.copies) {
-      const pl = placementOf[copy.key];
-      const built = buildPieceSvg({
-        piece: e.printPiece, bleedMm, paint: e.paint, labels: e.labels, previewMap: e.pv.map,
-        mirror: copy.mirror, rotate90: pl.rotated, dpi,
-      });
-      let png = null;
-      if (e.paint.printable) {
-        const r = new Resvg(built.svg, {
-          font: { fontDirs: [config.print.fontsDir], loadSystemFonts: true, defaultFontFamily: 'DejaVu Sans' },
-          imageRendering: 0, shapeRendering: 2, textRendering: 1,
-        });
-        png = r.render().asPng();
-        writeFileSync(join(dir, 'pieces', `${copy.key}.png`), png);
-      }
-      writeFileSync(join(dir, 'pieces', `${copy.key}.svg`), built.svg);
-      // vágóvonal a lapon: darab-tér (mm) → tükrözés/forgatás → eltolás a helyére (a kifutós doboz bal-felső sarka + b)
-      const M = multiply(translateM(pl.x + bleedMm, pl.y + bleedMm), built.placementMatrix);
-      pdfItems.push({
-        png, x: pl.x, y: pl.y, w: built.widthMm, h: built.heightMm,
-        cutPathMm: transformPath(e.printPiece.d, M), label: `${copy.key} · ${designId}`,
-      });
-      copiesOut.push({ key: copy.key, mirror: copy.mirror, rotated: pl.rotated, xMm: pl.x, yMm: pl.y, wMm: built.widthMm, hMm: built.heightMm,
-        png: png ? `pieces/${copy.key}.png` : null, svg: `pieces/${copy.key}.svg` });
-    }
-    manifestPieces.push({
-      id: e.piece.id, name: e.piece.name, footboard: Boolean(e.piece.footboard), zone: zoneOfPiece(e.piece)?.id ?? null,
-      widthMm: e.printPiece.widthMm, heightMm: e.printPiece.heightMm, bleedMm, mirror: Boolean(e.printPiece.mirror),
-      layer: e.info.key, tier: e.info.tier, patternId: e.info.layer.patternId, patternName: e.info.patternName,
-      printable: e.paint.printable, vinylColor: e.paint.vinylColor, dpiEffective: e.dpiEffective,
-      previewView: e.pv.view, copies: copiesOut, labels: e.labels.length,
-    });
+  if (geo.unassigned?.length) {
+    const groups = {};
+    for (const u of geo.unassigned) { const k = u.extra ?? 'azonosítatlan'; groups[k] = (groups[k] ?? 0) + 1; }
+    warnings.push(`A vágóíven ${geo.unassigned.length} darab nincs a konfigurátor zónáihoz rendelve (${Object.entries(groups).map(([k, n]) => `${k} ×${n}`).join(', ')}) – nem került a nyomatra.`);
   }
 
   // --- PDF ---
@@ -209,7 +242,7 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
   const tier = highestTier(zonesOut.map((z) => z.tier).concat(includeFootboard ? [layerCache.get(LAYER_FOOTBOARD)?.tier ?? 'solid'] : []));
   const title = `Scoover ${designId} – ${meta.name}${doc.year ? ` ${doc.year}` : ''}`;
   const pdfBytes = await composePdf({
-    widthMm: config.print.rollWidthMm, heightMm: lengthMm, items: pdfItems,
+    widthMm: page.widthMm, heightMm: page.heightMm, items: pdfItems,
     meta: { title, subject: `Roller-fólia ${tier.toUpperCase()} · ${orderRef ?? 'rendelés nélkül'}`, keywords: ['scoover', designId, 'CutContour'] },
   });
   const pdfName = `${designId}-${jobId}.pdf`;
@@ -217,7 +250,7 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
 
   const fbInfo = includeFootboard ? layerCache.get(LAYER_FOOTBOARD) : null;
   const manifest = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     jobId, designId, orderRef, createdAt: new Date().toISOString(),
     model: { id: meta.id, name: meta.name }, year: doc.year ?? null, view: doc.view,
     tier, mixed: Object.keys(doc.style.zones).length > 0,
@@ -225,11 +258,15 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
     footboard: fbInfo ? { tier: fbInfo.tier, patternName: fbInfo.patternName } : null,
     installation: doc.installation,
     bleedMm, dpi,
-    geometry: { source: print.source, sourceFile: print.sourceFile ?? null, generatedAt: print.generatedAt ?? null },
-    sheet: { rollWidthMm: config.print.rollWidthMm, lengthMm: Math.round(lengthMm * 10) / 10, pieceCount: pdfItems.length, gapMm: config.print.gapMm, marginMm: config.print.marginMm },
-    pieces: manifestPieces,
+    geometry: { source: geo.source, layout: page.layout, sourceFile: geo.sourceFile ?? null, sourceTitle: geo.sourceTitle ?? null, generatedAt: geo.generatedAt ?? null },
+    sheet: {
+      layout: page.layout, rollWidthMm: page.widthMm, lengthMm: Math.round(page.heightMm * 10) / 10,
+      pieceCount: pdfItems.length, gapMm: config.print.gapMm, marginMm: config.print.marginMm,
+    },
+    pieces: [...byPiece.values()],
+    unassigned: geo.unassigned ?? [],
     files: { pdf: pdfName, jobSheet: 'job-sheet.png', manifest: 'manifest.json' },
-    warnings,
+    warnings: [...new Set(warnings)],
     design: doc,
   };
 
@@ -244,4 +281,3 @@ export async function renderPrintJob({ design: doc, designId, jobId, dir, orderR
 export function readPreviewPng(path) {
   return path && existsSync(path) ? readFileSync(path) : null;
 }
-

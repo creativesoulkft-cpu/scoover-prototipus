@@ -84,8 +84,8 @@ for (const id of MODELS) {
  *
  * GENERÁLT, HELYŐRZŐ fájl (tools/derive-print-placeholder.js): a vázlat
  * darabjaiból közelített kontúrok, 1 vázlat-egység = ${MM_PER_UNIT} mm. NEM gyártási
- * pontosságú – a valódi vágófájl importja (tools/import-cutfile.js) cseréli
- * le, a szerkezet változatlan marad.
+ * pontosságú – a valódi vágóív (tools/cutfile/cutfile.py) felülírja: ha van
+ * server/print/models/<id>.print.json, a render azt használja.
  *
  * Darab-mezők: id (= a modell darab-id-ja), d (mm, saját origó), widthMm,
  * heightMm, quantity (bal/jobb), mirror (a 2. példány tükrözött),
@@ -104,7 +104,7 @@ export default ${JSON.stringify({
     pieces,
   }, null, 2)};
 `;
-  writeFileSync(new URL(`../src/data/models/${id}.print.js`, import.meta.url), out);
-  console.log(`${id}: ${pieces.length} darab → src/data/models/${id}.print.js · mmPerUnit photo ≈ ${photoMm ? r3(photoMm) : '–'}`);
+  writeFileSync(new URL(`../server/print/placeholders/${id}.print.js`, import.meta.url), out);
+  console.log(`${id}: ${pieces.length} darab → server/print/placeholders/${id}.print.js · mmPerUnit photo ≈ ${photoMm ? r3(photoMm) : '–'}`);
   for (const p of pieces) console.log(`   ${p.id.padEnd(14)} ${String(p.widthMm).padStart(7)} × ${String(p.heightMm).padStart(7)} mm ×${p.quantity}`);
 }

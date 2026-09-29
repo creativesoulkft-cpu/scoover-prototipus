@@ -1,0 +1,465 @@
+{
+  "model": "kukirin-g2-master",
+  "source": {
+    "file": "master.pdf",
+    "title": "Kukirin G2 Master matrica szett.cdr",
+    "creator": "CorelDRAW 2021",
+    "created": "D:20260919222339+02'00'"
+  },
+  "sheet": {
+    "widthMm": 938.92,
+    "heightMm": 467.419
+  },
+  "pieces": {
+    "1": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        760.66,
+        95.98,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.08)",
+        "neck (0.05)"
+      ]
+    },
+    "2": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        888.18,
+        95.98,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.08)",
+        "neck (0.05)"
+      ]
+    },
+    "3": {
+      "id": "fork",
+      "copy": "R",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.406,
+          "rotate": 85,
+          "mirror": false,
+          "scale": 1.02913
+        },
+        "schematic": {
+          "score": 0.435,
+          "rotate": 280,
+          "mirror": false,
+          "scale": 1.05479
+        }
+      },
+      "sig": [
+        90.14,
+        49.08,
+        117.737,
+        56.923,
+        3443.7
+      ]
+    },
+    "4": {
+      "id": "front-fender",
+      "copy": null,
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.302,
+          "rotate": 5,
+          "mirror": false,
+          "scale": 6.88517
+        },
+        "schematic": {
+          "score": 0.573,
+          "rotate": 310,
+          "mirror": false,
+          "scale": 3.69647
+        }
+      },
+      "sig": [
+        335.55,
+        100.89,
+        553.514,
+        160.561,
+        19451.0
+      ]
+    },
+    "5": {
+      "id": "fork",
+      "copy": "L",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.404,
+          "rotate": 275,
+          "mirror": true,
+          "scale": 1.02913
+        },
+        "schematic": {
+          "score": 0.431,
+          "rotate": 80,
+          "mirror": true,
+          "scale": 1.05479
+        }
+      },
+      "sig": [
+        552.07,
+        49.08,
+        117.737,
+        56.923,
+        3443.7
+      ]
+    },
+    "6": {
+      "id": "rear-swingarm",
+      "copy": "L",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.384,
+          "rotate": 295,
+          "mirror": true,
+          "scale": 0.88126
+        },
+        "schematic": {
+          "score": 0.473,
+          "rotate": 70,
+          "mirror": true,
+          "scale": 1.02125
+        }
+      },
+      "sig": [
+        642.49,
+        102.55,
+        56.923,
+        117.737,
+        3443.7
+      ]
+    },
+    "7": {
+      "id": "stem-lower",
+      "copy": null,
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.277,
+          "rotate": 10,
+          "mirror": false,
+          "scale": 0.946
+        },
+        "schematic": {
+          "score": 0.373,
+          "rotate": 15,
+          "mirror": false,
+          "scale": 2.79075
+        }
+      },
+      "sig": [
+        29.79,
+        279.41,
+        48.607,
+        365.055,
+        14849.4
+      ]
+    },
+    "8": {
+      "id": null,
+      "extra": "kerékagy-takaró",
+      "sig": [
+        340.69,
+        134.95,
+        90.0,
+        90.0,
+        5606.3
+      ],
+      "suggest": [
+        "display (0.62)",
+        "joint (0.57)"
+      ]
+    },
+    "9": {
+      "id": null,
+      "extra": "kerékagy-takaró",
+      "sig": [
+        440.8,
+        135.63,
+        90.0,
+        90.0,
+        5606.3
+      ],
+      "suggest": [
+        "display (0.62)",
+        "joint (0.57)"
+      ]
+    },
+    "10": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        748.88,
+        185.98,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.07)",
+        "neck (0.06)"
+      ]
+    },
+    "11": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        876.4,
+        185.98,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.07)",
+        "neck (0.06)"
+      ]
+    },
+    "12": {
+      "id": "rear-fender",
+      "copy": null,
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.209,
+          "rotate": 155,
+          "mirror": false,
+          "scale": 1.78774
+        },
+        "schematic": {
+          "score": 0.104,
+          "rotate": 200,
+          "mirror": false,
+          "scale": 1.05113
+        }
+      },
+      "sig": [
+        204.66,
+        138.96,
+        174.874,
+        75.128,
+        3929.4
+      ]
+    },
+    "13": {
+      "id": "deck-top",
+      "copy": null,
+      "confidence": "biztos",
+      "fitResult": {
+        "footboard": {
+          "score": 0.961,
+          "rotate": 0,
+          "mirror": false,
+          "scale": 0.99998
+        }
+      },
+      "sig": [
+        334.21,
+        266.32,
+        499.977,
+        158.0,
+        75650.5
+      ]
+    },
+    "14": {
+      "id": "neck",
+      "copy": null,
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.203,
+          "rotate": 310,
+          "mirror": false,
+          "scale": 1.30974
+        },
+        "schematic": {
+          "score": 0.39,
+          "rotate": 320,
+          "mirror": false,
+          "scale": 1.34008
+        }
+      },
+      "sig": [
+        631.19,
+        329.39,
+        79.511,
+        264.877,
+        10544.0
+      ]
+    },
+    "15": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        760.66,
+        278.97,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.08)",
+        "neck (0.05)"
+      ]
+    },
+    "16": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        888.18,
+        278.97,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.08)",
+        "neck (0.05)"
+      ]
+    },
+    "17": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        748.88,
+        371.33,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.07)",
+        "neck (0.06)"
+      ]
+    },
+    "18": {
+      "id": null,
+      "extra": "felni-csík",
+      "sig": [
+        876.4,
+        371.33,
+        90.5,
+        181.0,
+        1406.6
+      ],
+      "suggest": [
+        "fork (0.07)",
+        "neck (0.06)"
+      ]
+    },
+    "19": {
+      "id": "deck-side",
+      "copy": "L",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.541,
+          "rotate": 0,
+          "mirror": true,
+          "scale": 0.46609
+        },
+        "schematic": {
+          "score": 0.702,
+          "rotate": 0,
+          "mirror": true,
+          "scale": 0.61408
+        }
+      },
+      "sig": [
+        271.43,
+        386.98,
+        405.581,
+        18.0,
+        7166.4
+      ]
+    },
+    "20": {
+      "id": "deck-side",
+      "copy": "R",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.541,
+          "rotate": 0,
+          "mirror": false,
+          "scale": 0.46609
+        },
+        "schematic": {
+          "score": 0.702,
+          "rotate": 0,
+          "mirror": false,
+          "scale": 0.61408
+        }
+      },
+      "sig": [
+        271.43,
+        362.84,
+        405.581,
+        18.0,
+        7166.4
+      ]
+    },
+    "21": {
+      "id": "rear-swingarm",
+      "copy": "R",
+      "confidence": "kérdéses",
+      "fitResult": {
+        "photo": {
+          "score": 0.401,
+          "rotate": 335,
+          "mirror": false,
+          "scale": 0.88126
+        },
+        "schematic": {
+          "score": 0.433,
+          "rotate": 200,
+          "mirror": false,
+          "scale": 1.02125
+        }
+      },
+      "sig": [
+        508.16,
+        405.75,
+        117.737,
+        56.923,
+        3443.7
+      ]
+    },
+    "22": {
+      "id": "battery",
+      "copy": null,
+      "confidence": "kérdéses",
+      "fitResult": {
+        "schematic": {
+          "score": 0.596,
+          "rotate": 0,
+          "mirror": false,
+          "scale": 1.52224
+        }
+      },
+      "sig": [
+        246.62,
+        436.83,
+        363.0,
+        49.0,
+        17786.9
+      ]
+    }
+  }
+}

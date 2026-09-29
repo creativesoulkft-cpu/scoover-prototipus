@@ -130,7 +130,6 @@ src/
       _helpers.js     #   procedurális csempe-segédek
       solid-*.js / gradient-*.js / carbon-3d.js / hex-tech.js
     fonts.js          # felirat-betűtípus regiszter (6 Google Fonts) – kategóriák és feliratok innen választanak
-    <id>.print.js     #   NYOMDAI geometria (mm) – tools/import-cutfile.js (vagy helyőrző: derive-print-placeholder.js)
   design/
     schema.js         # a terv-dokumentum sémája (v1), ellenőrzés, migráció – kliens ÉS szerver
     useDesign.js      # reducer: minden tervmódosítás; rétegek (base / zone:<id> / footboard)
@@ -186,8 +185,9 @@ src/
   pricing.js                 # KÖZPONTI árazási modul – kliens ÉS szerver ugyanazt importálja
 server/                     # híd szerver (Node/Express + SQLite): kosár, tervek, fiók, nyomdai render; lásd server/README.md
 server/print/               #   render.js (recept → darabok → PDF+CutContour → munkalap), assets/ (mesterek), fonts/
-tools/import-cutfile.js     # valódi vágófájl (SVG, mm) → <id>.print.js
-tools/derive-print-placeholder.js # helyőrző nyomdai geometria a vázlatból
+tools/cutfile/cutfile.py    # VÁGÓÍV (Corel PDF) → számozott darabok → hozzárendelés → server/print/models/<id>.print.json
+tools/cutfile/<id>/mapping.json # darabszám → modell-darab (L/R, bizonyosság) – a geometria NINCS gitben (nyilvános repó)
+tools/derive-print-placeholder.js # helyőrző nyomdai geometria a vázlatból (server/print/placeholders)
 docs/print-pipeline.md      # A NYOMDAI FOLYAMAT LEÍRÁSA + vágófájl-követelmények
 public/patterns/            # nyomtatott textúrák (1024 px WebP + 256 px bélyegkép)
 public/brand/               # Scoover logó (SVG a fejlécben, PNG a mentett PNG vízjelén)

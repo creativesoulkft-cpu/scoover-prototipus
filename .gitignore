@@ -13,3 +13,10 @@ server/print/assets/patterns/*
 !server/print/assets/patterns/.gitkeep
 server/print/fonts/*
 !server/print/fonts/README.md
+# VÁGÓÍV-GEOMETRIA – a repó nyilvános, ezért a pontos kontúrok NEM kerülnek gitbe.
+# A hozzárendelés (mapping.json: darabszám → modell-darab) igen: ebből vihető át a következő változatra.
+tools/cutfile/*/pieces.json
+tools/cutfile/*/overview.*
+tools/cutfile/*/*.pdf
+server/print/models/*.json
+!server/print/models/.gitkeep

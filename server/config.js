@@ -76,5 +76,7 @@ export const config = {
     /** A kliens előnézeti textúrái – tartalék, ha nincs mester (figyelmeztetéssel) */
     previewAssetsDir: resolve(SERVER_DIR, '..', 'public'),
     fontsDir: resolve(SERVER_DIR, process.env.PRINT_FONTS_DIR ?? 'print/fonts'),
+    /** A valódi vágóívekből épült nyomdai geometria (tools/cutfile/cutfile.py build) – NINCS gitben. */
+    modelsDir: resolve(SERVER_DIR, process.env.PRINT_MODELS_DIR ?? 'print/models'),
   },
 };

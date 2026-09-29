@@ -22,6 +22,8 @@ export default {
   description: "Nagyobb kerekű, hosszabb dekkű változat, osztott kormányoszloppal – 12 darab.",
   view: 'side',
   viewBox: {"width":1000,"height":560},
+  /** A taposó valós mérete (mm) a felülnézeti tervezőhöz – a vágóívből; a pontos kontúr csak a szerveren van. */
+  footboardFlat: { widthMm: 500, heightMm: 158 },
 
   /** Nem fóliázott alkatrészek (kerék, felni, markolat) – csak vizuális kontextus. */
   decor: [

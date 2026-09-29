@@ -22,6 +22,8 @@ export default {
   description: "Kompakt, dupla felfüggesztésű városi roller – 10 fóliázható darab.",
   view: 'side',
   viewBox: {"width":1000,"height":820},
+  /** A taposó valós mérete (mm) a felülnézeti tervezőhöz – a vágóívből; a pontos kontúr csak a szerveren van. */
+  footboardFlat: { widthMm: 644, heightMm: 155 },
 
   /** Nem fóliázott alkatrészek (kerék, felni, markolat) – csak vizuális kontextus. */
   decor: [

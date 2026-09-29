@@ -43,17 +43,26 @@ export function renderJobSheet(manifest, { previewPng } = {}) {
       `${Math.round(p.widthMm)} × ${Math.round(p.heightMm)}`,
       String(p.copies.length),
       p.printable ? `nyomat: ${p.patternName}` : `vinyl ${p.vinylColor ?? ''} (csak vágás)`,
-      [p.dpiEffective ? `${p.dpiEffective} dpi` : '', p.footboard ? 'csúszásgátló' : '', p.mirror ? 'bal/jobb tükör' : ''].filter(Boolean).join(' · '),
+      [p.copies.map((c) => (c.n ? `#${c.n}` : null)).filter(Boolean).join(','), p.copies.some((c) => c.confidence === 'kérdéses') ? 'KÉRDÉSES' : '',
+        p.dpiEffective ? `${p.dpiEffective} dpi` : '', p.footboard ? 'csúszásgátló' : '', p.mirror ? 'bal/jobb' : ''].filter(Boolean).join(' · '),
     ];
     rows.push(cells.map((c, i) => `<text x="${colX[i]}" y="${y}" font-size="13" fill="#111" font-family="DejaVu Sans, Arial, sans-serif">${esc(c)}</text>`).join(''));
     y += 21;
   }
   gap(10);
-  line(`Lap: ${Math.round(manifest.sheet.rollWidthMm)} mm tekercs × ${Math.round(manifest.sheet.lengthMm)} mm hossz · ${manifest.sheet.pieceCount} darab · kifutó ${manifest.bleedMm} mm · vágóvonal: CutContour spot-szín (PDF)`, { size: 14, color: '#333' });
+  const lay = manifest.sheet.layout === 'sheet'
+    ? `Lap: az EREDETI vágóív (${manifest.geometry.sourceFile ?? ''}) ${Math.round(manifest.sheet.rollWidthMm)} × ${Math.round(manifest.sheet.lengthMm)} mm, a darabok az eredeti helyükön`
+    : `Lap: ${Math.round(manifest.sheet.rollWidthMm)} mm tekercs × ${Math.round(manifest.sheet.lengthMm)} mm hossz (polcos elrendezés)`;
+  line(`${lay} · ${manifest.sheet.pieceCount} darab · kifutó ${manifest.bleedMm} mm · vágóvonal: CutContour spot-szín`, { size: 14, color: '#333' });
   gap(8);
   if (manifest.warnings.length) {
     line('FIGYELMEZTETÉSEK', { size: 16, weight: 700, color: '#b3261e' });
-    for (const w of manifest.warnings) line(`! ${w}`, { size: 13, color: '#b3261e', x: 56 });
+    // hosszú figyelmeztetés: szóhatáron tördelve (a munkalap szélessége ~150 karakter)
+    const wrap = (t, n = 150) => t.split(' ').reduce((rows, w) => {
+      if (!rows.length || (rows[rows.length - 1] + ' ' + w).length > n) rows.push(w); else rows[rows.length - 1] += ` ${w}`;
+      return rows;
+    }, []);
+    for (const w of manifest.warnings) wrap(`! ${w}`).forEach((row, i) => line(i ? `   ${row}` : row, { size: 13, color: '#b3261e', x: 56 }));
   } else {
     line('Nincs figyelmeztetés – gyártásra kész.', { size: 14, color: '#1b7f3b', weight: 700 });
   }

@@ -83,7 +83,7 @@ export function patternDefs({ pattern, asset, transform, viewBox, previewMap, ex
  * Felirat a nézet egységeiben (a LabelLayer.jsx méretezése), majd a
  * previewMap viszi mm-be. `previewPiece`: a nézet darabja (d, labelAngle).
  */
-export function labelSvg({ label, font, color, previewPiece, uid }) {
+export function labelSvg({ label, font, color, previewPiece, uid, unmirror = false }) {
   const text = String(label.text ?? '').trim().toUpperCase();
   if (!text) return '';
   const box = pathBounds(previewPiece.d);
@@ -102,7 +102,37 @@ export function labelSvg({ label, font, color, previewPiece, uid }) {
   const ls = typeof font.letterSpacing === 'string' && font.letterSpacing.endsWith('em')
     ? parseFloat(font.letterSpacing) * fontSize : (Number(font.letterSpacing) || 0);
   const stroke = color === '#ffffff' ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)';
-  return `<text id="${uid}" x="${cx}" y="${cy}" transform="rotate(${angle} ${cx} ${cy}) translate(${cx} ${cy}) skewX(${font.skew ?? 0}) translate(${-cx} ${-cy})" text-anchor="middle" dominant-baseline="central" font-family="${esc(font.family)}, DejaVu Sans, Arial, sans-serif" font-weight="${font.weight}" font-size="${fontSize}" letter-spacing="${ls}" fill="${color}" stroke="${stroke}" stroke-width="${fontSize * 0.04}" paint-order="stroke">${esc(text)}</text>`;
+  // Tükrözött leképezésnél (bal oldali darab) a feliratot a saját középpontja körül
+  // visszatükrözzük: a helye és iránya követi a darabot, de a betűk nem fordulnak meg.
+  const wrapOpen = unmirror ? `<g transform="translate(${cx} ${cy}) scale(-1 1) translate(${-cx} ${-cy})">` : '';
+  const wrapClose = unmirror ? '</g>' : '';
+  return `${wrapOpen}<text id="${uid}" x="${cx}" y="${cy}" transform="rotate(${angle} ${cx} ${cy}) translate(${cx} ${cy}) skewX(${font.skew ?? 0}) translate(${-cx} ${-cy})" text-anchor="middle" dominant-baseline="central" font-family="${esc(font.family)}, DejaVu Sans, Arial, sans-serif" font-weight="${font.weight}" font-size="${fontSize}" letter-spacing="${ls}" fill="${color}" stroke="${stroke}" stroke-width="${fontSize * 0.04}" paint-order="stroke">${esc(text)}</text>${wrapClose}`;
+}
+
+/**
+ * Egy darab-példány SVG-je a SAJÁT terében (vágóívnél: lap-mm, a darab a helyén).
+ * A nézet a darab befoglaló doboza + kifutó; a kifutót a kontúr mintával húzása adja.
+ * @param {object} p
+ * @param {{d:string, xMm:number, yMm:number, widthMm:number, heightMm:number}} p.copy
+ * @param {number} p.bleedMm
+ * @param {{defs:string, fill:string}} p.paint
+ * @param {string[]} p.labels labelSvg stringek (nézet-egységben)
+ * @param {number[]} p.previewMap nézet → a darab tere
+ * @param {number} p.dpi
+ */
+export function buildCopySvg({ copy, bleedMm: b, paint, labels, previewMap, dpi }) {
+  const x = copy.xMm - b, y = copy.yMm - b, w = copy.widthMm + 2 * b, h = copy.heightMm + 2 * b;
+  const pxW = Math.round((w / 25.4) * dpi);
+  const pxH = Math.round((h / 25.4) * dpi);
+  const labelsBlock = labels.length
+    ? `<g clip-path="url(#clip)"><g transform="${matrixString(previewMap)}">${labels.join('')}</g></g>`
+    : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${pxW}" height="${pxH}" viewBox="${x} ${y} ${w} ${h}">
+<defs>${paint.defs}<clipPath id="clip"><path d="${copy.d}" clip-rule="evenodd"/></clipPath></defs>
+<path d="${copy.d}" fill="${paint.fill}" fill-rule="evenodd" stroke="${paint.fill}" stroke-width="${2 * b}" stroke-linejoin="round" stroke-linecap="round"/>
+${labelsBlock}
+</svg>`;
+  return { svg, xMm: x, yMm: y, widthMm: w, heightMm: h, pxWidth: pxW, pxHeight: pxH };
 }
 
 /**

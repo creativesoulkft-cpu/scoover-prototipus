@@ -28,13 +28,13 @@ bármikor, bármelyik szerveren. Ezért:
 ## 2. Mi történik a szerveren (server/print)
 
 ```
-terv (SCV-…)  +  modell nyomdai geometriája (src/data/models/<id>.print.js, mm)
+terv (SCV-…)  +  modell nyomdai geometriája (server/print/models/<id>.print.json – a vágóívből)
    │
    ├─ darabonként:  pieceSvg.js  → SVG mm-ben
    │      minta a nézet egységeiből mm-be leképezve (previewMaps), kifutó (a kontúr
    │      a mintával húzva 2×bleed szélesen), feliratok a darab kontúrjára vágva
    │      → resvg → 300 dpi PNG   (pieces/<id>[-L|-R].png)
-   ├─ nest.js:     polcos elrendezés a tekercs szélességére (forgatás, ha kell)
+   ├─ elrendezés:  a VÁGÓÍV EREDETI elrendezése (helyőrzőnél: nest.js polcos pakolás)
    ├─ pdf.js:      egy lap PDF – raszterek + VÁGÓVONAL "CutContour" spot-színnel
    ├─ jobSheet.js: munkalap PNG (mi készül, méretek, darabszám, anyag, figyelmeztetések)
    └─ manifest.json: minden adat gépi formában (+ a terv másolata)
@@ -61,39 +61,54 @@ API (admin): `POST /api/print-jobs {designId, orderRef}` →
 Kimenet: `server/data/print-jobs/<PJ-…>/` – ezt a mappát (és a SQLite
 adatbázist) rendszeres mentés alá kell vonni.
 
-## 3. Vágófájl-követelmények (a plotteres kollégának)
+## 3. A vágóív importja (CorelDRAW PDF)
 
-Modellenként és évjáratonként **egy SVG**, ebből készül a
-`src/data/models/<id>.print.js` a `node tools/import-cutfile.js <id> <fájl.svg>`
-paranccsal.
+A nyomdai geometria forrása a **Corelből exportált vágóív-PDF** (egy oldal, a
+vágóvonal színes körvonal – ahogy a "…matrica szett CUT vonal" fájlok).
+Semmit nem kell átrajzolni vagy elnevezni; a darabokat a szkript számozza.
 
-1. **1 egység = 1 mm.** A `viewBox` mm-ben; a `width`/`height` lehet `…mm`.
-2. **Minden transzformáció kilapítva** (Illustrator: Object → Expand,
-   exportnál "Flatten transforms"; Inkscape: Apply transforms). Az importáló a
-   `transform` attribútumot értelmezi, de ne bízzunk benne.
-3. **Minden fóliadarab egy zárt `<path>`**, `id="<darab-id>"` ahol a darab-id a
-   modell darabjának azonosítója (`kukirin-g2.js`): `deck-side`, `stem`,
-   `display`, `joint`, `fork`, `neck`, `battery`, `rear-swingarm`,
-   `rear-fender`, (`front-fender`), és a taposó: `deck-top`.
-   Elfogadott még `<polygon>` és `<rect>` is id-val.
-4. **Bal/jobb páros darabból csak a bal oldalit** rajzold (`deck-side`, `fork`,
-   `rear-swingarm`) – a jobb a tükörképe. Ha a jobb oldal más, rajzold külön
-   `<darab-id>-R` id-val.
-5. A kontúr a **vágás vonala** (a fólia végleges széle), kifutó nélkül – a
-   kifutót (alapból 3 mm, `--bleed`) a render adja hozzá.
-6. Sarkok: ahol a fólia felszedhető (taposó, sárvédő), a rádiusz legyen a
-   fájlban; a render nem kerekít.
-7. Ne legyen a fájlban más elem id-val (segédvonalak, méretek) – vagy legyen
-   id nélkül.
+```bash
+# egyszer: pip install pymupdf numpy pillow
+python3 tools/cutfile/cutfile.py extract "Kukirin G2 matrica szett CUT vonal.pdf" kukirin-g2
+#   → tools/cutfile/kukirin-g2/overview.png  (számozott darabok, méretekkel)
+#   → tools/cutfile/kukirin-g2/mapping.json  (szám → modell-darab, bal/jobb)
+python3 tools/cutfile/cutfile.py build kukirin-g2
+#   → server/print/models/kukirin-g2.print.json  (a szerver ebből renderel)
+```
 
-Az importáló kiírja, mely darabok hiányoznak, és mekkora az eltérés az
-előnézeti darab és a vágókontúr aránya között (5% fölött a minta illesztése
-közelítő). Utána a `src/data/models/index.js` `printScale` mezőjét a kiírt
-értékekre kell állítani (saját kép dpi-becslése).
+**Hozzárendelés (mapping.json):** melyik számú darab melyik konfigurátor-darab
+(`id`: deck-top, deck-side, stem, …), melyik oldal (`copy`: `L` / `R` / üres),
+és mennyire biztos (`biztos` / `valószínű` / `kérdéses`). A `kérdéses`
+hozzárendelés a munkalapon és a manifestben piros figyelmeztetést kap. A
+konfigurátor modelljében nem szereplő darabok (`extra`: felni-csík,
+kerékagy-takaró) nem kerülnek a nyomatra, amíg nincs zónájuk.
 
-**Amíg nincs vágófájl:** `node tools/derive-print-placeholder.js` a vázlatból
-készít helyőrzőt (`source: 'placeholder'`) – a lánc futtatható, de a munkalap
-és a manifest **"NEM gyártható"** figyelmeztetést ad.
+**Új változat ("pici pontosítás"):** ugyanaz a két parancs. Az `extract` az
+új darabokat hely + méret + terület alapján az előző változat darabjaihoz
+párosítja, a hozzárendelést átviszi, és megjelöli az új, eltűnt vagy
+jelentősen megváltozott darabokat.
+
+**Irány és tükör:** a `build` alak-illesztéssel (5°-os forgatás) megkeresi,
+hogyan fekszik a vevő előnézetében látott darab a vágóíven. A bal oldali (`L`)
+darab mindig a jobb oldali tükörképe (a matricát a nyomott oldaláról
+rajzolják); a fotó a roller jobb oldalát mutatja. Ha egy irány rossz, a
+mapping.json-ban kézzel rögzíthető: `"fit": {"photo": {"rotate": 90, "mirror": false}}`.
+
+**Elrendezés:** a nyomdai PDF lapja **pontosan a vágóív lapja**, a darabok az
+**eredeti helyükön**, a vágóvonal az eredeti görbe (ellenőrizve: < 0,001 mm
+eltérés) – a nyomda ugyanazt a vágást kapja, amit a Corelben megrajzoltatok,
+csak kitöltve. A kiválasztatlan zónák darabjai kimaradnak (se nyomat, se vágás).
+A kifutó 2 mm, szoros darabköznél automatikusan kisebb.
+
+**Titoktartás:** a repó NYILVÁNOS, ezért a vágóív PDF, a kinyert darabok és a
+`server/print/models/*.print.json` **nincs a gitben** (.gitignore), és a
+kliens (böngésző) sosem kapja meg – csak a szerver olvassa. A gitben csak a
+`mapping.json` van (számok, id-k, méret-aláírás). Éles szerveren a két
+parancsot ott kell lefuttatni, ahol a híd fut.
+
+**Amíg nincs vágóív:** `node tools/derive-print-placeholder.js` a vázlatból
+helyőrzőt készít (server/print/placeholders) – a lánc futtatható, de a
+munkalap "NEM gyártható" figyelmeztetést ad.
 
 ## 4. Nyomdai textúra-mesterek
 
@@ -126,7 +141,8 @@ széles kép egy ~1,2 m-es rolleren ~40 dpi. Ezért:
 |---|---|---|
 | `PRINT_ROLL_WIDTH_MM` | 610 | tekercs szélessége |
 | `PRINT_DPI` | 300 | raszter felbontás |
-| `PRINT_BLEED_MM` | 3 | kifutó (a modell `.print.js` felülírhatja) |
+| `PRINT_BLEED_MM` | 3 | kifutó a helyőrzőnél (a vágóívnél a build adja: 2 mm, szoros darabköznél kevesebb) |
+| `PRINT_MODELS_DIR` | print/models | a vágóívből épült geometria (nincs gitben) |
 | `PRINT_GAP_MM` / `PRINT_MARGIN_MM` | 6 / 10 | darabok köze / lapszél |
 | `PRINT_MIN_DPI_WARN` | 150 | saját kép figyelmeztetési küszöb |
 | `PRINT_ASSETS_DIR` | print/assets | textúra-mesterek |
