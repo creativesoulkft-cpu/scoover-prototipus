@@ -1,0 +1,1794 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>akkumulatorepites.hu v2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  akkumulatorepites.hu – v2 TERVEZET: kattintható prototípus egy fájlban.
+  Oldalak (WordPressben külön oldalak lesznek): #/ főoldal · #/roller · #/e-bike · #/hajo · #/biztonsag · #/jegyzet (belső, élesbe NEM kerül).
+  Sárga pontozott aláhúzás (.tbd, .tbd-b) = élesítés előtt megerősítendő. [Szögletes zárójel] (.fill) = hiányzó adat.
+  Képek: a v2/README.md listája szerint a fájl mellé másolva töltődnek be (data-src); amíg hiányoznak, felirattal ellátott helyőrző látszik.
+  FORM_ACTION a lenti <script> elején (MiniCRM). Üresen mailto-fallback. Meta Pixel csak süti-hozzájárulás után (README).
+-->
+<meta name="description" content="Roller és e-bike akku csere, felújítás fix áron, 106 900 Ft-tól. Tenpower 21700 cella, mért kapacitás, jótállási jegy. LiFePO4 hajóakku a Balatonon.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f1115">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LocalBusiness","name":"Whoosh – akkumulátor csere, felújítás, építés","url":"https://akkumulatorepites.hu/","telephone":"+36708520208","email":"erollerszerviz@gmail.com","address":{"@type":"PostalAddress","streetAddress":"Kossuth Lajos u. 10.","addressLocality":"Veszprém","addressCountry":"HU"},"areaServed":["Veszprém","Balatonfüred","Siófok","Keszthely","Balaton"],"priceRange":"106 900 Ft – 3 500 000 Ft","sameAs":["https://www.tiktok.com/@elektromosroller.net","https://elektromos-roller.net"]}
+</script>
+<style>
+  :root{
+    --bg:#0f1115;--bg2:#161a21;--bg3:#1d222b;--line:#2a303b;--line2:#363d4a;
+    --text:#e8eaee;--muted:#a4adbc;--faint:#737e8f;
+    --purple:#7a1f6e;--purple-soft:#a23d94;--purple-text:#dd92d0;
+    --green:#3dd400;--green-dark:#2fa600;--on-green:#0b1200;
+    --amber:#f2b84b;
+    --lake:#0c1524;--lake2:#122036;--lake-line:#243657;--lake-text:#8fc0ff;
+    --radius:14px;--max:1100px;--gut:18px;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:17px;line-height:1.55;padding-bottom:72px}
+  @media (min-width:860px){body{padding-bottom:0}}
+  h1,h2,h3,h4{line-height:1.13;margin:0 0 .5em;letter-spacing:-.015em;text-wrap:balance}
+  h1{font-size:clamp(1.95rem,6.2vw,3.25rem);font-weight:800}
+  h2{font-size:clamp(1.45rem,4.4vw,2.15rem);font-weight:800}
+  h3{font-size:1.12rem;font-weight:750}
+  p{margin:0 0 1em}
+  a{color:var(--green)}
+  strong,b{color:#fff}
+  ul,ol{margin:0 0 1em;padding-left:1.2em}
+  li{margin-bottom:.4em}
+  .num{font-variant-numeric:tabular-nums}
+  .wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
+  .sec{padding-block:56px}
+  @media (min-width:860px){.sec{scroll-margin-top:72px}}
+  .alt{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .tag{display:inline-block;font-size:.78rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--purple-text);margin-bottom:10px}
+  .lead{color:var(--muted);font-size:1.07rem;max-width:66ch}
+  .small{font-size:.88rem;color:var(--muted)}
+  [hidden]{display:none!important}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .note{font-size:.84rem;color:var(--faint);max-width:82ch;margin-top:10px}
+  :focus-visible{outline:2px solid var(--green);outline-offset:3px}
+
+  /* Tervezet-jelölések */
+  .draftbar{background:#221a08;border-bottom:1px solid #4a3a14;color:#f5d28f;font-size:.82rem}
+  .draftbar .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding-block:7px}
+  .draftbar b{color:#ffd98f;letter-spacing:.06em}
+  @media (max-width:600px){.draftbar .expl{display:none}}
+  .draftbar button,.draftbar a{font:inherit;font-size:.8rem;color:#ffd98f;background:transparent;border:1px solid #6b5520;border-radius:999px;padding:3px 10px;cursor:pointer;text-decoration:none}
+  .tbd{text-decoration:underline dotted var(--amber);text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-skip-ink:none}
+  .tbd::after{content:"?";display:inline-block;margin-left:3px;font-size:.62em;font-weight:900;color:#1b1400;background:var(--amber);border-radius:50%;width:1.35em;height:1.35em;line-height:1.35em;text-align:center;vertical-align:super;text-decoration:none}
+  .tbd-b{position:relative;outline:1px dashed rgba(242,184,75,.75);outline-offset:6px;border-radius:6px}
+  .tbd-b::before{content:"megerősítendő";position:absolute;top:-17px;right:8px;font-size:.64rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#1b1400;background:var(--amber);padding:1px 6px;border-radius:4px;z-index:2}
+  .fill{color:var(--amber);font-weight:700}
+  body.hide-tbd .tbd{text-decoration:none}
+  body.hide-tbd .tbd::after,body.hide-tbd .tbd-b::before{content:none;display:none}
+  body.hide-tbd .tbd-b{outline:0}
+
+  /* Fejléc */
+  .site{position:sticky;top:0;z-index:40;background:rgba(15,17,21,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .site .wrap{display:flex;align-items:center;gap:14px;min-height:58px}
+  .brand{display:flex;flex-direction:column;line-height:1.15;text-decoration:none;color:#fff;font-weight:800;letter-spacing:-.01em;flex:none}
+  .brand small{font-weight:650;color:var(--muted);font-size:.72rem;letter-spacing:.04em}
+  .nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+  .nav::-webkit-scrollbar{display:none}
+  .nav a{white-space:nowrap;color:var(--muted);text-decoration:none;font-weight:650;font-size:.92rem;padding:8px 10px;border-radius:8px}
+  .nav a:hover{color:#fff;background:var(--bg3)}
+  .nav a[aria-current="page"]{color:#fff;background:var(--bg3);box-shadow:inset 0 -2px 0 var(--green)}
+  .site .tel{flex:none;color:#fff;text-decoration:none;font-weight:750;font-size:.92rem}
+  @media (max-width:859px){.site{position:static}.site .tel{display:none}.site .wrap{flex-wrap:wrap;gap:4px 12px;padding-block:8px}.nav{flex-basis:100%;order:3;margin-inline:-6px}}
+
+  /* Gombok, kontakt sor */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:10px;font-weight:750;font-size:1rem;font-family:inherit;text-decoration:none;border:2px solid transparent;cursor:pointer;min-height:48px;text-align:center;transition:transform .08s,background .15s,border-color .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-green{background:var(--green);color:var(--on-green);border-color:var(--green)}
+  .btn-green:hover{background:var(--green-dark);border-color:var(--green-dark)}
+  .btn-green:focus-visible{outline-color:#fff}
+  .btn-ghost{background:transparent;color:#fff;border-color:var(--line2)}
+  .btn-ghost:hover{border-color:var(--purple-soft)}
+  .btn svg{width:18px;height:18px;fill:currentColor;flex:none}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  @media (max-width:520px){.btns .btn{width:100%}}
+  .cl{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:.95rem;color:var(--muted)}
+  .cl a{color:#fff;text-decoration:none;font-weight:650;display:inline-flex;align-items:center;gap:6px}
+  .cl a:hover{color:var(--green)}
+  .cl svg{width:18px;height:18px;fill:var(--green);flex:none}
+
+  /* Hero */
+  .hero{position:relative;overflow:hidden;padding-block:52px 40px;background:radial-gradient(900px 500px at 10% -10%,rgba(122,31,110,.5),transparent 60%),radial-gradient(700px 420px at 100% 0%,rgba(61,212,0,.11),transparent 60%),linear-gradient(180deg,#141821,var(--bg));border-bottom:1px solid var(--line)}
+  /* 21700-as cellák felülnézetben: méhsejt-rács a hero jobb oldalán */
+  .hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.055) 0 7px,transparent 7.6px),radial-gradient(circle,rgba(255,255,255,.055) 0 7px,transparent 7.6px);background-size:18px 31.18px;background-position:0 0,9px 15.59px;-webkit-mask-image:linear-gradient(110deg,transparent 40%,#000 80%);mask-image:linear-gradient(110deg,transparent 40%,#000 80%);pointer-events:none}
+  .hero>.wrap{position:relative;z-index:1}
+  .hero .bg{position:absolute;inset:0;z-index:0}
+  .hero .bg img{display:none;width:100%;height:100%;object-fit:cover}
+  .hero .bg.loaded img{display:block}
+  .hero .bg.loaded::after{content:"";position:absolute;inset:0;background:rgba(15,17,21,.4)}
+  .hero .bg::before{content:attr(data-label) " helye";position:absolute;right:12px;bottom:10px;font-size:.72rem;color:var(--faint);border:1px dashed var(--line2);border-radius:6px;padding:2px 8px}
+  .hero .bg.loaded::before{content:none}
+  .hero-lead{font-size:1.14rem;color:#cfd5df;max-width:58ch}
+  .hero-split{display:grid;gap:24px;align-items:center;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:860px){.hero-split{grid-template-columns:1.25fr .75fr}}
+  .doors-q{margin:26px 0 10px;font-weight:800;color:#fff;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase}
+  .doors{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:760px){.doors{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .door{display:flex;flex-direction:column;gap:5px;padding:20px;border-radius:var(--radius);background:rgba(22,26,33,.9);border:1px solid var(--line2);color:var(--text);text-decoration:none;transition:border-color .15s,transform .15s}
+  .door:hover{border-color:var(--green);transform:translateY(-2px)}
+  .door .ic{font-size:1.6rem;line-height:1}
+  .door .door-t{font-size:1.3rem;margin:6px 0 0}
+  .door .big{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.01em;margin-top:6px}
+  .door .go{margin-top:auto;padding-top:12px;color:var(--green);font-weight:750}
+  .door.hajo{background:linear-gradient(160deg,rgba(18,32,54,.95),rgba(12,21,36,.95));border-color:var(--lake-line)}
+  .door.hajo:hover{border-color:var(--lake-text)}
+  .door.hajo .go{color:var(--lake-text)}
+  .facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;font-size:.92rem;color:#c9cfd9}
+  .facts>span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:middle}
+  .pricebadge{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:4px 0 14px;padding:10px 14px;border-radius:12px;background:rgba(61,212,0,.08);border:1px solid rgba(61,212,0,.35)}
+  .pricebadge b{font-size:1.7rem}
+  .pricebadge span{color:#cfe9c0;font-weight:650}
+
+  /* Bizalom-sáv */
+  .proof{background:var(--bg2);border-bottom:1px solid var(--line);padding-block:26px}
+  .proof-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:520px){.proof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (min-width:900px){.proof-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  .pf{padding-left:14px;border-left:2px solid var(--purple-soft)}
+  .pf b{display:block;font-size:1rem}
+  .pf span{font-size:.86rem;color:var(--muted)}
+  .tiktok{margin-top:20px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:center;padding:16px;border-radius:12px;background:rgba(122,31,110,.16);border:1px solid rgba(162,61,148,.35)}
+  @media (min-width:760px){.tiktok{grid-template-columns:1fr 1.3fr}}
+  .tiktok .n{display:block;font-size:2rem;font-weight:800;color:#fff;line-height:1}
+
+  /* Rácsok, kártyák, dobozok */
+  .grid2{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:820px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .grid3{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:640px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (min-width:960px){.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .top{align-items:start}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .alt .card{background:var(--bg)}
+  .card h3{margin-bottom:8px}
+  .box{background:var(--bg3);border-radius:12px;padding:16px 18px;margin-top:14px}
+  .box h3{margin-bottom:6px}
+  .box p:last-child,.box ul:last-child{margin-bottom:0}
+  .box-green{background:rgba(61,212,0,.07);border:1px solid rgba(61,212,0,.3)}
+  .box-purple{background:var(--bg2);border-left:3px solid var(--purple-soft)}
+  .alt .box-purple{background:var(--bg)}
+  .list-ok{list-style:none;padding:0}
+  .list-ok li{position:relative;padding-left:26px}
+  .list-ok li::before{content:"";position:absolute;left:4px;top:.5em;width:10px;height:6px;border-left:2px solid var(--green);border-bottom:2px solid var(--green);transform:rotate(-45deg)}
+  .steps{display:grid;gap:12px;counter-reset:st;list-style:none;padding:0;margin:0;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:640px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (min-width:960px){.steps.four{grid-template-columns:repeat(4,minmax(0,1fr))}.steps.six{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .steps>li{counter-increment:st;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin:0}
+  .steps>li::before{content:counter(st);display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:var(--purple);color:#fff;font-weight:800;margin-bottom:10px}
+  .steps>li h3{font-size:1.04rem;margin-bottom:6px}
+  .steps>li p{color:var(--muted);font-size:.95rem;margin:0}
+  .steps>li.key{border-color:var(--green)}
+  .steps>li.key::before{background:var(--green);color:var(--on-green)}
+  .numlist{counter-reset:nl;list-style:none;padding:0;margin:0}
+  .numlist>li{counter-increment:nl;position:relative;padding:9px 0 9px 40px;border-bottom:1px dashed var(--line);margin:0}
+  .numlist>li:last-child{border-bottom:0}
+  .numlist>li::before{content:counter(nl);position:absolute;left:0;top:9px;width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;font-weight:800;font-size:.86rem;display:flex;align-items:center;justify-content:center}
+  .sym p{margin:0 0 6px;font-size:.95rem}
+  .sym h3{font-size:1.03rem}
+  .sym .ok{color:var(--muted)}
+  .sym .ok::before{content:"Ok: ";color:#e0a3d6;font-weight:750}
+  .sym .fix::before{content:"Megoldás: ";color:var(--green);font-weight:750}
+  .brands{font-weight:750;color:#fff}
+  .person{display:grid;grid-template-columns:118px 1fr;gap:16px;align-items:start}
+  @media (max-width:420px){.person{grid-template-columns:1fr}}
+  .quote{margin:0;font-size:1.06rem;color:var(--text)}
+
+  /* Táblák */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg2)}
+  .alt .tbl-wrap{background:var(--bg)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+  thead th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg3);vertical-align:bottom}
+  tbody tr:last-child>*{border-bottom:0}
+  tbody th{font-weight:750;color:#fff}
+  thead th.nt{text-transform:none;letter-spacing:0;font-size:.86rem;color:#dfe5ee}
+  thead th.nt small{display:block;font-size:.78rem;color:var(--muted);font-weight:500}
+  .vs td.no{color:var(--faint)}
+  .vs td.yes::before,.cmp td.us::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:middle}
+  .cmp{min-width:680px}
+  .cmp td{font-size:.93rem;color:var(--muted)}
+  .cmp td.us,.cmp th.us{color:#fff;background:rgba(61,212,0,.06)}
+  @media (max-width:560px){
+    .vs thead{display:none}
+    .vs tr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+    .vs tbody tr:last-child{border-bottom:0}
+    .vs tbody th{grid-column:1/-1;padding-bottom:0;border:0}
+    .vs td{border:0;padding-top:6px}
+    .vs td::after{content:attr(data-l);display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-top:4px}
+  }
+  .price-layout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:900px){.price-layout{grid-template-columns:1.1fr .9fr;align-items:start}}
+  .price-layout .box:first-child{margin-top:0}
+  .price-tbl th,.price-tbl td{padding:11px 12px}
+  .price-tbl tbody tr{cursor:pointer}
+  .price-tbl tbody tr:hover,.price-tbl tbody tr:focus-visible{background:rgba(122,31,110,.14);outline:none}
+  .price-tbl tbody tr.sel{background:rgba(61,212,0,.1)}
+  .chip{display:inline-block;padding:2px 8px;border-radius:6px;background:rgba(122,31,110,.28);color:#f3cdee;font-weight:800;font-size:.95rem;white-space:nowrap}
+  .cfg{display:block;font-size:.76rem;color:var(--faint);margin-top:4px;white-space:nowrap}
+  .wh{white-space:nowrap;color:#fff}
+  .wh small{display:block;color:var(--muted);font-size:.8rem}
+  .pr{text-align:right;font-weight:800;color:#fff;white-space:nowrap}
+  th.pr{text-align:right}
+
+  /* Képhelyek */
+  .ph{position:relative;margin:0;border:2px dashed var(--line2);border-radius:12px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:.85rem;text-align:center;padding:16px;min-height:140px}
+  .ph::after{content:attr(data-label)}
+  .ph img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ph.loaded{border:1px solid var(--line);padding:0}
+  .ph.loaded::after{content:none}
+  .ph.loaded img{display:block}
+  .r32{aspect-ratio:3/2;max-width:100%}
+  .r167{aspect-ratio:16/9;max-width:100%;max-height:520px;width:100%;margin-bottom:26px}
+  .r167:not(.loaded){aspect-ratio:auto;height:220px}
+  .r45{aspect-ratio:4/5;max-width:100%;min-height:0;font-size:.72rem;padding:8px}
+
+  /* Mérési lap sablon */
+  .sheet{background:#f1f2ee;color:#1b1e24;border-radius:10px;padding:16px 16px 12px;box-shadow:0 14px 34px rgba(0,0,0,.4);font-size:.84rem;max-width:520px;transform:rotate(-.5deg)}
+  .sheet-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline;border-bottom:2px solid #1b1e24;padding-bottom:6px;margin-bottom:4px}
+  .sheet-h b{color:#1b1e24;font-size:.95rem;letter-spacing:.1em;text-transform:uppercase}
+  .sheet-h span{color:#5b616b;font-size:.76rem}
+  .sheet .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #d3d6cf;padding:6px 0}
+  .sheet .row>span:first-child{color:#565c66}
+  .sheet .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#1b1e24;text-align:right}
+  .sheet .bl{display:inline-block;min-width:3.2em;border-bottom:1px dotted #7d838c}
+  .sheet .sub{margin-top:8px;color:#565c66}
+  .sheet .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:4px;margin:6px 0 4px}
+  .sheet .groups span{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.72rem;border:1px solid #c5c9c1;border-radius:4px;padding:3px 4px;color:#565c66}
+
+  /* GYIK */
+  .faq details{background:var(--bg2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+  .alt .faq details{background:var(--bg)}
+  .faq summary{cursor:pointer;padding:15px 46px 15px 18px;font-weight:750;list-style:none;position:relative}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";position:absolute;right:18px;top:9px;font-size:1.5rem;color:var(--green);font-weight:400}
+  .faq details[open] summary::after{content:"–"}
+  .faq .a{padding:0 18px 16px;color:#c9cfd9}
+  .faq .a p:last-child{margin-bottom:0}
+
+  /* Űrlap */
+  .lead-form{display:grid;gap:14px;max-width:640px}
+  .f{display:grid;gap:6px;font-size:.92rem;font-weight:650;color:#c9cfd9}
+  .f .opt{font-weight:500;color:var(--faint)}
+  input[type=text],input[type=tel],input[type=email],select,textarea{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line2);background:var(--bg);color:#fff;font:inherit;font-size:1rem}
+  .alt input[type=text],.alt input[type=tel],.alt input[type=email],.alt select,.alt textarea{background:#0b0d11}
+  input[type=file]{font:inherit;font-size:.88rem;color:var(--muted)}
+  textarea{min-height:100px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--green);outline-offset:0;border-color:var(--green)}
+  fieldset{border:0;padding:0;margin:0;min-width:0}
+  fieldset.cond{display:grid;gap:14px}
+  fieldset.cond[disabled]{display:none}
+  legend{font-size:.92rem;font-weight:650;color:#c9cfd9;margin-bottom:8px;padding:0}
+  .radios{display:flex;flex-wrap:wrap;gap:8px}
+  .radios label{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);cursor:pointer;font-weight:650}
+  .radios input{accent-color:var(--green);width:18px;height:18px;margin:0}
+  .radios label:has(input:checked){border-color:var(--green);background:rgba(61,212,0,.08)}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--muted)}
+  .consent input{width:18px;height:18px;margin-top:3px;accent-color:var(--green);flex:none}
+  .chosen{font-size:.9rem;color:#cfe9c0;background:rgba(61,212,0,.08);border:1px solid rgba(61,212,0,.3);border-radius:8px;padding:8px 10px}
+  .form-ok{display:none;padding:14px 16px;border-radius:10px;background:rgba(61,212,0,.1);border:1px solid rgba(61,212,0,.4)}
+  .warn-inline{display:none;font-size:.88rem;color:#f5d28f;background:#221a08;border:1px solid #4a3a14;border-radius:8px;padding:8px 10px;margin:0}
+
+  /* E-bike kompatibilitás */
+  .kompat{display:grid;gap:12px;margin-top:22px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:760px){.kompat{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .kp{border-radius:12px;padding:16px;background:rgba(22,26,33,.9);border:1px solid var(--line);border-top:4px solid var(--c)}
+  .kp h3{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--c);margin-bottom:6px}
+  .kp .who{font-weight:750;color:#fff;margin:0}
+  .kp p{font-size:.93rem;color:var(--muted);margin:6px 0 0}
+
+  /* Hajó színvilág */
+  .page-hajo .hero{background:radial-gradient(900px 520px at 88% -10%,rgba(90,150,255,.22),transparent 60%),linear-gradient(180deg,#0f1b30,var(--lake));border-bottom-color:var(--lake-line)}
+  .page-hajo .hero::before{background-image:repeating-linear-gradient(0deg,rgba(143,192,255,.06) 0 1px,transparent 1px 13px);background-size:auto;background-position:0 0;-webkit-mask-image:linear-gradient(180deg,transparent 45%,#000 100%);mask-image:linear-gradient(180deg,transparent 45%,#000 100%)}
+  .page-hajo .tag{color:var(--lake-text)}
+  .page-hajo .alt{background:var(--lake);border-color:var(--lake-line)}
+  .page-hajo .card,.page-hajo .steps>li,.page-hajo .faq details,.page-hajo .tbl-wrap{background:var(--lake2);border-color:var(--lake-line)}
+  .page-hajo thead th{background:#172a4a}
+  .page-hajo .box{background:#16294a}
+  .page-hajo .alt .card{background:var(--lake2)}
+  .yesno{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:820px){.yesno{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .yesno .no-col{background:var(--bg2);border:1px solid var(--line)}
+  .yesno .yes-col{border:1px solid var(--lake-text)!important}
+
+  /* Tervezői jegyzet */
+  .page-jegyzet .hero{background:linear-gradient(180deg,#221a08,var(--bg))}
+  .page-jegyzet .hero::before{content:none}
+  .page-jegyzet .tag{color:var(--amber)}
+  .finding{border-left:3px solid var(--amber);padding:12px 16px;background:var(--bg2);border-radius:0 12px 12px 0}
+  .finding h3{font-size:1.02rem;margin-bottom:6px}
+  .finding p{margin:0 0 6px;font-size:.95rem;color:#c9cfd9}
+  .finding .then{color:#cfe9c0}
+  .finding .src{font-size:.8rem;margin:0}
+  .finding .src a{color:var(--muted)}
+  .check{list-style:none;padding:0;margin:0 0 18px}
+  .check li{position:relative;padding:10px 12px 10px 40px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:.95rem}
+  .check li::before{content:"";position:absolute;left:13px;top:14px;width:14px;height:14px;border:2px solid var(--amber);border-radius:4px}
+  .srcs{font-size:.86rem;columns:1}
+  @media (min-width:820px){.srcs{columns:2;column-gap:32px}}
+  .srcs li{break-inside:avoid}
+  .srcs a{color:var(--muted)}
+
+  /* Lábléc, mobil sáv */
+  .foot{border-top:1px solid var(--line);background:#0b0d11;padding-block:40px 30px;color:var(--muted);font-size:.93rem}
+  .foot-grid{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+  @media (min-width:760px){.foot-grid{grid-template-columns:1.3fr 1fr 1fr 1fr}}
+  .foot h4{color:#fff;margin:0 0 8px;font-size:.95rem}
+  .foot p{margin:0 0 6px}
+  .foot a{color:#fff;text-decoration:none}
+  .foot a:hover{color:var(--green)}
+  .foot .legal{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);font-size:.82rem;color:var(--faint)}
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;background:rgba(15,17,21,.95);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+  .sticky .btn{padding:11px 10px;font-size:.95rem;min-height:46px}
+  @media (min-width:860px){.sticky{display:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-tel" viewBox="0 0 24 24"><path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011-.25c1.1.37 2.3.57 3.6.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1z"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4 1.7.7 2.3.8 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3z"/></symbol>
+</svg>
+
+<div class="draftbar"><div class="wrap">
+  <b>TERVEZET v2</b>
+  <span class="expl">Sárga pontozott aláhúzás: élesítés előtt megerősítendő. [Szögletes zárójel]: hiányzó adat.</span>
+  <button type="button" id="tbd-toggle" aria-pressed="true">Jelölések: be</button>
+  <a href="#/jegyzet">Tervezői jegyzet: kutatás és döntések →</a>
+</div></div>
+
+<header class="site"><div class="wrap">
+  <a class="brand" href="#/">akkumulatorepites.hu<small>Whoosh · Veszprém</small></a>
+  <nav class="nav" aria-label="Oldalak">
+    <a href="#/" data-nav="fooldal">Főoldal</a>
+    <a href="#/roller" data-nav="roller">Roller akku</a>
+    <a href="#/e-bike" data-nav="e-bike">E-bike akku</a>
+    <a href="#/hajo" data-nav="hajo">Hajóakku</a>
+    <a href="#/biztonsag" data-nav="biztonsag">Biztonság és jótállás</a>
+    <a href="#/fooldal/urlap">Ajánlatkérés</a>
+  </nav>
+  <a class="tel" href="tel:+36708520208">+36 70 852 0208</a>
+</div></header>
+
+<!-- ======================= FŐOLDAL ======================= -->
+<main class="page" id="fooldal">
+  <section class="hero" id="fooldal-top">
+    <div class="bg" data-label="hero.jpg"><img data-src="hero.jpg" alt="" fetchpriority="high"></div>
+    <div class="wrap">
+      <span class="tag">Akkumulátor-műhely · Veszprém, Kossuth Lajos u. 10.</span>
+      <h1>Roller-, e-bike- és hajóakku. Csere, felújítás, egyedi építés.</h1>
+      <p class="hero-lead"><b>Tudod, mi van benne.</b> Név szerint ismert cella, megmért pack, jótállási jegy. És egy cím Veszprémben, ahová visszahozod, ha bármi van.</p>
+      <p class="doors-q">Mihez kell?</p>
+      <div class="doors">
+        <a class="door" href="#/roller">
+          <span class="ic" aria-hidden="true">⚡</span>
+          <h2 class="door-t">Roller</h2>
+          <span>Új pack a gyári rekeszbe, fix árlistáról.</span>
+          <span class="big num">106 900 Ft-tól</span>
+          <span class="small">36V 10Ah-tól 72V 30Ah-ig, 13 méret · 5–10 munkanap</span>
+          <span class="go">Roller akku csere →</span>
+        </a>
+        <a class="door" href="#/e-bike">
+          <span class="ic" aria-hidden="true">🚲</span>
+          <h2 class="door-t">E-bike</h2>
+          <span>Felújítás a te tokodba, vagy új pack.</span>
+          <span class="big num">36 · 48 · 52 V</span>
+          <span class="small">Előbb megnézzük, mibe lehet, és ezt előre megmondjuk.</span>
+          <span class="go">E-bike akku felújítás →</span>
+        </a>
+        <a class="door hajo" href="#/hajo">
+          <span class="ic" aria-hidden="true">⛵</span>
+          <h2 class="door-t">Hajó, Balaton</h2>
+          <span>LiFePO4 rendszer ólom helyett, a hajódba építve.</span>
+          <span class="big num">2–6 kWh</span>
+          <span class="small">24 és 48 V · ingyenes felmérés a kikötőben</span>
+          <span class="go">Hajóakku a Balatonon →</span>
+        </a>
+      </div>
+      <div class="facts"><span>Ajánlat 24 órán belül</span><span>Építés 5–10 munkanap</span><span>Jótállási jeggyel</span><span>Helyben, futár nélkül</span></div>
+      <div class="cl"><span>Vagy hívj most:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="proof" aria-label="Amit ellenőrizhetsz">
+    <div class="wrap">
+      <div class="proof-grid">
+        <div class="pf"><b>Tenpower INR21700-50ME</b><span>Név szerint, gyártói adatlappal, minden roller- és e-bike-packban.</span></div>
+        <div class="pf"><b class="tbd" title="Megerősítendő: vállalod a mérési lapot minden packhoz?">Mérési lap minden packhoz</b><span>A mért kapacitás a te papírodon van, nem a dobozon.</span></div>
+        <div class="pf"><b class="tbd" title="Megerősítendő: jogszabály szerinti jótállás (151/2003. Korm. r.), jogászi ellenőrzéssel">Jótállás 2 év, 250 000 Ft felett 3 év</b><span>Jótállási jeggyel, e-mailben is.</span></div>
+        <div class="pf"><b>10 év rollerszerviz</b><span>Whoosh, Veszprém. Amit szervizelünk, annak az akkuját is ismerjük.</span></div>
+      </div>
+      <div class="tiktok">
+        <div><span class="n num">920 000+</span><p class="small" style="margin:6px 0 0">megtekintés egy műhelyvideónkon. TikTok: <a href="https://www.tiktok.com/@elektromosroller.net" target="_blank" rel="noopener">@elektromosroller.net</a></p></div>
+        <div class="ph" style="min-height:110px" data-label="[TikTok-videó beágyazva – WordPressben, süti-hozzájárulás után]"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="fooldal-kulonbseg">
+    <div class="wrap">
+      <span class="tag">Mi a különbség</span>
+      <h2>Kívülről ugyanúgy néz ki. Belül nem.</h2>
+      <p class="lead">Nem az számít, hol gyártották a cellát. Az számít, hogy tudod-e, mi van benne, és megmérte-e valaki.</p>
+      <div class="grid2 top">
+        <div class="tbl-wrap">
+          <table class="vs">
+            <thead><tr><th scope="col"><span class="sr">Mi</span></th><th scope="col">Ismeretlen pack</th><th scope="col">Nálunk</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Cella</th><td class="no" data-l="Ismeretlen pack">„5000 mAh” felirat, típus nélkül</td><td class="yes" data-l="Nálunk">Tenpower INR21700-50ME, adatlappal, független méréssel</td></tr>
+              <tr><th scope="row">Kötés</th><td class="no" data-l="Ismeretlen pack">Gyakran forrasztás a cellán</td><td class="yes" data-l="Nálunk">Ponthegesztett nikkelszalag</td></tr>
+              <tr><th scope="row">Csere</th><td class="no" data-l="Ismeretlen pack">Van, ahol pár új cella a régiek közé</td><td class="yes" data-l="Nálunk">Mindig teljes cellasor, új cellákból</td></tr>
+              <tr><th scope="row">Mérés</th><td class="no" data-l="Ismeretlen pack">Nincs</td><td class="yes" data-l="Nálunk"><span class="tbd" title="Megerősítendő: mérsz cellánként feszültséget és belső ellenállást?">Cellánként feszültség és belső ellenállás, beépítés előtt</span></td></tr>
+              <tr><th scope="row">BMS</th><td class="no" data-l="Ismeretlen pack">Ami a dobozban volt</td><td class="yes" data-l="Nálunk">A motorodhoz és a terheléshez választva</td></tr>
+              <tr><th scope="row">Szigetelés</th><td class="no" data-l="Ismeretlen pack">Minimális</td><td class="yes" data-l="Nálunk">Szigetelés, hőzsugor, balance harness</td></tr>
+              <tr><th scope="row">Átadás</th><td class="no" data-l="Ismeretlen pack">Feltöltve, papír nélkül</td><td class="yes" data-l="Nálunk">Kapacitásmérés és kiegyenlítés, <span class="tbd" title="Megerősítendő: mérési lap minden packhoz">mérési lappal</span></td></tr>
+              <tr><th scope="row">Ha baj van</th><td class="no" data-l="Ismeretlen pack">Külföldi webshop, e-mail</td><td class="yes" data-l="Nálunk">Veszprém, Kossuth Lajos u. 10., jótállási jeggyel</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <figure class="ph r32" data-label="ponthegesztes.jpg – ponthegesztés közelről (TikTok-kivágás is jó)"><img data-src="ponthegesztes.jpg" alt="Ponthegesztés: nikkelszalag a 21700-as cellákon a Whoosh műhelyében" loading="lazy"></figure>
+          <p class="note">A Tenpower kínai gyártó, ahogy a legtöbb cellagyár. A különbség nem a származás. Az, hogy név szerint tudjuk, mi van a packban, és megmérjük.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Kérdésed van?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="fooldal-biztonsag">
+    <div class="wrap">
+      <span class="tag">Biztonság</span>
+      <h2>Így épül, hogy ne legyen belőle baj. És így töltsd.</h2>
+      <p class="lead">A katasztrófavédelem adatai szerint 2024-ben 21 elektromos roller gyulladt ki Magyarországon, 2025-ben augusztus elejéig már ugyanennyi. Az esetek 40 százaléka töltés közben történt. <a href="https://infostart.hu/belfold/2025/08/13/sokkolo-fotoval-uzen-az-e-rollereseknek-a-katasztrofavedelem" target="_blank" rel="noopener">Forrás</a></p>
+      <div class="grid2">
+        <div class="card">
+          <h3>Hat lépés, minden packnál</h3>
+          <ol class="numlist">
+            <li><b>Új, azonos típusú cellák.</b> Használt, bontott vagy kevert cellát nem építünk be.</li>
+            <li><b>Cellánkénti mérés beépítés előtt.</b> <span class="tbd" title="Megerősítendő: cellaválogatás mérés alapján">Ami kilóg, kimarad.</span></li>
+            <li><b>Ponthegesztés.</b> A cellára forrasztani tilos, a páka hője belülről károsítja.</li>
+            <li><b>BMS a terheléshez méretezve.</b> Túltöltés, mélykisütés, túláram és rövidzár ellen.</li>
+            <li><b>Szigetelés, hőzsugor,</b> kiegyenlítő vezetékek minden cellacsoporthoz.</li>
+            <li><b>Kapacitásmérés és kiegyenlítés</b> átadás előtt.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Öt szabály töltéshez</h3>
+          <ol class="numlist">
+            <li><b>Csak a packhoz való töltővel.</b> 36 V-os pack, 42 V-os töltő. A címkén rajta van.</li>
+            <li><b>Felügyelet mellett.</b> Ne éjszakára, ne hosszabbítóval, ne a bejárati ajtó elé.</li>
+            <li><b>Hidegből behozva várj.</b> 0 °C alatt lítium akkut nem töltünk.</li>
+            <li><b>Esés, ütés, beázás után ne töltsd.</b> Hozd be, megmérjük.</li>
+            <li><b>Duzzad, szagot ad, forró:</b> húzd ki, vidd ki a szabadba, hívj.</li>
+          </ol>
+        </div>
+      </div>
+      <p style="margin-top:18px"><b>Kockázat nulla nincs. Kezelt kockázat van.</b> Ezért mérünk, ezért van BMS, és ezért írjuk le, hogyan tölts. <a href="#/biztonsag">Biztonság és jótállás részletesen →</a></p>
+      <div class="cl"><span>Kérdésed van a töltésről?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="fooldal-folyamat">
+    <div class="wrap">
+      <figure class="ph r167" data-label="muhely.jpg – a műhely: ponthegesztő, kapacitásmérő, munka közben"><img data-src="muhely.jpg" alt="A Whoosh akkuépítő műhelye Veszprémben, munka közben" loading="lazy"></figure>
+      <span class="tag">Folyamat</span>
+      <h2>Írsz, 24 órán belül konkrét árat kapsz. Nem -tól.</h2>
+      <p class="lead">Rollernél és e-bike-nál fotó alapján, hajónál a felmérés után.</p>
+      <ol class="steps four">
+        <li><h3>Írsz vagy hívsz</h3><p>Rollernél a típus és az akku címkéjének fotója elég. E-bike-nál a címke és a csatlakozó. Hajónál kimegyünk, ingyen.</p></li>
+        <li><h3>Írásos ajánlat</h3><p>24 órán belül: ár, mi van benne, mi nincs, határidő, jótállás. <span class="tbd" title="Megerősítendő: az ajánlat és a bevizsgálás ingyenes">Ha nem kéred, nem fizetsz semmit.</span></p></li>
+        <li><h3>50% előleg, építés</h3><p>Az előlegből rendeljük a cellákat. Építés 5–10 munkanap az előleg beérkezésétől.</p></li>
+        <li><h3>Átadás</h3><p>Kapacitásmérés, kiegyenlítés, <span class="tbd" title="Megerősítendő: mérési lap">mérési lap</span>, jótállási jegy, számla. Ha a rollert hozod, beszerelve viszed haza.</p></li>
+      </ol>
+
+      <div class="grid2 top" style="margin-top:30px">
+        <div>
+          <h3>A mérési lap: ezt kapod minden packhoz</h3>
+          <p class="small">A mezőket a te packod mért értékei töltik ki. Ebből látod, hogy a pack tudja, amit ígértünk, és ez a viszonyítási alap, ha később bármi van.</p>
+          <p class="small"><span class="tbd" title="Javaslat: vezesd be ezt a lapot, ez a legolcsóbb és legerősebb megkülönböztető">Sablon, élesítés előtt a te mérőeszközeidhez igazítjuk.</span></p>
+        </div>
+        <div class="sheet" role="img" aria-label="Mérési lap sablon kitöltetlen mezőkkel">
+          <div class="sheet-h"><b>Mérési lap</b><span>akkumulatorepites.hu · Whoosh, Veszprém</span></div>
+          <div class="row"><span>Sorszám · dátum</span><span class="v"><span class="bl"></span> · <span class="bl"></span></span></div>
+          <div class="row"><span>Pack</span><span class="v"><span class="bl"></span> V <span class="bl"></span> Ah · <span class="bl"></span>S<span class="bl"></span>P</span></div>
+          <div class="row"><span>Cella</span><span class="v">Tenpower INR21700-50ME</span></div>
+          <div class="row"><span>Mért kapacitás</span><span class="v"><span class="bl"></span> Ah · <span class="bl"></span> Wh</span></div>
+          <div class="row"><span>Kisütés</span><span class="v"><span class="bl"></span> A-rel, <span class="bl"></span> V-ig</span></div>
+          <div class="sub">Cellacsoportok kiegyenlítés után, V</div>
+          <div class="groups"><span>1 _,___</span><span>2 _,___</span><span>3 _,___</span><span>4 _,___</span><span>5 _,___</span><span>6 _,___</span><span>7 _,___</span><span>8 _,___</span><span>9 _,___</span><span>10 _,___</span><span>11 _,___</span><span>12 _,___</span><span>13 _,___</span></div>
+          <div class="row"><span>BMS</span><span class="v"><span class="bl"></span> A · <span class="bl"></span> V / <span class="bl"></span> V</span></div>
+          <div class="row"><span>Védelmi próba</span><span class="v">☐ túltöltés ☐ mélykisütés ☐ túláram</span></div>
+          <div class="row"><span>Átadta</span><span class="v"><span class="bl" style="min-width:8em"></span></span></div>
+        </div>
+      </div>
+
+      <div class="box box-purple" id="fooldal-atvetel">
+        <h3>Átvétel: futár nélkül</h3>
+        <p>Kész packot futárral nem küldünk. A 100 Wh feletti lítium akku veszélyes áru (UN 3480), a posta és a csomagautomaták nem viszik, és már egy 36V 10Ah pack is 360 Wh.</p>
+        <ul class="list-ok">
+          <li>Átveszed Veszprémben, a Kossuth Lajos u. 10.-ben.</li>
+          <li>Hozod a rollert, beszereljük, és úgy viszed haza.</li>
+          <li><span class="tbd" title="Megerősítendő: saját kiszállítás díja és ADR-rendje">Veszprém és a Balaton között kivisszük, egyeztetett díjjal.</span></li>
+          <li>A hajót a kikötőben építjük be.</li>
+        </ul>
+      </div>
+      <div class="cl"><span>Indulnál?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="fooldal-ki-epiti">
+    <div class="wrap">
+      <span class="tag">Ki építi</span>
+      <h2>Akkumulátor-felújítás és -építés Veszprémben</h2>
+      <div class="grid2 top">
+        <div class="card">
+          <div class="person">
+            <figure class="ph r45" data-label="szilard.jpg"><img data-src="szilard.jpg" alt="Szilárd, a Whoosh vezetője a veszprémi műhelyben" loading="lazy"></figure>
+            <blockquote class="quote tbd-b" title="Javaslat: a saját szavaiddal véglegesítsd">„Szilárd vagyok, tíz éve szerelem a rollereket a Kossuth utcában. Az akkukat azért kezdtem magam építeni, mert amit a vevők a netről rendeltek, az pár hónap után nálam landolt. Amit átadok, azt lemértem, és ide hozod vissza, ha bármi van.”</blockquote>
+          </div>
+        </div>
+        <div class="card">
+          <figure class="ph r32" data-label="golfboard-pack.jpg – a kész Golfboard-pack"><img data-src="golfboard-pack.jpg" alt="Nagy, egyedi Golfboard-akkupack a Whoosh műhelyéből" loading="lazy"></figure>
+          <h3 style="margin-top:14px">Referencia: Golfboard-pack</h3>
+          <p style="margin:0">Nagy pack, golfboardhoz: <span class="fill">[V] / [Ah] / [kWh], [cellaszám] cella, mért kapacitás [Ah]</span>. Ugyanezzel a módszerrel épül minden roller-, e-bike- és hajópack.</p>
+        </div>
+      </div>
+      <div class="grid2 top" style="margin-top:18px">
+        <div>
+          <h3>Amit szervizelünk, annak az akkuját is ismerjük</h3>
+          <p class="brands">Whoosh · Segway Ninebot · Xiaomi · Kukirin · Navee · OOTD · Gspace · Yume</p>
+          <p class="small">A rollert, az e-bike-ot hozod. A hajóhoz mi megyünk: Balatonfüred, Siófok, Keszthely és környéke.</p>
+        </div>
+        <div class="card">
+          <h3>Itt találsz</h3>
+          <p>Whoosh, Veszprém, Kossuth Lajos u. 10.<br>Nyitvatartás: <span class="fill">[nap–nap, óra–óra]</span><br><a href="tel:+36708520208">+36 70 852 0208</a> · <a href="mailto:erollerszerviz@gmail.com">erollerszerviz@gmail.com</a></p>
+          <p style="margin:0"><a href="https://www.google.com/maps/search/?api=1&amp;query=Veszpr%C3%A9m%2C%20Kossuth%20Lajos%20u.%2010." target="_blank" rel="noopener">Útvonal a térképen →</a></p>
+        </div>
+      </div>
+      <div class="cl"><span>Beugranál? Előbb hívj:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="fooldal-gyik">
+    <div class="wrap">
+      <span class="tag">GYIK</span>
+      <h2>Amit mindenki megkérdez</h2>
+      <div class="faq">
+        <details><summary>Mennyibe kerül?</summary><div class="a"><p>Roller- és e-bike-packra fix, bruttó árlistánk van: 36V 10Ah 106 900 Ft-tól 72V 30Ah 330 900 Ft-ig, 13 méretben. A teljes lista a <a href="#/roller/arak">roller oldalon</a> van, minden sornál a cellaszámmal és a becsült kilométerrel. Hajóra rendszert építünk, ott az ár a hajódtól, a motortól és a használattól függ: <span class="tbd" title="Újraszámolandó, lásd a tervezői jegyzetet">jellemzően 1,5–3,5 millió Ft</span>, felmérés után, tételesen, írásban.</p></div></details>
+        <details><summary>Megéri, vagy vegyek új rollert?</summary><div class="a"><p>Ha a váz, a motor és a vezérlő jó, és a pack ára kevesebb egy hasonló új roller árának felénél, a pack a jobb üzlet. Az új roller új gyári akkuval jön, ami pár év múlva ugyanitt lesz. Ha a vezérlő is gyanús, vagy a roller mindenhol fárad, megmondjuk, hogy ne öntsd bele. Akkor is, ha nem lesz belőle munka.</p></div></details>
+        <details><summary>Kínai cella, vagy Samsung?</summary><div class="a"><p>A Tenpower kínai gyártó, ahogy a legtöbb cellagyár. Nem a márkanevet fizeted meg, hanem a cellát: a gyártói adatlap szerint 5000 mAh, legalább 4950 mAh, kb. 15 A folyamatos áram. A Batemo független mérése 4,95 Ah-t mért rajta, vagyis a cella tudja, amit a papír ír. A kínai akkuval nem a származás a baj, hanem hogy senki nem mérte meg.</p></div></details>
+        <details><summary>Kigyulladhat?</summary><div class="a"><p>Lítium akku kigyulladhat, ezt nem tagadjuk. A rollertüzek 40 százaléka töltés közben történik. A mi tapasztalatunk szerint a baj forrása jellemzően rossz vagy sérült cella, forrasztás, hiányzó védelem vagy nem hozzá való töltő. Ezért ponthegesztünk, ezért méretezzük a BMS-t, ezért mérünk átadás előtt, és ezért írjuk le, hogyan tölts. <a href="#/biztonsag">Részletek →</a></p></div></details>
+        <details><summary>Gyorsabb lesz tőle a roller?</summary><div class="a"><p>Nem. Több Ah több kilométert ad, nem több km/h-t. A sebességet a motor és a vezérlő adja. Ha gyorsítani akarod a rollert, az más beszélgetés, jogi következményekkel: járműkategória, biztosítás. Ezt előre tisztázzuk.</p></div></details>
+        <details><summary>Miért kell 50% előleg, és mi lesz vele?</summary><div class="a"><p>Az előlegből rendeljük a cellákat a te packodhoz, 48V 20Ah-nál ez 89 950 Ft. Előleg, nem foglaló: ha a pack nem építhető meg, vagy mi nem tudjuk teljesíteni, visszajár. <span class="tbd" title="Megerősítendő: visszalépési szabály, szerződésben rögzítve">Ha a cellák megrendelése után lépsz vissza, a már beszerzett cellák árát levonjuk, a többi visszajár.</span> Egyedi méretre épített akku, ezért a 14 napos elállási jog nem vonatkozik rá. Ezt az ajánlatban előre, írásban megkapod.</p></div></details>
+        <details><summary>Postázzátok?</summary><div class="a"><p>Nem. A 100 Wh feletti lítium akku veszélyes áru (UN 3480), a posta és a csomagautomaták nem viszik, és már egy 36V 10Ah pack is 360 Wh. Átveszed Veszprémben, vagy hozod a rollert, és beszerelve viszed haza. <span class="tbd" title="Megerősítendő: saját kiszállítás">Veszprém és a Balaton között kivisszük.</span> A hajót eleve a kikötőben építjük be.</p></div></details>
+        <details><summary>Mi a jótállás?</summary><div class="a"><p><span class="tbd" title="Megerősítendő: 151/2003. Korm. r. szerinti sávok">2 év, 250 000 Ft feletti packra 3 év</span>, jótállási jeggyel, e-mailben is. Ha hiba van, Veszprémben javítjuk. Ha 30 napon belül nem sikerül, cseréljük, vagy visszaadjuk az árát. A hajóba fixen bekötött akkut a helyszínen javítjuk. <a href="#/biztonsag/jotallas">Pontos feltételek →</a></p></div></details>
+        <details><summary>Mi lesz a régi cellákkal?</summary><div class="a"><p><span class="tbd" title="Megerősítendő: hulladékleadás, EPR">Nem adjuk vissza: veszélyes hulladék, mi adjuk le a gyűjtőnek, ez benne van az árban.</span> Felújításnál a régi házadat újra használjuk. Egy fáradt cellasort otthon tárolni nem biztonságos.</p></div></details>
+      </div>
+      <div class="cl"><span>Más kérdés?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="fooldal-urlap">
+    <div class="wrap">
+      <span class="tag">Ajánlatkérés</span>
+      <h2>Írd meg, mihez kell. 24 órán belül válaszolunk.</h2>
+      <p class="lead">Rollernél elég a típus és az akku címkéjének fotója. E-bike-nál a címke és a csatlakozó. Hajónál a motor és a kikötő, a többit a felmérésen nézzük.</p>
+      <form class="lead-form" id="f-fooldal" method="post">
+        <fieldset>
+          <legend>Mihez kell?</legend>
+          <div class="radios">
+            <label><input type="radio" name="tipus" value="Roller" id="ff-t-roller" checked> Roller</label>
+            <label><input type="radio" name="tipus" value="E-bike" id="ff-t-ebike"> E-bike</label>
+            <label><input type="radio" name="tipus" value="Hajó" id="ff-t-hajo"> Hajó</label>
+          </div>
+        </fieldset>
+        <label class="f" for="ff-nev">Név<input type="text" name="nev" id="ff-nev" required autocomplete="name" data-l="Név"></label>
+        <label class="f" for="ff-tel">Telefon<input type="tel" name="telefon" id="ff-tel" required autocomplete="tel" placeholder="+36 ..." data-l="Telefon"></label>
+        <label class="f" for="ff-email">E-mail<input type="email" name="email" id="ff-email" required autocomplete="email" data-l="E-mail"></label>
+        <label class="f" for="ff-jarmu">Jármű típusa <span class="opt">pl. Xiaomi Pro 2, Kukirin G2 Max, Bafang kit, Torqeedo Cruise</span><input type="text" name="jarmu" id="ff-jarmu" data-l="Jármű"></label>
+        <label class="f" for="ff-akku">Mostani akku <span class="opt">V / Ah, a címkén van. Hajónál: ólom/AGM, darab</span><input type="text" name="akku" id="ff-akku" placeholder="pl. 36 V 7,8 Ah" data-l="Mostani akku"></label>
+        <fieldset class="cond" data-when="E-bike" disabled>
+          <label class="f" for="ff-rendszer">Rendszer
+            <select name="rendszer" id="ff-rendszer" required data-l="Rendszer">
+              <option value="">Válassz…</option><option>Bafang</option><option>Nyílt / kínai / egyéb</option><option>Shimano STEPS</option><option>Bosch</option><option>Yamaha</option><option>Brose</option><option>Nem tudom</option>
+            </select>
+          </label>
+          <p class="warn-inline">Bosch, Yamaha és Brose akkut nem nyitunk fel. Ha nem vagy biztos a rendszerben, küldd el a fotót, megnézzük.</p>
+        </fieldset>
+        <fieldset class="cond" data-when="Hajó" disabled>
+          <label class="f" for="ff-motor">Motor típusa, teljesítménye<input type="text" name="motor" id="ff-motor" required placeholder="pl. ePropulsion Navy 6.0, 6 kW" data-l="Motor"></label>
+          <label class="f" for="ff-hajo">Hajó típusa, hossza<input type="text" name="hajo" id="ff-hajo" required placeholder="pl. 6 m-es motoros, 7,5 m-es vitorlás" data-l="Hajó"></label>
+          <label class="f" for="ff-kikoto">Kikötő, hol áll a hajó<input type="text" name="kikoto" id="ff-kikoto" required placeholder="pl. Balatonfüred" data-l="Kikötő"></label>
+        </fieldset>
+        <label class="f" for="ff-foto">Fotó <span class="opt">címke, csatlakozó, rekesz · legfeljebb 3 kép</span><input type="file" name="foto" id="ff-foto" accept="image/*" multiple></label>
+        <label class="f" for="ff-uzenet">Üzenet <span class="opt">opcionális</span><textarea name="uzenet" id="ff-uzenet" placeholder="Tünet, napi táv, bármi, ami segít." data-l="Üzenet"></textarea></label>
+        <label class="consent" for="ff-gdpr"><input type="checkbox" name="gdpr" id="ff-gdpr" required><span>Elolvastam az <a href="#/biztonsag/adatkezeles">adatkezelési tájékoztatót</a>, és hozzájárulok, hogy az adataimat az ajánlathoz kezeljétek.</span></label>
+        <input type="hidden" name="forras" value="akkumulatorepites.hu"><input type="hidden" name="kivalasztott_sor" value="">
+        <button class="btn btn-green" type="submit">Árat kérek</button>
+        <p class="small" style="margin:0">Az ajánlat <span class="tbd" title="Megerősítendő">ingyenes, és nem kötelez semmire</span>. Előleget csak megrendeléskor kérünk.</p>
+        <div class="form-ok" role="status">Köszönjük. Ha a leveleződ megnyílt, küldd el a levelet, és 24 órán belül jelentkezünk. A fotókat <a class="form-wa" href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener">küldd WhatsAppon</a>, vagy hívj: <a href="tel:+36708520208">+36 70 852 0208</a>.</div>
+      </form>
+      <div class="cl"><span>Vagy azonnal:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= ROLLER ======================= -->
+<main class="page" id="roller" hidden>
+  <section class="hero" id="roller-top">
+    <div class="wrap">
+      <div class="hero-split">
+        <div>
+          <span class="tag">Roller akku csere és felújítás · Veszprém</span>
+          <h1>Roller akku csere és felújítás. Új, megmért pack a gyári rekeszbe.</h1>
+          <p class="pricebadge"><span>36V 10Ah</span><b class="num">106 900 Ft</b><span>-tól, fix árlistáról</span></p>
+          <p class="hero-lead">A rollered jó, csak az akku fáradt el. Tenpower 21700 cella, a motorodhoz választott BMS, kapacitásmérés átadás előtt. Ajánlat 24 órán belül, építés 5–10 munkanap.</p>
+          <div class="btns"><a class="btn btn-green" href="#/roller/urlap">Árat kérek a rolleremre</a><a class="btn btn-ghost" href="#/roller/arak">Árlista</a></div>
+          <p class="small" style="margin-top:14px">Xiaomi, Ninebot, Kukirin, Navee, OOTD, Gspace, Yume, Whoosh. Ha a váz, a motor és a vezérlő jó, az akkut megcsináljuk.</p>
+        </div>
+        <figure class="ph r32" data-label="pack-roller.jpg – kész roller-pack hőzsugorban, mellette a mérőműszer"><img data-src="pack-roller.jpg" alt="Kész 21700-as roller-akkupack hőzsugorban, mellette kapacitásmérő" loading="lazy"></figure>
+      </div>
+      <div class="facts"><span>Ajánlat 24 órán belül</span><span>Építés 5–10 munkanap</span><span>Fix bruttó árlista</span><span class="tbd" title="Megerősítendő: jótállás sávjai">Jótállás 2 év, 250 000 Ft felett 3 év</span></div>
+      <div class="cl"><span>Leggyorsabb: fotózd le az akku címkéjét, és küldd el.</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="roller-tunetek">
+    <div class="wrap">
+      <span class="tag">Tünetek</span>
+      <h2>Felére esett a hatótáv? Többnyire a cella fáradt el, nem a roller.</h2>
+      <div class="grid3">
+        <div class="card sym"><h3>Feleannyit megy, mint újkorában.</h3><p class="ok">a cellák kapacitása elfogyott.</p><p class="fix">új pack teljes cellasorral, ha kell, több Ah-val ugyanabba a rekeszbe.</p></div>
+        <div class="card sym"><h3>Nem viszi fel a dombra, lassul terhelésen.</h3><p class="ok">megnőtt a cellák belső ellenállása, terhelésre leesik a feszültség.</p><p class="fix">új cellák, a motor áramához méretezett BMS.</p></div>
+        <div class="card sym"><h3>Menet közben lekapcsol, aztán újra megy.</h3><p class="ok">a BMS véd, mert egy cellacsoport a többi alá esik.</p><p class="fix">a mérés dönti el, cella vagy BMS. Nem tippelünk.</p></div>
+        <div class="card sym"><h3>Hidegben azonnal leül.</h3><p class="ok">a fáradt cella hidegben még kevesebbet ad le.</p><p class="fix">új cellasor, és elmondjuk, hogyan töltsd télen.</p></div>
+        <div class="card sym"><h3>Nem tölt, vagy a töltő azonnal zöldre vált.</h3><p class="ok">lehet a töltő, az aljzat vagy a BMS.</p><p class="fix">megmérjük, és csak azt cseréljük, ami hibás.</p></div>
+        <div class="card sym"><h3>A netes „olcsó” akku fél év után leült.</h3><p class="ok">nem tudod, mi volt benne, és nincs, aki felel érte.</p><p class="fix">név szerinti cella, mért kapacitás, jótállás egy veszprémi címre.</p></div>
+      </div>
+      <p style="margin-top:18px"><b>Ha a mérés szerint a BMS vagy a töltő a hibás, azt mondjuk.</b> Nem építünk feleslegesen packot.</p>
+      <div class="box box-purple">
+        <h3>Két szó, amit tisztázunk</h3>
+        <p><b>Felújítás:</b> a te házadba új cellasor és új BMS. <b>Építés:</b> új pack a te méretedre, akár nagyobb, akár más házba. Mindkettő teljes cellacsere. Pár új cellát a régiek közé nem teszünk: a régiek lehúzzák az újakat, és a pack hamar ugyanott lesz.</p>
+      </div>
+      <div class="cl"><span>Nem tudod, melyik a tiéd? Írd meg a tünetet:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="roller-arak">
+    <div class="wrap">
+      <span class="tag">Árak</span>
+      <h2>Árlista. Soronként pontos ár, nem -tól.</h2>
+      <p class="lead">Bruttó ügyfélárak Tenpower INR21700-50ME cellával, a motorodhoz választott BMS-sel, ponthegesztéssel, hőzsugorral és átadási teszttel. Érvényes: 2026. szeptember. <span class="tbd" title="Megerősítendő vállalás">Az írásos ajánlatban rögzített ár nem változik.</span></p>
+      <div class="price-layout">
+        <div>
+          <div class="tbl-wrap">
+            <table class="price-tbl" data-form="f-roller">
+              <thead><tr><th scope="col">Pack · <span class="tbd" title="Ellenőrizd soronként a felépítést (S×P) és a cellaszámot">felépítés</span></th><th scope="col">Energia · kb. hatótáv*</th><th scope="col" class="pr">Bruttó ár</th></tr></thead>
+              <tbody>
+                <tr data-cfg="36V 10Ah (10S2P) – 106 900 Ft"><td><span class="chip">36V 10Ah</span><span class="cfg">10S2P · 20 cella</span></td><td class="wh num">360 Wh<small>kb. 14–24 km</small></td><td class="pr num">106 900 Ft</td></tr>
+                <tr data-cfg="36V 15Ah (10S3P) – 123 900 Ft"><td><span class="chip">36V 15Ah</span><span class="cfg">10S3P · 30 cella</span></td><td class="wh num">540 Wh<small>kb. 22–36 km</small></td><td class="pr num">123 900 Ft</td></tr>
+                <tr data-cfg="36V 20Ah (10S4P) – 139 900 Ft"><td><span class="chip">36V 20Ah</span><span class="cfg">10S4P · 40 cella</span></td><td class="wh num">720 Wh<small>kb. 29–48 km</small></td><td class="pr num">139 900 Ft</td></tr>
+                <tr data-cfg="48V 15Ah (13S3P) – 147 900 Ft"><td><span class="chip">48V 15Ah</span><span class="cfg">13S3P · 39 cella</span></td><td class="wh num">702 Wh<small>kb. 28–47 km</small></td><td class="pr num">147 900 Ft</td></tr>
+                <tr data-cfg="48V 20Ah (13S4P) – 179 900 Ft"><td><span class="chip">48V 20Ah</span><span class="cfg">13S4P · 52 cella</span></td><td class="wh num">936 Wh<small>kb. 37–62 km</small></td><td class="pr num">179 900 Ft</td></tr>
+                <tr data-cfg="48V 25Ah (13S5P) – 201 900 Ft"><td><span class="chip">48V 25Ah</span><span class="cfg">13S5P · 65 cella</span></td><td class="wh num">1170 Wh<small>kb. 47–78 km</small></td><td class="pr num">201 900 Ft</td></tr>
+                <tr data-cfg="52V 20Ah (14S4P) – 190 900 Ft"><td><span class="chip">52V 20Ah</span><span class="cfg">14S4P · 56 cella</span></td><td class="wh num">1008 Wh<small>kb. 40–67 km</small></td><td class="pr num">190 900 Ft</td></tr>
+                <tr data-cfg="52V 25Ah (14S5P) – 214 900 Ft"><td><span class="chip">52V 25Ah</span><span class="cfg">14S5P · 70 cella</span></td><td class="wh num">1260 Wh<small>kb. 50–84 km</small></td><td class="pr num">214 900 Ft</td></tr>
+                <tr data-cfg="60V 20Ah (16S4P) – 213 900 Ft"><td><span class="chip">60V 20Ah</span><span class="cfg">16S4P · 64 cella</span></td><td class="wh num">1152 Wh<small>kb. 46–77 km</small></td><td class="pr num">213 900 Ft</td></tr>
+                <tr data-cfg="60V 25Ah (16S5P) – 239 900 Ft"><td><span class="chip">60V 25Ah</span><span class="cfg">16S5P · 80 cella</span></td><td class="wh num">1440 Wh<small>kb. 58–96 km</small></td><td class="pr num">239 900 Ft</td></tr>
+                <tr data-cfg="60V 30Ah (16S6P) – 277 900 Ft"><td><span class="chip">60V 30Ah</span><span class="cfg">16S6P · 96 cella</span></td><td class="wh num">1728 Wh<small>kb. 69–115 km</small></td><td class="pr num">277 900 Ft</td></tr>
+                <tr data-cfg="72V 20Ah (20S4P) – 252 900 Ft"><td><span class="chip">72V 20Ah</span><span class="cfg">20S4P · 80 cella</span></td><td class="wh num">1440 Wh<small>kb. 58–96 km</small></td><td class="pr num">252 900 Ft</td></tr>
+                <tr data-cfg="72V 30Ah (20S6P) – 330 900 Ft"><td><span class="chip">72V 30Ah</span><span class="cfg">20S6P · 120 cella</span></td><td class="wh num">2160 Wh<small>kb. 86–144 km</small></td><td class="pr num">330 900 Ft</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">*Becslés 15–25 Wh/km fogyasztással. Könnyű roller, sík út, mérsékelt tempó: a sáv teteje. Nagy, kétmotoros roller, domb, hideg: a sáv alja vagy kevesebb. <span class="tbd" title="A sávot a saját tapasztalatod szerint állítsd">Energia = cellaszám × 3,6 V × 5 Ah.</span> A 13 soros „48 V” névlegesen 46,8 V, ezért a 48V 20Ah pack 936 Wh.</p>
+          <p class="small">Koppints egy sorra, és beírjuk az ajánlatkérőbe. Nem találod a méreted? Írd meg, mi van a rolleredben, megmondjuk, melyik sor.</p>
+          <p style="margin:0"><b>Jótállás:</b> <span class="tbd" title="Megerősítendő">239 900 Ft-ig 2 év, felette 3 év</span>, jótállási jeggyel. <a href="#/biztonsag/jotallas">Feltételek →</a></p>
+        </div>
+        <div>
+          <div class="box">
+            <h3>Mit kapsz a pénzért</h3>
+            <p>Egy 48V 20Ah packban 52 cella van, 13 sorban, soronként 4. A cella ára csak egy része a számlának. Hozzá jön a BMS, a nikkelszalag és a ponthegesztés, a szigetelés és a hőzsugor, a kiegyenlítő vezetékek, a mérés és a teszt, a beszerelés, ha a rollert hozod, és a jótállás fedezete. Ezért nem cellánként árazunk.</p>
+            <p class="small">Nagyobb pack Wh-ra vetítve olcsóbb: a 36V 10Ah kb. 297 Ft/Wh, a 72V 30Ah kb. 153 Ft/Wh.</p>
+          </div>
+          <div class="box">
+            <h3>Nagy teljesítményű rollerhez</h3>
+            <p>Az 50ME energiacella: a gyártói adatlap szerint cellánként kb. 15 A-t ad folyamatosan. Négy párhuzamos cella kb. 60 A, hat kb. 90 A. 3 kW feletti rollerhez a párhuzamos cellaszámot és a BMS áramhatárát a motor csúcsáramához méretezzük. <span class="tbd" title="Megerősítendő: vállalod a nagy teljesítményű rollereket?">Írd meg a motor teljesítményét, és számolunk.</span></p>
+          </div>
+          <div class="box box-purple">
+            <h3>Mi nincs benne</h3>
+            <ul>
+              <li><b>Akkurekesz-átalakítás</b>, ha a nagyobb pack nem fér a gyári helyre. Előre megmondjuk, mennyi.</li>
+              <li><b>Töltő.</b> Ha a mostani feszültsége stimmel, marad. Ha nem, vagy gyorsabb kell, külön adjuk, előre megmondott áron.</li>
+              <li><b>Kiszállítás Veszprémen kívül.</b> Futárral nem küldünk, mert veszélyes áru.</li>
+            </ul>
+          </div>
+          <div class="box box-green">
+            <h3>Előleg</h3>
+            <p><b>50% megrendeléskor, 50% átadáskor.</b> Az előlegből rendeljük a cellákat: 48V 20Ah-nál ez 89 950 Ft. Előleg, nem foglaló: ha a pack nem építhető meg, vagy mi nem tudjuk teljesíteni, visszajár. Egyedi méretre épített akku, ezért a 14 napos elállási jog nem vonatkozik rá. Ezt az ajánlatban írásban megkapod, mielőtt bármit fizetnél.</p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:20px"><b>Népszerű rollerek:</b> Xiaomi M365, Pro 2, 4 Pro · Ninebot G30, Max G2 · Kukirin G2 Pro, G2 Max, G4. Írd meg a típust, megmondjuk, melyik sor a tiéd, és mi fér a rekeszbe.</p>
+      <div class="btns"><a class="btn btn-green" href="#/roller/urlap">Árat kérek a rolleremre</a></div>
+      <div class="cl"><span>Gyors kérdés az árról?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="roller-megeri">
+    <div class="wrap">
+      <span class="tag">Összehasonlítás</span>
+      <h2>Van olcsóbb. Ott nem tudod, mi van benne.</h2>
+      <p class="lead">Nem tagadjuk: 30–100 ezer forintért is kapsz roller akkut. Ez a tábla azt mutatja, mit kapsz a különbözetért. Nem cégeket hasonlítunk, hanem azt, ami ellenőrizhető.</p>
+      <div class="tbl-wrap">
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="sr">Kérdés</span></th><th scope="col">Webshopos „kész pack”</th><th scope="col">Gyári csereakku szervizben</th><th scope="col">Felújító „-tól” áron</th><th scope="col" class="us">Nálunk</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Cellatípus kiírva?</th><td>Ritkán, vagy csak „5000 mAh”</td><td>Gyári, típus nem közölt</td><td>Márka igen, típus ritkán</td><td class="us">Tenpower INR21700-50ME, adatlappal</td></tr>
+            <tr><th scope="row">Mért kapacitás átadáskor?</th><td>Nem</td><td>Nem</td><td>Ritkán</td><td class="us"><span class="tbd" title="Megerősítendő: mérési lap">Igen, mérési lapon</span></td></tr>
+            <tr><th scope="row">BMS a motorodhoz?</th><td>Ami a dobozban van</td><td>Gyári</td><td>Változó</td><td class="us">A terheléshez választva</td></tr>
+            <tr><th scope="row">Teljes cellacsere?</th><td>Új pack</td><td>Új pack</td><td>Van részleges is</td><td class="us">Mindig teljes cellasor</td></tr>
+            <tr><th scope="row">Jótállás hol?</th><td>Külföldi eladónál, e-mailben</td><td>A szervizben</td><td>Az adott városban</td><td class="us">Veszprém, Kossuth Lajos u. 10.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Általános piaci kép, 2026. szeptember. A táblát görgetheted.</p>
+      <p><b>Egy őszinte mondat.</b> Ha a rolleredhez van gyári csereakku, és neked az a jobb üzlet, megmondjuk. Kiszámoljuk, mielőtt bármit rendelnél.</p>
+      <div class="grid2 top" style="margin-top:24px">
+        <div>
+          <h3>Megéri, vagy vegyél új rollert?</h3>
+          <ol class="numlist">
+            <li><b>Jó a váz, a motor és a vezérlő,</b> és a pack kevesebb egy hasonló új roller árának felénél: pack. Az új roller új gyári akkuval jön, ami pár év múlva ugyanitt lesz.</li>
+            <li><b>A vezérlő is gyanús, vagy a roller több helyen fárad:</b> számoljunk együtt. Lehet, hogy megéri, lehet, hogy nem. Megmondjuk.</li>
+            <li><b>Olcsó roller, ami mindenhol fárad:</b> fék, kerék, kijelző, vezérlő. Ne öntsd bele. Ezt is megmondjuk, akkor is, ha nem lesz belőle munka.</li>
+          </ol>
+        </div>
+        <div class="box box-green" style="margin-top:0">
+          <h3>Nagyobb akku: több kilométer, nem több sebesség</h3>
+          <p class="num">360 Wh: kb. 14–24 km<br>720 Wh: kb. 29–48 km<br>1170 Wh: kb. 47–78 km</p>
+          <p class="small">Súly, domb, hideg, gumi és a jobb kezed dönti el, hol vagy a sávban. A sebességet a motor és a vezérlő adja, nem az akku.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Küldd el, mi van a rolleredben, kiszámoljuk:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="roller-cella">
+    <div class="wrap">
+      <span class="tag">A cella</span>
+      <h2>Nem a márkanevet fizeted meg, hanem a mért kapacitást.</h2>
+      <div class="grid2 top">
+        <div class="card">
+          <h3>Tenpower INR21700-50ME, a gyártói adatlapból</h3>
+          <ul class="list-ok">
+            <li><b>5000 mAh</b> tipikus, legalább 4950 mAh</li>
+            <li><b>3,6 V</b> névleges feszültség</li>
+            <li><b>kb. 15 A</b> folyamatos kisütőáram cellánként</li>
+            <li><b>21700-as méret</b>, 21,1 × 70,7 mm, 68 g</li>
+          </ul>
+          <p style="margin:0"><b>Független mérés:</b> a Batemo 4,95 Ah-t mért a cellán, vagyis a cella hozza a névleges kapacitást. <a href="https://www.batemo.com/products/batemo-cell-explorer/tenpower-inr21700-50me/" target="_blank" rel="noopener">Batemo-adatok →</a></p>
+        </div>
+        <div>
+          <h3>Miért nem Samsung vagy LG?</h3>
+          <p>A Tenpower kínai gyártó, ahogy a legtöbb cellagyár. Nem a márkanevet fizeted meg. Cserébe a pack mért kapacitása a te papírodon van, nem a dobozon. A kínai akkuval nem a származás a baj, hanem hogy senki nem mérte meg.</p>
+          <h3>Miért 21700, nem 18650?</h3>
+          <p>Több Ah fér ugyanabba a rekeszbe: egy 21700-as cella kb. 5000 mAh, egy 18650-es kb. 2500–3500. Rollernél a hely a szűk keresztmetszet, nem a súly.</p>
+          <h3>Ciklusszámot nem ígérünk</h3>
+          <p style="margin:0">A cellagyártó laborban, ideális körülmények között mér. A te packod hidegben, melegben, félig lemerítve, néha hetekig tele hagyva él. Ezért mért kapacitást és jótállást adunk, nem ciklusszámot. Ha valaki 2000 ciklust ígér egy roller-packra, kérdezd meg, mivel mérte.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Kérdésed a celláról?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="roller-gyik">
+    <div class="wrap">
+      <span class="tag">GYIK · roller</span>
+      <h2>Amit rolleresek kérdeznek</h2>
+      <div class="faq">
+        <details><summary>Mi van, ha nem fér be a rekeszbe?</summary><div class="a"><p>Első körben a rekesz belméretére tervezünk: a 21700-as cellákat úgy rendezzük el, hogy a lehető legtöbb kapacitás férjen a meglévő helyre. Ha a kért Ah fizikailag nem fér be, két út van. Vagy átalakítjuk a rekeszt, ez külön tétel, előre megmondjuk az árát. Vagy a legnagyobb packot építjük, ami még befér. Ezt az ajánlatban leírjuk, nem átadáskor derül ki.</p></div></details>
+        <details><summary>Marad a töltőm?</summary><div class="a"><p>Ha a feszültség ugyanaz, marad. Egy 36 V-os roller töltője 42 V-ot ad, ez így normális. Nagyobb Ah-nál ugyanaz a töltő csak tovább tölt. Ha feszültséget váltunk, vagy gyorsabb töltés kell, töltőt külön adunk, előre megmondott áron. Fotózd le a töltő címkéjét, megmondjuk.</p></div></details>
+        <details><summary>Mennyit nyerek kilométerben?</summary><div class="a"><p>A táblában minden sornál ott a becslés. Egy fáradt 36V 7,8Ah-s gyári akku helyett egy 36V 15Ah-s pack majdnem kétszer annyi energiát ad, mint az eredeti újkorában. Konkrét számot akkor mondunk, ha tudjuk a rollered típusát és a súlyodat. Sebességet nem nyersz, ezt előre mondjuk.</p></div></details>
+        <details><summary>Külső vagy pót akkut is építetek?</summary><div class="a"><p><span class="tbd" title="Megerősítendő: építesz külső packot?">A gyári rekeszbe építünk, ez a fő irány. Külső akku csak akkor, ha a vezérlő és a kábelezés bírja, és van hová biztonságosan rögzíteni.</span> Ezt a fotók alapján egyedileg nézzük. Ha nem való hozzá, megmondjuk.</p></div></details>
+        <details><summary>Mennyi idő?</summary><div class="a"><p>Ajánlat 24 órán belül. Az előleg beérkezése után 5–10 munkanap az építés, a teszt és az átadás. Ha a rollert hozod beszerelésre, időpontot egyeztetünk. Tavasszal, a szezon elején érdemes előbb írni.</p></div></details>
+        <details><summary>Mi lesz a régi cellákkal?</summary><div class="a"><p><span class="tbd" title="Megerősítendő">Nem adjuk vissza: veszélyes hulladék, mi adjuk le a gyűjtőnek, ez benne van az árban.</span> Felújításnál a régi házadat újra használjuk. Egy fáradt cellasort otthon tárolni nem biztonságos.</p></div></details>
+      </div>
+      <div class="cl"><span>Más kérdés?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="roller-urlap">
+    <div class="wrap">
+      <span class="tag">Ajánlatkérés · roller</span>
+      <h2>Küldj egy fotót az akku címkéjéről. 24 órán belül árat kapsz.</h2>
+      <form class="lead-form" id="f-roller" method="post">
+        <input type="hidden" name="tipus" value="Roller">
+        <p class="chosen" hidden></p>
+        <label class="f" for="fr-nev">Név<input type="text" name="nev" id="fr-nev" required autocomplete="name" data-l="Név"></label>
+        <label class="f" for="fr-tel">Telefon<input type="tel" name="telefon" id="fr-tel" required autocomplete="tel" placeholder="+36 ..." data-l="Telefon"></label>
+        <label class="f" for="fr-email">E-mail<input type="email" name="email" id="fr-email" required autocomplete="email" data-l="E-mail"></label>
+        <label class="f" for="fr-jarmu">Roller típusa<input type="text" name="jarmu" id="fr-jarmu" required placeholder="pl. Xiaomi Pro 2, Ninebot Max G2, Kukirin G2 Pro" data-l="Roller"></label>
+        <label class="f" for="fr-akku">Mostani akku <span class="opt">V / Ah, a címkén van</span><input type="text" name="akku" id="fr-akku" placeholder="pl. 36 V 7,8 Ah" data-l="Mostani akku"></label>
+        <label class="f" for="fr-km">Mennyi hatótáv kellene? <span class="opt">opcionális</span><input type="text" name="km" id="fr-km" placeholder="pl. napi 40 km" data-l="Kívánt hatótáv"></label>
+        <label class="f" for="fr-foto">Fotó <span class="opt">címke, csatlakozó, rekesz · legfeljebb 3 kép</span><input type="file" name="foto" id="fr-foto" accept="image/*" multiple></label>
+        <label class="f" for="fr-uzenet">Üzenet <span class="opt">tünet, dombos útvonal, súly</span><textarea name="uzenet" id="fr-uzenet" data-l="Üzenet"></textarea></label>
+        <label class="consent" for="fr-gdpr"><input type="checkbox" name="gdpr" id="fr-gdpr" required><span>Elolvastam az <a href="#/biztonsag/adatkezeles">adatkezelési tájékoztatót</a>, és hozzájárulok, hogy az adataimat az ajánlathoz kezeljétek.</span></label>
+        <input type="hidden" name="forras" value="akkumulatorepites.hu/roller"><input type="hidden" name="kivalasztott_sor" value="" data-l="Kiválasztott sor">
+        <button class="btn btn-green" type="submit">Árat kérek a rolleremre</button>
+        <p class="small" style="margin:0">Az ajánlat <span class="tbd" title="Megerősítendő">ingyenes, és nem kötelez semmire</span>. Előleget csak megrendeléskor kérünk.</p>
+        <div class="form-ok" role="status">Köszönjük. Ha a leveleződ megnyílt, küldd el a levelet, és 24 órán belül jelentkezünk. A fotókat <a class="form-wa" href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener">küldd WhatsAppon</a>, vagy hívj: <a href="tel:+36708520208">+36 70 852 0208</a>.</div>
+      </form>
+      <div class="cl"><span>Inkább hívnál?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= E-BIKE ======================= -->
+<main class="page" id="e-bike" hidden>
+  <section class="hero" id="e-bike-top">
+    <div class="wrap">
+      <span class="tag">E-bike akku felújítás · Veszprém</span>
+      <h1>E-bike akku felújítás és egyedi pack. 36, 48 és 52 V, a te tokodba vagy új házba.</h1>
+      <p class="hero-lead">A te házadba új, teljes, megmért cellasor és BMS. Előbb megnézzük, mibe lehet. Ha nem lehet, azt is egyenesen megmondjuk, nem szétszedés után.</p>
+      <div class="kompat tbd-b" title="A listát a saját tapasztalatod szerint véglegesítsd">
+        <div class="kp" style="--c:#3dd400"><h3>Ebbe igen</h3><p class="who">Nyílt vezérlős e-bike, Bafang és más kitek, átalakított bringa, generikus tok</p><p>Vázakku, csomagtartós tok, roller-tok. Teljes újraépítés saját BMS-sel, méréssel, jótállással.</p></div>
+        <div class="kp" style="--c:#e27aa6"><h3>Ebbe nem</h3><p class="who">Bosch · Yamaha · Brose</p><p>Zárt, kommunikáló BMS. A gyártó tiltja a felnyitást, szétszedés után zárolhat. Nem kísérletezünk a te akkuddal.</p></div>
+        <div class="kp" style="--c:#f2b84b"><h3>Egyedileg nézzük</h3><p class="who">Shimano STEPS</p><p>Küldd el a címke és a csatlakozó fotóját, megmondjuk, mit lehet.</p></div>
+      </div>
+      <div class="btns"><a class="btn btn-green" href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>Címkefotó WhatsAppon</a><a class="btn btn-ghost" href="#/e-bike/urlap">Ajánlatkérés</a></div>
+      <div class="facts"><span>Ajánlat 24 órán belül, fotó alapján</span><span>Építés 5–10 munkanap</span><span>Fix bruttó árlista</span></div>
+      <div class="cl"><span>Vagy hívj:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="e-bike-arak">
+    <div class="wrap">
+      <span class="tag">Két út</span>
+      <h2>Felújítás nálunk: a gyári házba új, teljes cellasor és BMS.</h2>
+      <div class="grid2 top">
+        <div class="card"><h3>1. Meglévő ház: felújítás</h3><p style="margin:0">A te tokod marad, benne új Tenpower 21700 cellasor és új BMS. A csatlakozó és a rögzítés a gyári. Ha a tok sérült, vagy a zár nem használható, előre megmondjuk.</p></div>
+        <div class="card"><h3>2. Új tok vagy vázakku: építés</h3><p style="margin:0">Ha a régi ház nem használható, vagy több Ah kell, mint ami belefér, új tokba építünk. Ugyanaz a cella, ugyanaz a mérés, ugyanaz a jótállás.</p></div>
+      </div>
+      <p style="margin-top:16px">Mindkettő teljes cellasor. Pár új cellát a régiek közé nem teszünk: a régi cellák lehúzzák az újakat.</p>
+      <div class="price-layout" style="margin-top:22px">
+        <div>
+          <h3>Árak · e-bike</h3>
+          <div class="tbl-wrap">
+            <table class="price-tbl" data-form="f-ebike">
+              <thead><tr><th scope="col">Pack · <span class="tbd" title="Ellenőrizd a felépítést">felépítés</span></th><th scope="col">Energia</th><th scope="col" class="pr">Bruttó ár</th></tr></thead>
+              <tbody>
+                <tr data-cfg="36V 10Ah (10S2P) – 106 900 Ft"><td><span class="chip">36V 10Ah</span><span class="cfg">10S2P · 20 cella</span></td><td class="wh num">360 Wh</td><td class="pr num">106 900 Ft</td></tr>
+                <tr data-cfg="36V 15Ah (10S3P) – 123 900 Ft"><td><span class="chip">36V 15Ah</span><span class="cfg">10S3P · 30 cella</span></td><td class="wh num">540 Wh</td><td class="pr num">123 900 Ft</td></tr>
+                <tr data-cfg="36V 20Ah (10S4P) – 139 900 Ft"><td><span class="chip">36V 20Ah</span><span class="cfg">10S4P · 40 cella</span></td><td class="wh num">720 Wh</td><td class="pr num">139 900 Ft</td></tr>
+                <tr data-cfg="48V 15Ah (13S3P) – 147 900 Ft"><td><span class="chip">48V 15Ah</span><span class="cfg">13S3P · 39 cella</span></td><td class="wh num">702 Wh</td><td class="pr num">147 900 Ft</td></tr>
+                <tr data-cfg="48V 20Ah (13S4P) – 179 900 Ft"><td><span class="chip">48V 20Ah</span><span class="cfg">13S4P · 52 cella</span></td><td class="wh num">936 Wh</td><td class="pr num">179 900 Ft</td></tr>
+                <tr data-cfg="48V 25Ah (13S5P) – 201 900 Ft"><td><span class="chip">48V 25Ah</span><span class="cfg">13S5P · 65 cella</span></td><td class="wh num">1170 Wh</td><td class="pr num">201 900 Ft</td></tr>
+                <tr data-cfg="52V 20Ah (14S4P) – 190 900 Ft"><td><span class="chip">52V 20Ah</span><span class="cfg">14S4P · 56 cella</span></td><td class="wh num">1008 Wh</td><td class="pr num">190 900 Ft</td></tr>
+                <tr data-cfg="52V 25Ah (14S5P) – 214 900 Ft"><td><span class="chip">52V 25Ah</span><span class="cfg">14S5P · 70 cella</span></td><td class="wh num">1260 Wh</td><td class="pr num">214 900 Ft</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Bruttó ügyfélárak Tenpower INR21700-50ME cellával, BMS-sel, ponthegesztéssel, hőzsugorral és átadási teszttel. Érvényes: 2026. szeptember. Az e-bike hatótávja a rásegítési fokozattól függ, ezért itt nem írunk kilométert: a Wh-ból és a mostani akkud adataiból kiszámoljuk neked.</p>
+          <p class="small" style="margin:0">Koppints egy sorra, és beírjuk az ajánlatkérőbe. Jótállás: <span class="tbd" title="Megerősítendő">2 év</span>, jótállási jeggyel, a saját házba épített packra is.</p>
+        </div>
+        <div>
+          <figure class="ph r32" data-label="ebike-akku.jpg – felnyitott e-bike tok új cellasorral"><img data-src="ebike-akku.jpg" alt="Felnyitott e-bike akkutok új 21700-as cellasorral" loading="lazy"></figure>
+          <div class="box box-purple">
+            <h3>Mi nincs benne</h3>
+            <ul>
+              <li><b>Új tok vagy ház,</b> ha a régi nem használható. Előre megmondjuk, mennyi.</li>
+              <li><b>Töltő,</b> ha a feszültség nem stimmel. Ha stimmel, a gyári marad.</li>
+              <li><b>Kiszállítás Veszprémen kívül.</b> Futárral nem küldünk, veszélyes áru.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="grid2 top" style="margin-top:24px">
+        <div>
+          <h3>Ezt tapasztalod?</h3>
+          <ul class="list-ok">
+            <li>A hatótáv jóval kevesebb, mint újkorában.</li>
+            <li>A rásegítés kihagy terhelésen, emelkedőn.</li>
+            <li>Nem tölt, vagy a töltő azonnal zöldet mutat.</li>
+          </ul>
+          <p class="small" style="margin:0">Ha a mérés szerint a töltő vagy a vezérlő a hibás, azt mondjuk. Nem építünk feleslegesen.</p>
+        </div>
+        <div class="box box-green" style="margin-top:0">
+          <h3>Egy mondat a szabályokról</h3>
+          <p>Csak kapacitást növelünk. A pedelec 25 km/h-s rásegítése marad, a motorhoz és a vezérlőhöz nem nyúlunk.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Kérdésed van?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="e-bike-folyamat">
+    <div class="wrap">
+      <span class="tag">Folyamat</span>
+      <h2>Fotó a címkéről és a csatlakozóról. 24 órán belül megmondjuk, lehet-e, és mennyiért.</h2>
+      <ol class="steps four">
+        <li><h3>Három fotó</h3><p>Az akku címkéje, a csatlakozó, a ház egészben.</p></li>
+        <li><h3>Írásos válasz</h3><p>24 órán belül: lehet-e, melyik úton, mennyiért, mi nincs benne, jótállás.</p></li>
+        <li><h3>50% előleg, építés</h3><p>5–10 munkanap. Az akkut behozod Veszprémbe.</p></li>
+        <li><h3>Átadás</h3><p>Kapacitásmérés, kiegyenlítés, <span class="tbd" title="Megerősítendő">mérési lap</span>, jótállási jegy, számla.</p></li>
+      </ol>
+      <div class="cl"><span>Indulnál?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="e-bike-gyik">
+    <div class="wrap">
+      <span class="tag">GYIK · e-bike</span>
+      <h2>Amit e-bike-osok kérdeznek</h2>
+      <div class="faq">
+        <details><summary>Bosch, Shimano vagy Yamaha akkum van. Meg tudjátok csinálni?</summary><div class="a"><p><span class="tbd" title="Megerősítendő lista">Bosch, Yamaha és Brose akkut nem nyitunk fel.</span> Zárt, kommunikáló BMS-sel mennek, a gyártó tiltja a felnyitást, és szétszedés után az akku vagy a rendszer zárolhat. Nem adunk el olyat, amiért nem tudunk felelni. Shimano STEPS-et a fotók alapján egyedileg nézünk. Nyílt vezérlős, Bafang, kínai vagy átalakított bringába teljes packot építünk.</p></div></details>
+        <details><summary>Marad a gyári töltőm?</summary><div class="a"><p>Ha a rendszerfeszültség ugyanaz marad, igen. Egy 36 V-os akku töltője 42 V-ot ad, egy 48 V-osé 54,6 V-ot, ez normális. Nagyobb Ah-nál ugyanaz a töltő tovább tölt. Ha új tokra váltunk más csatlakozóval, a csatlakozót illesztjük, vagy töltőt adunk, előre megmondott áron.</p></div></details>
+        <details><summary>Mennyi idő?</summary><div class="a"><p>Ajánlat 24 órán belül a fotók alapján. Az előleg beérkezésétől 5–10 munkanap az építés, a teszt és az átadás. Ha tokot vagy csatlakozót külön kell beszerezni, ezt az ajánlatban jelezzük, és a határidőt hozzáigazítjuk.</p></div></details>
+        <details><summary>Mi a jótállás?</summary><div class="a"><p>Ugyanaz, mint rollerre: <span class="tbd" title="Megerősítendő">2 év, 250 000 Ft felett 3 év</span>, jótállási jeggyel, a saját házba épített packra is. Veszprémben javítjuk. Ha 30 napon belül nem sikerül, cseréljük, vagy visszaadjuk az árát. <a href="#/biztonsag/jotallas">Pontos feltételek →</a></p></div></details>
+        <details><summary>Mi lesz a régi cellákkal?</summary><div class="a"><p><span class="tbd" title="Megerősítendő">Nem adjuk vissza, veszélyes hulladékként adjuk le, ez benne van az árban.</span> A régi házadat felújításnál újra használjuk, ezért azt ne dobd ki, hozd magaddal.</p></div></details>
+      </div>
+      <div class="cl"><span>Más kérdés?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="e-bike-urlap">
+    <div class="wrap">
+      <span class="tag">Ajánlatkérés · e-bike</span>
+      <h2>Küldd el a címke és a csatlakozó fotóját.</h2>
+      <form class="lead-form" id="f-ebike" method="post">
+        <input type="hidden" name="tipus" value="E-bike">
+        <p class="chosen" hidden></p>
+        <label class="f" for="fe-nev">Név<input type="text" name="nev" id="fe-nev" required autocomplete="name" data-l="Név"></label>
+        <label class="f" for="fe-tel">Telefon<input type="tel" name="telefon" id="fe-tel" required autocomplete="tel" placeholder="+36 ..." data-l="Telefon"></label>
+        <label class="f" for="fe-email">E-mail<input type="email" name="email" id="fe-email" required autocomplete="email" data-l="E-mail"></label>
+        <label class="f" for="fe-jarmu">E-bike márka, típus<input type="text" name="jarmu" id="fe-jarmu" required placeholder="pl. Bafang BBS02 kit, saját átalakítás" data-l="E-bike"></label>
+        <label class="f" for="fe-rendszer">Rendszer
+          <select name="rendszer" id="fe-rendszer" required data-l="Rendszer">
+            <option value="">Válassz…</option><option>Bafang</option><option>Nyílt / kínai / egyéb</option><option>Shimano STEPS</option><option>Bosch</option><option>Yamaha</option><option>Brose</option><option>Nem tudom</option>
+          </select>
+        </label>
+        <p class="warn-inline">Bosch, Yamaha és Brose akkut nem nyitunk fel. Ha nem vagy biztos a rendszerben, küldd el a fotót, megnézzük.</p>
+        <label class="f" for="fe-akku">Akku címke <span class="opt">V / Ah</span><input type="text" name="akku" id="fe-akku" placeholder="pl. 36 V 10,4 Ah" data-l="Akku címke"></label>
+        <label class="f" for="fe-ah">Kívánt kapacitás <span class="opt">opcionális</span><input type="text" name="kivant" id="fe-ah" placeholder="pl. 15 Ah, vagy ami befér" data-l="Kívánt kapacitás"></label>
+        <label class="f" for="fe-foto">Fotó <span class="opt">címke, csatlakozó, ház · legfeljebb 3 kép</span><input type="file" name="foto" id="fe-foto" accept="image/*" multiple></label>
+        <label class="f" for="fe-uzenet">Üzenet <span class="opt">opcionális</span><textarea name="uzenet" id="fe-uzenet" data-l="Üzenet"></textarea></label>
+        <label class="consent" for="fe-gdpr"><input type="checkbox" name="gdpr" id="fe-gdpr" required><span>Elolvastam az <a href="#/biztonsag/adatkezeles">adatkezelési tájékoztatót</a>, és hozzájárulok, hogy az adataimat az ajánlathoz kezeljétek.</span></label>
+        <input type="hidden" name="forras" value="akkumulatorepites.hu/e-bike"><input type="hidden" name="kivalasztott_sor" value="" data-l="Kiválasztott sor">
+        <button class="btn btn-green" type="submit">Megnézzük, lehet-e</button>
+        <p class="small" style="margin:0">Ha nem lehet, azt is 24 órán belül megírjuk.</p>
+        <div class="form-ok" role="status">Köszönjük. Ha a leveleződ megnyílt, küldd el a levelet, és 24 órán belül jelentkezünk. A fotókat <a class="form-wa" href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener">küldd WhatsAppon</a>, vagy hívj: <a href="tel:+36708520208">+36 70 852 0208</a>.</div>
+      </form>
+      <div class="cl"><span>Inkább hívnál?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= HAJÓ ======================= -->
+<main class="page page-hajo" id="hajo" hidden>
+  <section class="hero" id="hajo-top">
+    <div class="wrap">
+      <div class="hero-split">
+        <div>
+          <span class="tag">Hajóakku a Balatonon</span>
+          <h1>LiFePO4 hajóakku ólom helyett. Felmérve, beépítve, a vízen kipróbálva.</h1>
+          <p class="hero-lead">24 és 48 V-os rendszer, 2–6 kWh, prizmatikus cellák, Bluetooth-felügyelet. Ingyenes felmérés a hajódnál, Balatonfüred, Siófok és Keszthely környékén.</p>
+          <p class="pricebadge" style="background:rgba(143,192,255,.08);border-color:rgba(143,192,255,.35)"><span style="color:#cfe0ff">Rendszerként, beépítve:</span><b class="num tbd" title="Újraszámolandó, lásd a tervezői jegyzetet">1,5–3,5 millió Ft</b><span style="color:#cfe0ff">töltő nélkül</span></p>
+          <div class="btns"><a class="btn btn-green" href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>Írd meg, milyen hajó és motor</a><a class="btn btn-ghost" href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a></div>
+          <p class="small" style="margin-top:12px">Inkább írnál? <a href="#/hajo/urlap">Rövid űrlap →</a></p>
+        </div>
+        <figure class="ph r32" data-label="pack-hajo.jpg – LiFePO4 prizmatikus cellák, vagy nagy pack a műhelyben"><img data-src="pack-hajo.jpg" alt="Prizmatikus LiFePO4 cellák egy készülő hajóakku-packban" loading="lazy"></figure>
+      </div>
+      <div class="facts"><span>Ingyenes felmérés a kikötőben</span><span>Tételes, írásos ajánlat</span><span>Beépítés és teszt a vízen</span><span class="tbd" title="Megerősítendő">3 év jótállás, javítás a helyszínen</span></div>
+    </div>
+  </section>
+
+  <section class="sec" id="hajo-kinek">
+    <div class="wrap">
+      <span class="tag">Kinek építünk</span>
+      <h2>Kis 12 V-os csónakmotorhoz egy kész doboz is jó. Ha 24 vagy 48 V-os motor hajtja a hajót, beszéljünk.</h2>
+      <div class="yesno">
+        <div class="card no-col">
+          <h3>Ehhez nem kellünk</h3>
+          <p>12 V-os horgász-csónakmotor, néhány száz watt, egy akku, egy fogyasztó. Ehhez kész 12,8 V 100 Ah LiFePO4 akkut kapsz boltban, kb. 120–155 ezer forintért. Azt mi nem építjük meg drágábban.</p>
+          <p style="margin:0" class="small">Ha kérdezed, megmondjuk, mit nézz a dobozon: a BMS áramát, a fagyvédelmet, és hogy hol érvényesíted a garanciát.</p>
+        </div>
+        <div class="card yes-col">
+          <h3>Ehhez kellünk</h3>
+          <p>24 vagy 48 V-os rendszer, 1–12 kW-os külmotor, például Torqeedo Cruise vagy ePropulsion Navy, vagy beépített hajtás. Egész napos használat, fedélzeti fogyasztók, egyedi rekesz, töltő-illesztés. Itt a kész doboz nem elég: méretezni, rögzíteni, védeni és tesztelni kell, a te hajódban.</p>
+          <p style="margin:0" class="small">12 V-os rendszert is építünk, ha a kész doboz kevés: több fogyasztó, egyedi rekesz, 2 kWh felett.</p>
+        </div>
+      </div>
+      <div class="box tbd-b" title="Megerősítendő tipikus konfigurációk" style="margin-top:22px">
+        <h3>Tipikus rendszerek</h3>
+        <ul class="list-ok" style="margin:0">
+          <li><b>25,6 V, 100–200 Ah (2,5–5 kWh):</b> 1–3 kW-os külmotorhoz, egész napos cirkálásra.</li>
+          <li><b>51,2 V, 60–120 Ah (3–6 kWh):</b> 3–6 kW-os külmotorhoz vagy beépített hajtáshoz.</li>
+        </ul>
+      </div>
+      <p class="small" style="margin-top:12px">A pontos méretet a felmérésen mérjük, nem tippeljük.</p>
+      <div class="cl"><span>Nem tudod, melyik vagy? Írd meg a motort:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="hajo-miert">
+    <div class="wrap">
+      <span class="tag">Miért most, miért LiFePO4</span>
+      <h2>A Balatonon belső égésű motorral nem mehetsz. Elektromossal igen. Az akku a napod hossza a vízen.</h2>
+      <div class="grid2 top">
+        <div>
+          <h3>A szabály pontosan</h3>
+          <p>A Balaton teljes területén belső égésű motorral hajtott kishajót és csónakot üzemeltetni tilos. A tilalom a belső égésű motorra szól, az elektromos hajtásra nem. 2022 óta a 7 méternél rövidebb, legfeljebb 14,7 kW-os, kb. 20 lóerős gépi hajtású csónakhoz nem kell lajstromozás, hajólevél és kishajó-vezetői engedély.</p>
+          <p class="note">2000. évi XLII. törvény 58. §, 30/2003. Korm. rendelet. <a href="https://net.jogtar.hu/jogszabaly?docid=a0000042.tv" target="_blank" rel="noopener">Jogszabály →</a></p>
+          <h3 style="margin-top:18px">Biztonság, korrektül</h3>
+          <p style="margin:0">A LiFePO4 a legbiztonságosabb lítium-kémia: a hőmegfutás jóval magasabb hőmérsékleten indul, mint a rollerekben használt NMC-nél, és a katód nem ad le oxigént. Tűzbiztos akku nincs. Ezért van BMS, főbiztosíték, hőmérséklet-figyelés és fagypont alatti töltéstiltás. Hajón, zárt térben ezt a kémiát vállaljuk.</p>
+        </div>
+        <div>
+          <h3>Ólom vagy LiFePO4</h3>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th scope="col"><span class="sr">Tulajdonság</span></th><th scope="col">Ólom, AGM</th><th scope="col">LiFePO4</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Súly, 12 V 100 Ah</th><td class="num">kb. 28–32 kg</td><td class="num">kb. 11–14 kg</td></tr>
+                <tr><th scope="row">Kivehető kapacitás</th><td>kb. a fele</td><td>80–90%</td></tr>
+                <tr><th scope="row">Ciklus</th><td>300–600, ha csak a feléig meríted</td><td>3000+ 80%-os kisütésnél, gyártói adat</td></tr>
+                <tr><th scope="row">Feszültség menet közben</th><td>Fokozatosan esik, a motor lassul</td><td>Lapos görbe, a végéig teljes erő</td></tr>
+                <tr><th scope="row">Tél</th><td>Tele kell tartani, vagy kiszerelni</td><td>Félig töltve is állhat, fagyban nem tölthető</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:30px">Mennyi ideig megy? Egyszerű osztás, nem prospektus</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col" class="nt">A motor felvett teljesítménye</th><th scope="col" class="nt">25,6 V 100 Ah<small>kb. 2,3 kWh kivehető</small></th><th scope="col" class="nt">51,2 V 100 Ah<small>kb. 4,6 kWh kivehető</small></th></tr></thead>
+          <tbody>
+            <tr><th scope="row" class="num">3000 W</th><td class="num">kb. 45 perc</td><td class="num">kb. 1 óra 30 perc</td></tr>
+            <tr><th scope="row" class="num">1000 W</th><td class="num">kb. 2 óra 15 perc</td><td class="num">kb. 4 óra 30 perc</td></tr>
+            <tr><th scope="row" class="num">500 W</th><td class="num">kb. 4 óra 30 perc</td><td class="num">kb. 9 óra</td></tr>
+            <tr><th scope="row" class="num">250 W</th><td class="num">kb. 9 óra</td><td class="num">kb. 18 óra</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">A 3000 W egy nagyobb külmotor teljes gázon, a 250 W lassú cirkálás. Kivehető energia osztva a felvett teljesítménnyel, veszteségek nélkül. A csavar teljesítményigénye a sebességgel meredeken nő, ezért részgázon a motor a névleges teljesítménye töredékét veszi fel. Felső becslés méretezéshez: motor W × napi menetóra ÷ 1000, plusz 20% tartalék. A valós felvételt a felmérésen mérjük.</p>
+      <div class="cl"><span>Kérdésed a szabályokról vagy a kémiáról?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="hajo-ar">
+    <div class="wrap">
+      <span class="tag">Mi van az árban</span>
+      <h2>Nem akkut árulunk, hanem a hajódba tervezett, beépített, vízen tesztelt rendszert.</h2>
+      <div class="grid2 top">
+        <div class="card tbd-b" title="A tételeket erősítsd meg: ezek kerülnek az ajánlatba">
+          <h3>Tételesen, ez van a rendszerárban</h3>
+          <ul class="list-ok" style="margin:0">
+            <li>Helyszíni felmérés: motor, fogyasztók, rekesz, töltési lehetőség a kikötőben</li>
+            <li>Tervezés: feszültség, kapacitás, BMS-áram, házméret, csatlakozók</li>
+            <li>Prizmatikus LiFePO4 cellák, a gyártót az ajánlatban megnevezzük</li>
+            <li>Nagyáramú BMS Bluetooth-felügyelettel, hőszenzorral, fagypont alatti töltéstiltással</li>
+            <li>Főbiztosíték és főkapcsoló</li>
+            <li>Egyedi, rögzített, víz ellen védett ház</li>
+            <li>Kábelezés, saruk, a motor és a fedélzeti hálózat bekötése</li>
+            <li>Beépítés a hajóban</li>
+            <li>Teszt a vízen, terhelés alatt, veled</li>
+            <li>Jótállás, javítás a helyszínen</li>
+          </ul>
+        </div>
+        <div>
+          <div class="box" style="margin-top:0">
+            <h3>A töltő külön tétel</h3>
+            <p>Nem rejtjük el. A nagyságrendjét a felmérésen mondjuk meg, az ajánlatban külön sorban látod. Ha a mostani töltőd megfelel, marad.</p>
+          </div>
+          <div class="box">
+            <h3>Biztonság a vízen, laikusan</h3>
+            <p>Cellaszintű feszültségfigyelés. Riasztás a telefonodon, mielőtt a BMS lekapcsol. Főbiztosíték a rövidzár ellen. Rögzítés, hogy hullámzásban se mozduljon. Fagyvédelem töltéskor. A töltőt ellenőrizzük, nem feltételezzük.</p>
+          </div>
+          <div class="box">
+            <h3>Javítás a kikötőben</h3>
+            <p><span class="tbd" title="Jogászi megerősítés: a jótállási rendelet 6. §-a a hajóakkura">A jótállási rendelet szerint a fixen bekötött vagy 10 kg-nál nehezebb terméket az üzemeltetés helyén kell javítani.</span> Mi eleve így csináljuk: kimegyünk.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:30px">Mihez hasonlítsd</h3>
+      <div class="tbl-wrap">
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="sr">Szempont</span></th><th scope="col">Kész doboz webshopból</th><th scope="col">Gyári, márkás hajóakku</th><th scope="col" class="us">Whoosh rendszer</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Példa</th><td>12,8 V 100 Ah LiFePO4</td><td>48 V, 5 kWh, gyári rendszerakku</td><td class="us">24/48 V, 2–6 kWh, a hajódra tervezve</td></tr>
+            <tr><th scope="row">Ár, 2026. szeptember</th><td class="num">kb. 120–155 ezer Ft</td><td class="num"><span class="tbd" title="Forrással frissítendő">kb. 1,65–2,1 millió Ft</span>, töltő és beépítés nélkül</td><td class="us num"><span class="tbd" title="Újraszámolandó">1,5–3,5 millió Ft</span>, beépítve, töltő külön</td></tr>
+            <tr><th scope="row">BMS</th><td>kb. 100 A, sokszor app nélkül</td><td>Gyári, zárt</td><td class="us">Nagyáramú, Bluetooth, a motorodhoz méretezve</td></tr>
+            <tr><th scope="row">Beépítés</th><td>Nincs</td><td>Nincs</td><td class="us">Benne van, a kikötőben</td></tr>
+            <tr><th scope="row">Teszt a vízen</th><td>Nincs</td><td>Nincs</td><td class="us">Benne van, veled</td></tr>
+            <tr><th scope="row">Ki jön ki a kikötőbe?</th><td>Senki</td><td>Nem része a terméknek</td><td class="us">Mi</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Tájékoztató webáruházi árak, 2026. szeptember, árfolyamfüggők. A 48 V-os, kb. 5 kWh-s napelemes tárolók, kb. 430–530 ezer Ft, beltéri egységek, hajóba nem valók.</p>
+
+      <div class="grid2 top" style="margin-top:22px">
+        <div class="card">
+          <h3>Referencia, őszintén</h3>
+          <p>Balatoni hajós beépítést még nem tudunk mutatni, ezt nem is írjuk másképp. Nagy packot már építettünk: Golfboard-pack, <span class="fill">[V] / [Ah] / [kWh], [cellaszám] cella, mért kapacitás [Ah]</span>. A hajós rendszer ugyanezzel a módszerrel készül.</p>
+          <p style="margin:0"><span class="tbd" title="Döntés: dokumentált első beépítés, esetleg kedvezménnyel">Az első balatoni beépítést végig dokumentáljuk.</span></p>
+        </div>
+        <figure class="ph r32" data-label="golfboard-pack.jpg – a Golfboard-pack mint nagy pack referencia"><img data-src="golfboard-pack.jpg" alt="Nagy, egyedi Golfboard-akkupack" loading="lazy"></figure>
+      </div>
+      <div class="cl"><span>Írd meg, milyen hajó és motor:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="hajo-folyamat">
+    <div class="wrap">
+      <span class="tag">Folyamat</span>
+      <h2>Felmérés, írásos ajánlat, előleg, építés, beépítés, teszt a vízen. Ebben a sorrendben.</h2>
+      <ol class="steps six">
+        <li><h3>Felmérés a hajónál</h3><p>Motor, fogyasztók, akkurekesz, töltési lehetőség a kikötőben. Ingyenes.</p></li>
+        <li><h3>Tételes ajánlat e-mailben</h3><p>Cellák, BMS, ház, beépítés, teszt, töltő külön sorban, jótállás, fizetési ütem. <span class="tbd" title="Megerősítendő">Ha nem kéred, nem fizetsz.</span></p></li>
+        <li class="key"><h3>50% előleg</h3><p>Csak az írásos ajánlat elfogadása után. Ebből rendeljük a cellákat.</p></li>
+        <li><h3>Építés a műhelyben</h3><p>Prizmatikus LiFePO4 cellák, BMS, egyedi ház, mérés.</p></li>
+        <li><h3>Beépítés</h3><p>Rögzítés, főbiztosíték, kábelezés, a motor és a töltő bekötése.</p></li>
+        <li><h3>Teszt a vízen, veled</h3><p>Terhelés alatt, appból figyelve. Így adjuk át, jótállási jeggyel.</p></li>
+      </ol>
+      <div class="grid2 top" style="margin-top:22px">
+        <div class="box" style="margin-top:0">
+          <h3>Jótállás hajón</h3>
+          <p>Magánszemélynek <span class="tbd" title="Megerősítendő: 250 000 Ft felett 3 év">3 év</span>, jótállási jeggyel, javítás a kikötőben. Cégnek a feltételeket az ajánlatban külön rögzítjük. Az ajánlaton jelöljük, kinek szól.</p>
+        </div>
+        <div class="box box-green" style="margin-top:0">
+          <h3>Mikor érdemes</h3>
+          <p>Két jó időpont van: kiemelés előtt, szeptember–októberben, vagy vízretétel előtt, február–áprilisban. Kiemeléskor derül ki, hogy fáradt az ólom. Tavasszal kész hajóval indulsz.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Kérdésed van a menetrendről?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="hajo-gyik">
+    <div class="wrap">
+      <span class="tag">GYIK · hajó</span>
+      <h2>Amit hajósok kérdeznek</h2>
+      <div class="faq">
+        <details><summary>Mekkora akku kell a hajómhoz?</summary><div class="a"><p>Felső becslés: a motor watt × napi menetóra ÷ 1000, plusz 20%. Ez teljes gázzal számol, a valóság kevesebb, mert részgázon a motor a névleges teljesítménye töredékét veszi fel. Ezért nem tippelünk: kimegyünk, megnézzük a motort, a fogyasztókat, a rekeszt és a töltési lehetőséget, és utána mondunk számot. A felmérés ingyenes.</p></div></details>
+        <details><summary>Marad az ólomtöltőm?</summary><div class="a"><p>Csak akkor, ha van lítium- vagy AGM-programja 14,2–14,6 V-os töltőfeszültséggel, 12 V-os rendszerre vetítve, nincs kiegyenlítő vagy deszulfatáló módja, és a fenntartó töltés 13,5 V alatt van, vagy kikapcsol. A felmérésen megnézzük. Ha nem stimmel, LiFePO4-töltőt javaslunk, külön tételként, előre megmondott áron.</p></div></details>
+        <details><summary>Kibírja a hideget és a vizet?</summary><div class="a"><p>Víz ellen védett, rögzített házba építjük, a kábelek saruzva, a csatlakozók védve. A BMS fagypont alatt tiltja a töltést, mert a LiFePO4-et 0 °C alatt tölteni tilos, kisütni lehet. Télen félig töltve állhat a hajóban. Ha fűtetlen helyen telel, azt is átbeszéljük.</p></div></details>
+        <details><summary>Biztonságos a vízen?</summary><div class="a"><p>A LiFePO4 a legbiztonságosabb lítium-kémia, de tűzbiztos akku nincs, ezért nem az ígéretre építünk, hanem a védelemre: cellaszintű figyelés, riasztás az appban a lekapcsolás előtt, főbiztosíték, hőszenzor, rögzítés, fagyvédelem töltéskor. A rendszert terhelés alatt, a vízen teszteljük, mielőtt átadjuk.</p></div></details>
+        <details><summary>Mennyi idő?</summary><div class="a"><p>A felmérést egyeztetjük, <span class="tbd" title="Megerősítendő">jellemzően egy héten belül</span>. Ajánlat a felmérés után 24 órán belül. Az előleg beérkezésétől a pack építése 5–10 munkanap, a beépítés és a vízi teszt a kikötőhöz és az időjáráshoz igazodik.</p></div></details>
+        <details><summary>Cégként vagy magánszemélyként vásárolok. Mi a különbség?</summary><div class="a"><p>Magánszemélynek a jogszabály szerinti kötelező jótállás jár, jótállási jeggyel. Cégnek a kötelező jótállás nem jár, ott a feltételeket az ajánlatban külön rögzítjük. Számla mindkét esetben jár.</p></div></details>
+        <details><summary>Van hajós referenciátok?</summary><div class="a"><p>Balatoni hajóban még nincs, ezt nem írjuk másképp. Amit mutatni tudunk: a nagy Golfboard-pack mért adatokkal, tíz év roller- és akkumunka, és ugyanaz a mérési módszer minden packnál. A felmérés ingyenes, az ajánlat írásos és tételes.</p></div></details>
+      </div>
+      <div class="cl"><span>Más kérdés?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="hajo-urlap">
+    <div class="wrap">
+      <span class="tag">Kapcsolat · hajó</span>
+      <h2>Írd meg, milyen hajó és motor. Kimegyünk, és megmérjük.</h2>
+      <div class="btns" style="margin-top:0;margin-bottom:22px"><a class="btn btn-green" href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp: hajó és motor</a><a class="btn btn-ghost" href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>Hívás</a></div>
+      <form class="lead-form" id="f-hajo" method="post">
+        <input type="hidden" name="tipus" value="Hajó">
+        <label class="f" for="fb-nev">Név<input type="text" name="nev" id="fb-nev" required autocomplete="name" data-l="Név"></label>
+        <label class="f" for="fb-tel">Telefon<input type="tel" name="telefon" id="fb-tel" required autocomplete="tel" placeholder="+36 ..." data-l="Telefon"></label>
+        <label class="f" for="fb-email">E-mail<input type="email" name="email" id="fb-email" required autocomplete="email" data-l="E-mail"></label>
+        <label class="f" for="fb-motor">Motor típusa, teljesítménye<input type="text" name="motor" id="fb-motor" required placeholder="pl. ePropulsion Navy 6.0, 6 kW" data-l="Motor"></label>
+        <label class="f" for="fb-hajo">Hajó típusa, hossza<input type="text" name="hajo" id="fb-hajo" required placeholder="pl. 6 m-es motoros, 7,5 m-es vitorlás" data-l="Hajó"></label>
+        <label class="f" for="fb-kikoto">Kikötő, hol áll a hajó<input type="text" name="kikoto" id="fb-kikoto" required placeholder="pl. Balatonfüred" data-l="Kikötő"></label>
+        <label class="f" for="fb-akku">Mostani akku <span class="opt">ólom, AGM: V / Ah / darab</span><input type="text" name="akku" id="fb-akku" placeholder="pl. 4 × 12 V 100 Ah AGM" data-l="Mostani akku"></label>
+        <label class="f" for="fb-ora">Hány órát vagy a vízen egy nap? <span class="opt">opcionális</span><input type="text" name="ora" id="fb-ora" placeholder="pl. 4–5 óra, félgázon" data-l="Napi használat"></label>
+        <label class="f" for="fb-uzenet">Üzenet <span class="opt">opcionális</span><textarea name="uzenet" id="fb-uzenet" data-l="Üzenet"></textarea></label>
+        <label class="consent" for="fb-gdpr"><input type="checkbox" name="gdpr" id="fb-gdpr" required><span>Elolvastam az <a href="#/biztonsag/adatkezeles">adatkezelési tájékoztatót</a>, és hozzájárulok, hogy az adataimat az ajánlathoz kezeljétek.</span></label>
+        <input type="hidden" name="forras" value="akkumulatorepites.hu/hajo">
+        <button class="btn btn-green" type="submit">Ingyenes felmérést kérek</button>
+        <p class="small" style="margin:0">A felmérés és az ajánlat ingyenes. Előleget csak az írásos ajánlat elfogadása után kérünk.</p>
+        <div class="form-ok" role="status">Köszönjük. Ha a leveleződ megnyílt, küldd el a levelet, és 24 órán belül hívunk, hogy egyeztessük a felmérést. Sürgős? <a class="form-wa" href="https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener">WhatsApp</a> vagy <a href="tel:+36708520208">+36 70 852 0208</a>.</div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= BIZTONSÁG ÉS JÓTÁLLÁS ======================= -->
+<main class="page" id="biztonsag" hidden>
+  <section class="hero" id="biztonsag-top">
+    <div class="wrap">
+      <span class="tag">Biztonság és jótállás</span>
+      <h1>Hogyan épül, hogyan töltsd, és mit vállalunk érte.</h1>
+      <p class="hero-lead">A legtöbb rollertűz töltés közben vagy álló helyzetben keletkezik. Itt leírjuk, mit teszünk ellene a műhelyben, mit tehetsz te otthon, és mi a jótállás pontos tartalma.</p>
+      <div class="btns"><a class="btn btn-ghost" href="#/biztonsag/epites">Így épül</a><a class="btn btn-ghost" href="#/biztonsag/toltes">Így töltsd</a><a class="btn btn-ghost" href="#/biztonsag/jotallas">Jótállás</a><a class="btn btn-ghost" href="#/biztonsag/feltetelek">Ajánlat és fizetés</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="biztonsag-szamok">
+    <div class="wrap">
+      <span class="tag">A számok</span>
+      <h2>Elektromos rollertüzek Magyarországon</h2>
+      <div class="grid2 top">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th scope="col">Év</th><th scope="col" class="pr">Tűzeset</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="pr num">11</td></tr>
+              <tr><th scope="row">2023</th><td class="pr num">15</td></tr>
+              <tr><th scope="row">2024</th><td class="pr num">21</td></tr>
+              <tr><th scope="row">2025, augusztus elejéig</th><td class="pr num">21</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p>A katasztrófavédelem adatai szerint az esetek fele álló helyzetben, 40 százaléka töltés közben, 9 százaléka menet közben történt.</p>
+          <p>A katasztrófavédelem tanácsai röviden: megbízható forrásból vett akku, a töltőt és a járművet házilag ne alakítsd át, ne tölts hosszabbítóval, egyszerre egy rollert tölts, ne hagyd éjszakára töltőn, és esés, ütés után 3–4 napig tartsd szem előtt, mert a tűz később is jöhet.</p>
+          <p class="note">Forrás: katasztrófavédelmi adatok, <a href="https://infostart.hu/belfold/2025/08/13/sokkolo-fotoval-uzen-az-e-rollereseknek-a-katasztrofavedelem" target="_blank" rel="noopener">Infostart, 2025. augusztus 13.</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="biztonsag-epites">
+    <div class="wrap">
+      <span class="tag">A műhelyben</span>
+      <h2>Így épül egy pack nálunk</h2>
+      <ol class="steps six">
+        <li><h3>Új, nevesített cella</h3><p>Roller- és e-bike-packba Tenpower INR21700-50ME, hajóra prizmatikus LiFePO4, gyártói adatlappal. Használt, bontott vagy kevert cellát nem építünk be: két különböző állapotú cella egy packban egymást húzza le, és a gyengébb melegszik.</p></li>
+        <li><h3>Mérés beépítés előtt</h3><p><span class="tbd" title="Megerősítendő">Minden cellán feszültség és belső ellenállás. Ami kilóg, kimarad.</span> Így a párhuzamos csoportok egyformán terhelődnek.</p></li>
+        <li><h3>Ponthegesztés</h3><p>Nikkelszalag, ponthegesztve. A cellára forrasztani tilos: a páka hője a cella belsejét károsítja, és ez hónapokkal később okoz bajt.</p></li>
+        <li><h3>BMS a terheléshez</h3><p>Túltöltés ellen legfeljebb 4,2 V cellánként NMC-nél, 3,65 V LiFePO4-nél. Mélykisütés, túláram és rövidzár ellen is. <span class="tbd" title="Megerősítendő: hőszenzor és 0 °C tiltás rollerpackban is?">Hőszenzorral, 0 °C alatti töltéstiltással.</span> Hajón Bluetooth-felügyelettel.</p></li>
+        <li><h3>Szigetelés, hőzsugor</h3><p>Szigetelés a cellacsoportok között, a pack hőzsugorban. A kiegyenlítő vezetékek minden cellacsoportot a BMS-hez kötnek, így a BMS látja és kiegyenlíti őket.</p></li>
+        <li class="key"><h3>Átadás méréssel</h3><p>Teljes feltöltés, kisütés a végfeszültségig, mért kapacitás, kiegyenlítés. <span class="tbd" title="Megerősítendő">BMS-védelmi próba, az eredmény a mérési lapon.</span></p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="biztonsag-toltes">
+    <div class="wrap">
+      <span class="tag">Otthon</span>
+      <h2>Töltési útmutató</h2>
+      <div class="grid2 top">
+        <div class="card">
+          <h3>Roller és e-bike</h3>
+          <ol class="numlist">
+            <li><b>Csak a packhoz való töltővel.</b> A töltő kimeneti feszültsége a címkén van, lásd a táblát.</li>
+            <li><b>Felügyelet mellett.</b> Ne alvás közben, ne ha elmész otthonról, ne hosszabbítóval, ne az előszobában a kijárat előtt.</li>
+            <li><b>Szobahőmérsékleten.</b> A fagyos garázsból behozott rollert hagyd egy-két órát felmelegedni. Napon, forró csomagtartóban se tölts.</li>
+            <li><b>Esés, ütés, beázás után ne tölts.</b> Hozd be, megmérjük. Egy leesett pack kívülről ép lehet, belül nem.</li>
+            <li><b>Ha duzzad, szagot ad, sistereg vagy forró a ház:</b> húzd ki a töltőt, vidd ki a szabadba, kőre vagy betonra, és hívj minket.</li>
+            <li><b>Tárolás.</b> Ha hetekig nem használod, félig-háromnegyedig töltve tárold, ne tele és ne üresen. Havonta nézz rá.</li>
+          </ol>
+        </div>
+        <div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th scope="col">Pack</th><th scope="col" class="pr">Töltő kimenete</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">36 V · 10 cellasor</th><td class="pr num">42 V</td></tr>
+                <tr><th scope="row">48 V · 13 cellasor</th><td class="pr num">54,6 V</td></tr>
+                <tr><th scope="row">52 V · 14 cellasor</th><td class="pr num">58,8 V</td></tr>
+                <tr><th scope="row">60 V · 16 cellasor</th><td class="pr num">67,2 V</td></tr>
+                <tr><th scope="row">72 V · 20 cellasor</th><td class="pr num">84 V</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>Hajó, LiFePO4</h3>
+            <ol class="numlist">
+              <li><b>Lítium-programmal vagy LiFePO4-töltővel.</b> Az ólomtöltő kiegyenlítő és deszulfatáló módja tilos.</li>
+              <li><b>0 °C alatt nem tölthető.</b> A BMS tiltja. Kisütni fagyban is lehet.</li>
+              <li><b>Télen félig töltve állhat.</b> Tavasszal nézd meg az appban a cellafeszültségeket, mielőtt indulsz.</li>
+              <li><b>Riasztásnál ne indulj.</b> Hívj minket.</li>
+              <li><b>Vízbe került, ütést kapott a ház:</b> ne tölts, hívj, kimegyünk.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="cl"><span>Nem vagy biztos a töltődben? Fotózd le a címkéjét:</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="biztonsag-jotallas">
+    <div class="wrap">
+      <span class="tag">Jótállás</span>
+      <h2>Ami jár, és amit vállalunk</h2>
+      <div class="grid2 top">
+        <div>
+          <div class="tbl-wrap tbd-b" title="Megerősítendő: jogászi ellenőrzés, lásd a tervezői jegyzetet">
+            <table>
+              <thead><tr><th scope="col">Termék</th><th scope="col" class="pr">Jótállás</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Roller- és e-bike-pack, 106 900–239 900 Ft</th><td class="pr">2 év</td></tr>
+                <tr><th scope="row">72V 20Ah, 60V 30Ah, 72V 30Ah</th><td class="pr">3 év</td></tr>
+                <tr><th scope="row">Hajóakku-rendszer</th><td class="pr">3 év</td></tr>
+                <tr><th scope="row">Felújított, saját házba épített pack</th><td class="pr">ugyanígy, ár szerint</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">A fogyasztónak eladott tartós termékre a 151/2003. Korm. rendelet 10 000 és 250 000 Ft között 2 év, 250 000 Ft felett 3 év jótállást ír elő. <a href="https://net.jogtar.hu/jogszabaly?docid=a0300151.kor" target="_blank" rel="noopener">Jogszabály →</a></p>
+        </div>
+        <div>
+          <h3>Hogyan működik</h3>
+          <ul class="list-ok">
+            <li>Jótállási jegyet kapsz átadáskor, papíron és e-mailben.</li>
+            <li>A jótállás a teljes packra szól: cellák, BMS, hegesztés, kábelezés, ház.</li>
+            <li>Hiba esetén Veszprémben javítjuk. A hajóba fixen bekötött akkut a kikötőben.</li>
+            <li>Ha a javítás 30 napon belül nem sikerül, cseréljük, vagy visszaadjuk a vételárat.</li>
+            <li>A jótállástól függetlenül 2 év kellékszavatosság is megillet.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid2 top" style="margin-top:20px">
+        <div class="box box-purple tbd-b" title="A kizárásokat jogász és te hagyjátok jóvá">
+          <h3>Mire nem vonatkozik</h3>
+          <p>A jótállás nem terjed ki arra a hibára, amit bizonyíthatóan ezek okoztak:</p>
+          <ul>
+            <li>nem a packhoz való töltő: más feszültség, sérült vagy átalakított töltő</li>
+            <li>beázás, vízbe merülés, ha a pack nem erre tervezett, védett házban van</li>
+            <li>mechanikai sérülés: esés, ütés, átszúrás, összenyomás</li>
+            <li>a pack felnyitása, átalakítása, a BMS módosítása vagy megkerülése</li>
+          </ul>
+          <p>A rendeltetésszerű használat, a napi közlekedés, az esőben menés, a hidegben tárolás és a hozzá való töltővel töltés mind a jótállás alá esik. Kizárásra csak akkor hivatkozunk, ha a hiba oka a mérésen egyértelműen látszik, és ezt le is írjuk neked.</p>
+        </div>
+        <div class="box">
+          <h3>Ciklusszám</h3>
+          <p>Ciklusszámot nem ígérünk, és a jótállás nem ciklusszámhoz kötött. A kapacitás természetes csökkenése használat közben nem hiba. Ha viszont a jótállási időn belül indokolatlanul gyorsan veszít a kapacitásából, az hiba, és javítjuk.</p>
+          <h3 style="margin-top:14px">Céges vevőnek</h3>
+          <p>A kötelező jótállás fogyasztónak jár. Céges vásárlásnál a feltételeket az ajánlatban külön rögzítjük.</p>
+        </div>
+      </div>
+      <div class="cl"><span>Kérdésed a jótállásról?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="biztonsag-feltetelek">
+    <div class="wrap">
+      <span class="tag">Ajánlat és fizetés</span>
+      <h2>Ajánlati és fizetési feltételek, röviden</h2>
+      <div class="grid2 top">
+        <div>
+          <h3>Az ajánlat</h3>
+          <p>Írásban, e-mailben kapod, 24 órán belül, hajónál a felmérés után. Benne: bruttó ár, mi van benne, mi nincs, fizetési ütem, építési határidő, jótállás, kellékszavatosság, panaszkezelés, cégadatok. <span class="tbd" title="Megerősítendő">Az ajánlat és a bevizsgálás ingyenes.</span></p>
+          <h3>Az előleg</h3>
+          <p>50% megrendeléskor, 50% átadáskor. Az előlegből rendeljük a cellákat. Előleg, nem foglaló: ha a pack nem építhető meg, vagy mi nem tudjuk teljesíteni, teljes egészében visszajár.</p>
+          <h3>Ha visszalépsz</h3>
+          <p class="tbd-b" title="Megerősítendő: szerződésben rögzített szabály">A cellák megrendelése előtt az előleg visszajár. A cellák megrendelése után a már beszerzett, a te packodhoz rendelt cellák árát levonjuk, a többi visszajár. Ezt a szerződésben rögzítjük, nem utólag találjuk ki.</p>
+        </div>
+        <div>
+          <h3>Elállási jog</h3>
+          <p>Egyedi méretre, a te járműved adataira épített akku, ezért a 45/2014. Korm. rendelet szerint a 14 napos elállási jog nem vonatkozik rá. Ezt az ajánlatban, az elfogadás előtt írásban megkapod.</p>
+          <h3>Hajónál</h3>
+          <p>A kikötőben kötött szerződés üzlethelyiségen kívül kötött szerződésnek számít. Ezért az ajánlatot és a teljes tájékoztatót e-mailben küldjük, hogy nyugodtan elolvashasd, mielőtt bármit aláírsz.</p>
+          <h3>Átvétel</h3>
+          <p>Kész packot futárral nem küldünk: 100 Wh felett a lítium akku veszélyes áru. Átveszed Veszprémben, beszerelve viszed a járművel, vagy a hajóba a kikötőben építjük be.</p>
+          <h3>Panasz</h3>
+          <p>Először nekünk szólj: +36 70 852 0208, erollerszerviz@gmail.com, vagy személyesen a Kossuth Lajos u. 10.-ben. Ha nem tudunk megegyezni, a Veszprém Vármegyei Békéltető Testülethez fordulhatsz: <span class="fill">[cím és elérhetőség a bekeltetes.hu-ról]</span>.</p>
+        </div>
+      </div>
+      <div class="box" id="biztonsag-adatkezeles">
+        <h3>Adatkezelési tájékoztató</h3>
+        <p style="margin:0"><span class="fill">[Külön oldal: adatkezelő cégadatai, cél, jogalap, megőrzési idő, jogaid, NAIH elérhetősége. A süti-sávban egyenrangú Elfogadom és Elutasítom gomb.]</span></p>
+      </div>
+      <div class="cl"><span>Kérdésed a feltételekről?</span><a href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>+36 70 852 0208</a><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a></div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================= TERVEZŐI JEGYZET (belső, élesbe NEM kerül) ======================= -->
+<main class="page page-jegyzet" id="jegyzet" hidden>
+  <section class="hero" id="jegyzet-top">
+    <div class="wrap">
+      <span class="tag">Belső jegyzet · élesben nem jelenik meg</span>
+      <h1>Mit találtunk, mit változtattunk, mi kell tőled</h1>
+      <p class="hero-lead">Nyolc irányból néztük meg a témát: hazai versenytársak és áraik, balatoni hajós piac, keresési szokások, jog, nemzetközi jó példák, műszaki állítások, WordPress és hirdetés. A tartalmat eldöntő állításokat független forrásból is ellenőriztük, a jótállási szabályt és a tűzeset-statisztikát a mai szövegből.</p>
+      <div class="btns"><a class="btn btn-ghost" href="#/jegyzet/talalatok">Találatok</a><a class="btn btn-ghost" href="#/jegyzet/dontesek">Döntések</a><a class="btn btn-ghost" href="#/jegyzet/wordpress">WordPress</a><a class="btn btn-ghost" href="#/jegyzet/fotok">Fotók</a><a class="btn btn-ghost" href="#/jegyzet/forrasok">Források</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="jegyzet-talalatok">
+    <div class="wrap">
+      <span class="tag">Találatok</span>
+      <h2>A tíz, ami a tartalmat megváltoztatta</h2>
+      <div class="grid2 top">
+        <div class="finding">
+          <h3>1. A 12 hónap garancia fogyasztónak kevés.</h3>
+          <p>A 151/2003. Korm. rendelet hatályos szövege: 10 000–250 000 Ft között 2 év, 250 000 Ft felett 3 év kötelező jótállás. A 10/2024. IM rendelet listáján az elektromos roller és kerékpár, a motoros vízi jármű, és ezek alkotórésze is szerepel. Ha 30 napon belül nem sikerül a javítás, cserélni kell, a fixen bekötött vagy 10 kg feletti terméket helyben kell javítani.</p>
+          <p class="then">A v2 mindenhol 2, illetve 3 évet ír. A pack besorolását egy fogyasztóvédelmi jogász egy óra alatt megerősíti.</p>
+          <p class="src"><a href="https://net.jogtar.hu/jogszabaly?docid=a0300151.kor" target="_blank" rel="noopener">151/2003. Korm. r.</a> · <a href="https://net.jogtar.hu/jogszabaly?docid=a2400010.im" target="_blank" rel="noopener">10/2024. IM r.</a></p>
+        </div>
+        <div class="finding">
+          <h3>2. A „Postázás külön” nem tartható.</h3>
+          <p>A 100 Wh feletti lítium akku veszélyes áru (UN 3480). Már a legkisebb, 36V 10Ah pack is 360 Wh. A posta és a csomagautomaták nem viszik, a futárok csak külön veszélyesáru-szerződéssel.</p>
+          <p class="then">A v2 átvételt, beszerelést és saját kiszállítást ír. A saját kiszállítás ADR-rendjét egyszer egy tanácsadóval érdemes rendbe tenni.</p>
+        </div>
+        <div class="finding">
+          <h3>3. Nem a legolcsóbbak vagyunk, hanem a legellenőrizhetőbbek.</h3>
+          <p>A táblánk a budapesti és Pest megyei felújítóknál olcsóbb: Masterbike 36V 14Ah 140 000 Ft + ÁFA, Akkucentrál 36V 14Ah 147 320 Ft, nálunk 36V 15Ah 123 900 Ft. A győri Doctor Akku kalkulátora viszont 48V 21Ah-ra kb. 125 000 Ft-ot becsül, a TurbóBringa kész 48V 20Ah Samsung/LG packja töltővel 200 000 Ft.</p>
+          <p class="then">Pozíció: név szerinti cella, mérés, jótállás, veszprémi cím. Versenytárs neve az élő oldalra nem kerül, csak kategóriák.</p>
+        </div>
+        <div class="finding">
+          <h3>4. A „nem kínai cella” érv visszafelé sül el.</h3>
+          <p>A Tenpower is kínai. Ami működik: gyártói adatlap, 5000 mAh tipikus, 4950 minimum, kb. 15 A. A Batemo független mérése 4,95 Ah. Az 50ME energiacella, 3 kW feletti rollernél a párhuzamos cellaszámot méretezni kell.</p>
+          <p class="then">A v2 a mérést és az adatlapot hozza, nem a származást.</p>
+        </div>
+        <div class="finding">
+          <h3>5. Az emberek csere és felújítás szóra keresnek.</h3>
+          <p>A leggyakoribb: „roller akku csere”, modellnévvel (Xiaomi, Ninebot, Kukirin). Második: „felújítás”, „cellacsere”. Az „akkumulátor építés” kis forgalmú, de nincs rá jó magyar oldal.</p>
+          <p class="then">A címekben és a H1-ekben a vevő szava áll, az „építés” a mi magyarázatunk.</p>
+        </div>
+        <div class="finding">
+          <h3>6. Mérési lapot a hazai oldalakon nem láttunk.</h3>
+          <p>A jó német és holland felújítók írásos mérési jegyzőkönyvet adnak. Itthon a versenytársak jellemzően nem írnak cellatípust, mért kapacitást és jótállási időt.</p>
+          <p class="then">A mérési lap a legolcsóbb és legerősebb megkülönböztető. A v2 sablont is ad hozzá.</p>
+        </div>
+        <div class="finding">
+          <h3>7. A tűz a vevő első félelme.</h3>
+          <p>Katasztrófavédelem: 2022-ben 11, 2023-ban 15, 2024-ben 21 rollertűz, 2025-ben augusztus elejéig már 21. Az esetek 40 százaléka töltés közben. Versenytárs ezt tartalommal nem kezeli.</p>
+          <p class="then">Külön blokk és oldal: így építünk, így töltsd. Sehol nincs „tűzbiztos”.</p>
+          <p class="src"><a href="https://infostart.hu/belfold/2025/08/13/sokkolo-fotoval-uzen-az-e-rollereseknek-a-katasztrofavedelem" target="_blank" rel="noopener">Infostart, katasztrófavédelmi adatok</a></p>
+        </div>
+        <div class="finding">
+          <h3>8. A hajós ár kWh-ra vetítve a kész dobozok többszöröse.</h3>
+          <p>1,5–3,5 millió Ft 2–6 kWh-ra kb. 580–750 Ft/Wh. Kész LiFePO4: 12,8 V 100 Ah 120–155 ezer Ft, 25,6 V 100 Ah 220–255 ezer Ft, ez kb. 85–120 Ft/Wh. Gyári márkás 5 kWh-s hajóakku kb. 1,65–2,1 millió Ft, töltő és beépítés nélkül.</p>
+          <p class="then">Csak tételes rendszerárként védhető, 24/48 V-os, 1–12 kW-os hajókra. A 12 V-os horgászt a kész dobozhoz küldjük. Az árat újra kell számolni, két csomagot javaslunk.</p>
+        </div>
+        <div class="finding">
+          <h3>9. A Balaton-szabály pontosan.</h3>
+          <p>Belső égésű motor tilos, az elektromos hajtást a szabály nem tiltja. 2022 óta 7 m alatt, 14,7 kW-ig nem kell lajstrom és engedély. Az „aggregátor is tilos a hajón” állítás egyik jogszabályban sincs, ezért nem írjuk. A parton van hajós versenytárs, a balatonfüredi SAKKU 12 és 24 V-os LiFePO4 csónakakkukat épít. Felmérést, beépítést és vízi tesztet senki nem kínál.</p>
+          <p class="src"><a href="https://net.jogtar.hu/jogszabaly?docid=a0000042.tv" target="_blank" rel="noopener">Vkt. 58. §</a> · <a href="https://net.jogtar.hu/jogszabaly?docid=a0300030.kor" target="_blank" rel="noopener">30/2003. Korm. r.</a></p>
+        </div>
+        <div class="finding">
+          <h3>10. Műszaki pontosítások.</h3>
+          <p>„A LiFePO4 nem gyullad meg” helyett „a legbiztonságosabb lítium-kémia, tűzbiztos akku nincs”. Ólom: 300–600 ciklus 50%-os kisütésnél. A LiFePO4 0 °C alatt nem tölthető. Ólomtöltő csak lítium- vagy AGM-programmal, kiegyenlítő mód nélkül. A 13 soros „48 V” névlegesen 46,8 V, ezért a Wh-t cellaszámból számoljuk.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec alt" id="jegyzet-valtozas">
+    <div class="wrap">
+      <span class="tag">v1 → v2</span>
+      <h2>Mi változott a mostani oldalhoz képest</h2>
+      <div class="grid2 top">
+        <ul class="list-ok">
+          <li>Egy hosszú oldal helyett főoldal, három saját aloldal és egy biztonság-jótállás oldal. A hirdetés mindig a saját aloldalra visz.</li>
+          <li>Új vezérgondolat: „Tudod, mi van benne.”</li>
+          <li>12 hónap helyett 2 és 3 év, postázás helyett átvétel, „nem gyullad meg” helyett korrekt biztonsági szöveg.</li>
+          <li>Az ártábla cellaszámot, valós Wh-t és becsült kilométert mutat.</li>
+          <li>Hajón a fő gomb a WhatsApp, nem az űrlap. A hajós ár tételes rendszerár, összehasonlító táblával.</li>
+        </ul>
+        <ul class="list-ok">
+          <li>Új blokkok: különbség-tábla, mérési lap, tünetek, „megéri-e”, cellaadatok, e-bike kompatibilitás, „kinek nem” a hajón, menetidő-tábla, töltési útmutató.</li>
+          <li>Az űrlap kvalifikál: jármű, mostani akku, fotó. Hajónál a motor és a kikötő kötelező.</li>
+          <li>Belső linkeken nincs UTM, mert felülírná a hirdetés forrását a mérésben. UTM csak a hirdetési linkekre kell.</li>
+          <li>Hívás és WhatsApp kattintás külön mérhető esemény, a Pixel csak süti-hozzájárulás után fut.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="jegyzet-dontesek">
+    <div class="wrap">
+      <span class="tag">Döntések</span>
+      <h2>Ami tőled kell, fontossági sorrendben</h2>
+      <h3>Élesítés előtt kötelező</h3>
+      <ul class="check">
+        <li><b>Jótállás:</b> vállalod a 2 évet, 250 000 Ft felett a 3 évet? Egy órás fogyasztóvédelmi jogászi egyeztetés a pack besorolásáról és a kizárásokról.</li>
+        <li><b>Cégadatok:</b> cégnév, székhely, adószám, nyitvatartás, adatkezelési tájékoztató, a békéltető testület címe.</li>
+        <li><b>Átadási teszt:</b> mit mérsz ma pontosan? Vállalod a mérési lapot, a cellánkénti belső ellenállás-mérést és a BMS-próbát? A v2 ezt ígéri.</li>
+        <li><b>Hajós ár:</b> újraszámolás anyag, munka, kiszállás és jótállási tartalék alapján. Javaslat: két csomag, 25,6 V 100 Ah és 51,2 V 100 Ah, beépítve, „-tól” áron, a gyári márkás hajóakku ára alatt.</li>
+        <li><b>Hajós műszaki tartalom:</b> cellagyártó, BMS-típus, hőszenzor és fagyvédelem, védett ház, főbiztosíték. Ki végzi a beépítést, van-e rá felelősségbiztosítás?</li>
+        <li><b>E-bike lista:</b> Bosch, Yamaha, Brose nem, Shimano egyedileg, nyílt rendszerek igen. Így van?</li>
+        <li><b>Előleg-szabály:</b> mi van, ha a cellarendelés után lép vissza a vevő? Ingyenes-e az ajánlat és a bevizsgálás?</li>
+        <li><b>Fotók:</b> legalább a hero, a ponthegesztés, a mérési lap, te, és a Golfboard-pack. Placeholderrel nem élesítünk.</li>
+      </ul>
+      <h3>Erősen ajánlott</h3>
+      <ul class="check">
+        <li>Golfboard-pack adatai: V, Ah, kWh, cellaszám, mért kapacitás. Épített packok száma, Google-értékelések.</li>
+        <li>Saját kiszállítás díja Veszprém és a Balaton között. Partner-átvétel Kapuváron vagy Szlovákiában?</li>
+        <li>Külső, pót akkut vállalsz? 3 kW feletti rollert? Régi cellák leadása hogyan megy?</li>
+        <li>A hatótáv-becslés sávja, 15–25 Wh/km, a te tapasztalatod szerint.</li>
+        <li>A „Ki építi” idézet a saját szavaiddal.</li>
+      </ul>
+      <h3>Háttér, nem az oldalra</h3>
+      <ul class="check">
+        <li>EU 2023/1542 akkumulátorrendelet: aki packot épít és elad, gyártónak számít. CE-jelölés, megfelelőségi nyilatkozat, címke, sorszám. Mellette EPR-regisztráció a MOHU-nál és az OKIR-ban. Tanácsadóval érdemes rendbe tenni.</li>
+        <li>Hirdetés: roller februártól májusig, hajó márciustól májusig és szeptember–októberben. A hajós őszi ablak most nyitva van.</li>
+        <li>Hirdetési felépítés: roller-hirdetés árral a címben a roller oldalra, hajós hirdetés WhatsApp-kattintásra, a 920 000-es TikTok-videó Spark Ads-ként. A lead értéke percek alatt esik: WhatsApp automata első válasz, 5 percen belül ember.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec alt" id="jegyzet-wordpress">
+    <div class="wrap">
+      <span class="tag">WordPress</span>
+      <h2>Átállás röviden</h2>
+      <div class="grid2 top">
+        <ul class="list-ok">
+          <li><b>Téma:</b> Kadence vagy GeneratePress, child theme. Oldalanként saját sablon ebből a HTML-ből. Elementor lassabb, a Custom HTML blokk levágja a fejlécet és a scripteket.</li>
+          <li><b>Oldalak:</b> főoldal, /roller-akku-csere, /e-bike-akku-felujitas, /hajoakku-lifepo4-balaton, /biztonsag-es-jotallas, adatkezelési tájékoztató.</li>
+          <li><b>Űrlap:</b> a MiniCRM-hez nincs hivatalos WordPress-bővítmény. Két út: natív beküldés a MiniCRM űrlap-végpontjára, vagy Contact Form 7 plusz webhook.</li>
+        </ul>
+        <ul class="list-ok">
+          <li><b>Sütik:</b> CookieYes vagy Complianz, egyenrangú Elutasítom gombbal. A Pixel, a Lead és a Contact esemény csak hozzájárulás után.</li>
+          <li><b>SEO:</b> Rank Math, LocalBusiness és GYIK-séma. Google Cégprofil telephellyel és balatoni szolgáltatási területtel.</li>
+          <li><b>Tárhely és DNS:</b> a domain a Forpsinál van, ott a legkevesebb a DNS-munka. A GitHub Pages-terv helyett a tárhely címére mutat a domain.</li>
+          <li><b>Képek</b> WebP-ben, a hero 150 KB alatt. Részletek: v2/README.md a repóban.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="jegyzet-fotok">
+    <div class="wrap">
+      <span class="tag">Fotók</span>
+      <h2>Fotólista a v2-höz</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Fájl</th><th scope="col">Méret</th><th scope="col">Mi legyen rajta</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">hero.jpg</th><td class="num">1600×1067</td><td>Kész, zsugorozott pack a kézben vagy a munkaasztalon, mögötte elmosódva a műhely</td></tr>
+            <tr><th scope="row">pack-roller.jpg</th><td class="num">1200×800</td><td>Kész roller-pack hőzsugorban, mellette a kapacitásmérő kijelzője</td></tr>
+            <tr><th scope="row">ponthegesztes.jpg</th><td class="num">1200×800</td><td>Ponthegesztés közelről: cellák, nikkelszalag. Új</td></tr>
+            <tr><th scope="row">muhely.jpg</th><td class="num">1600×900</td><td>Széles műhelykép: ponthegesztő, kapacitásmérő, munka közben</td></tr>
+            <tr><th scope="row">szilard.jpg</th><td class="num">800×1000</td><td>Te, a műhelyben, álló kép. Új</td></tr>
+            <tr><th scope="row">golfboard-pack.jpg</th><td class="num">1200×800</td><td>A kész Golfboard-pack. Új</td></tr>
+            <tr><th scope="row">ebike-akku.jpg</th><td class="num">1200×800</td><td>Felnyitott e-bike tok új cellasorral. Új</td></tr>
+            <tr><th scope="row">pack-hajo.jpg</th><td class="num">1200×800</td><td>LiFePO4 prizmatikus cellák, vagy a Golfboard-pack, amíg nincs hajós</td></tr>
+            <tr><th scope="row">referencia-hajo.jpg</th><td>később</td><td>Csak valódi balatoni beépítésről. Addig a hely nem jelenik meg.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">JPG 80% minőségben, WordPressbe feltöltés előtt WebP-re alakítva. AI-generált termékfotó nem kerül ki.</p>
+    </div>
+  </section>
+
+  <section class="sec alt" id="jegyzet-forrasok">
+    <div class="wrap">
+      <span class="tag">Források</span>
+      <h2>Amire a számok épülnek</h2>
+      <ul class="srcs">
+        <li><a href="https://net.jogtar.hu/jogszabaly?docid=a0300151.kor" target="_blank" rel="noopener">151/2003. Korm. rendelet, kötelező jótállás</a></li>
+        <li><a href="https://net.jogtar.hu/jogszabaly?docid=a2400010.im" target="_blank" rel="noopener">10/2024. IM rendelet, jótállás-köteles termékek</a></li>
+        <li><a href="https://net.jogtar.hu/jogszabaly?docid=a0000042.tv" target="_blank" rel="noopener">2000. évi XLII. törvény, víziközlekedés</a></li>
+        <li><a href="https://net.jogtar.hu/jogszabaly?docid=a0300030.kor" target="_blank" rel="noopener">30/2003. Korm. rendelet, belső égésű motorok</a></li>
+        <li><a href="https://infostart.hu/belfold/2025/08/13/sokkolo-fotoval-uzen-az-e-rollereseknek-a-katasztrofavedelem" target="_blank" rel="noopener">Infostart: katasztrófavédelmi rollertűz-adatok</a></li>
+        <li><a href="https://www.veol.hu/helyi-kozelet/2025/08/rolleres-tuzmegelozesre-hivtak-fel-a-figyelmet" target="_blank" rel="noopener">Veol: rolleres tűzmegelőzés</a></li>
+        <li><a href="https://www.batemo.com/products/batemo-cell-explorer/tenpower-inr21700-50me/" target="_blank" rel="noopener">Batemo: Tenpower INR21700-50ME mérés</a></li>
+        <li><a href="https://www.akkuabc.hu/tenpower-inr21700-50me-li-ion-ipari-akku-3-6v-5000mah-15a-2170050me" target="_blank" rel="noopener">AkkuABC: Tenpower 50ME adatok</a></li>
+        <li><a href="https://doctorakku.hu/" target="_blank" rel="noopener">Doctor Akku, Győr: akkuépítés kalkulátor</a></li>
+        <li><a href="https://masterbike.hu/termekek/akkumulator-felujitas-791" target="_blank" rel="noopener">Masterbike: akkufelújítás árlista</a></li>
+        <li><a href="https://akkucentral.hu/spl/589200/Li-ion-elektromos-kerekpar-akku-felujitas-feszultseg-szerint" target="_blank" rel="noopener">Akkucentrál: felújítás feszültség szerint</a></li>
+        <li><a href="https://www.akku-elem.hu/roller-gordeszk-akkumulator-felujitas" target="_blank" rel="noopener">Akku-Elem: roller akku felújítás</a></li>
+        <li><a href="https://birdbike.hu/AKKUMULATOR-FELUJITAS" target="_blank" rel="noopener">Birdbike, Siófok: akkumulátor-felújítás</a></li>
+        <li><a href="https://turbobringa.hu/termek/akkumulator-48v-20ah-960wh-vazra-szerelheto/" target="_blank" rel="noopener">TurbóBringa: 48V 20Ah kész pack</a></li>
+        <li><a href="https://www.eroller-shop.hu/akkumulator-felujitas" target="_blank" rel="noopener">E-Roller Shop: akkumulátor-felújítás</a></li>
+        <li><a href="https://www.akkuhaz.hu/akku-felujitas" target="_blank" rel="noopener">Akkuház: akku-felújítás</a></li>
+        <li><a href="https://www.wheel-e.hu/akku-felujitas/" target="_blank" rel="noopener">Wheel-E: akku-felújítás</a></li>
+        <li><a href="https://sakku.hu/elektromos-kerekpar-akkumulator-felujitas/" target="_blank" rel="noopener">SAKKU: e-bike akku felújítás, hajóakku</a></li>
+        <li><a href="https://www.rollervilag.hu/spg/572727/Munkadijaink-arlistaja" target="_blank" rel="noopener">Roller Világ: munkadíjak</a></li>
+        <li><a href="https://royalscooter.hu/roller-javitas" target="_blank" rel="noopener">Royal Scooter: roller javítás</a></li>
+        <li><a href="https://www.efish.hu/lifepo4-munka-akkumulatorok-es-toltok-885/12v-lifepo4-akkumulatorok-929" target="_blank" rel="noopener">eFish: 12 V LiFePO4 árak</a></li>
+        <li><a href="https://www.efish.hu/lifepo4-munka-akkumulatorok-es-toltok-885/24v-lifepo4-akkumulatorok-930" target="_blank" rel="noopener">eFish: 24 V LiFePO4 árak</a></li>
+        <li><a href="https://villanyraktar.hu/termekkategoria/lifepo-4-akkumulator/" target="_blank" rel="noopener">Villanyraktár: LiFePO4 tárolók</a></li>
+        <li><a href="https://www.trinexus.hu/spd/2104-00/Torqeedo-Power-48-5000-litium-akkumulator" target="_blank" rel="noopener">Trinexus: Torqeedo Power 48-5000</a></li>
+        <li><a href="https://smartcell.hu/" target="_blank" rel="noopener">SmartCell: 12 V LiFePO4</a></li>
+        <li><a href="https://www.elemnagyker.hu/EVE-LF280K-v3-LiFePO4-280Ah-32V-os-prizmatikus-akk" target="_blank" rel="noopener">Elemnagyker: EVE LF280K cella</a></li>
+        <li><a href="https://porthole.hu/cikk/6612-ketelyek-es-tapasztalatok-az-elektromos-hajozasban" target="_blank" rel="noopener">Porthole: tapasztalatok az elektromos hajózásban</a></li>
+      </ul>
+      <p class="note">Az árak 2026. szeptember végi lekérdezések, tájékoztató jellegűek. Versenytárs-árat az élő oldalra nem írunk.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><h4>Whoosh · Veszprém</h4><p>Roller-, e-bike- és hajóakku csere, felújítás, egyedi építés. Saját műhely, megmért packok, jótállási jeggyel.</p></div>
+      <div><h4>Kapcsolat</h4><p><a href="tel:+36708520208">+36 70 852 0208</a></p><p><a href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener">WhatsApp</a></p><p><a href="mailto:erollerszerviz@gmail.com">erollerszerviz@gmail.com</a></p><p>Veszprém, Kossuth Lajos u. 10.</p><p>Nyitvatartás: <span class="fill">[nap–nap, óra–óra]</span></p></div>
+      <div><h4>Oldalak</h4><p><a href="#/roller">Roller akku csere</a></p><p><a href="#/e-bike">E-bike akku felújítás</a></p><p><a href="#/hajo">Hajóakku a Balatonon</a></p><p><a href="#/biztonsag">Biztonság és jótállás</a></p><p><a href="#/biztonsag/feltetelek">Ajánlati feltételek</a></p><p><a href="#/biztonsag/adatkezeles">Adatkezelési tájékoztató</a></p></div>
+      <div><h4>Máshol</h4><p><a href="https://www.tiktok.com/@elektromosroller.net" target="_blank" rel="noopener">TikTok: @elektromosroller.net</a></p><p><a href="https://elektromos-roller.net" target="_blank" rel="noopener">Webshop: elektromos-roller.net</a></p></div>
+    </div>
+    <div class="legal">
+      <p><span class="fill">[Cégnév]</span> · Székhely: <span class="fill">[székhely]</span> · Adószám: <span class="fill">[adószám]</span></p>
+      <p>Az árak bruttó forintárak, 2026. szeptemberi állapot. Panasszal a Veszprém Vármegyei Békéltető Testülethez fordulhatsz. <a href="#/biztonsag/feltetelek">Részletek →</a></p>
+      <p style="margin:0">© 2026 <span class="fill">[Cégnév]</span> · <span class="fill">[Süti-beállítások link, a süti-bővítmény adja]</span></p>
+    </div>
+  </div>
+</footer>
+
+<div class="sticky" aria-label="Gyors kapcsolat">
+  <a class="btn btn-ghost" href="tel:+36708520208"><svg aria-hidden="true" focusable="false"><use href="#i-tel"/></svg>Hívás</a>
+  <a class="btn btn-green wa" href="https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&amp;utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=akku" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>WhatsApp</a>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ============================================================
+  // FORM_ACTION: a MiniCRM űrlap-végpont URL-je (lásd v2/README.md).
+  // Üresen ("") mailto-fallback megy az erollerszerviz@gmail.com címre.
+  // WordPressben az űrlapot a bővítmény adja, ez a logika ott elhagyható.
+  // ============================================================
+  var FORM_ACTION = "";
+
+  var TITLES = {
+    'fooldal': 'Roller és e-bike akku csere, felújítás, hajóakku | Veszprém',
+    'roller': 'Roller akku csere Veszprém – fix ár, 106 900 Ft-tól | Whoosh',
+    'e-bike': 'E-bike akku felújítás Veszprém – 36, 48, 52 V | Whoosh',
+    'hajo': 'LiFePO4 hajóakku a Balatonon – felmérés, beépítés | Whoosh',
+    'biztonsag': 'Roller akku biztonság, töltés és jótállás | Whoosh Veszprém',
+    'jegyzet': 'Tervezői jegyzet – akkumulatorepites.hu v2'
+  };
+  var WA = {"fooldal": "https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku", "roller": "https://wa.me/36708520208?text=Szia%21%20Roller%20akku%20%C3%BCgyben%20%C3%ADrok.%20T%C3%ADpus%3A%20%E2%80%A6%20Mostani%20akku%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku", "e-bike": "https://wa.me/36708520208?text=Szia%21%20E-bike%20akku%20%C3%BCgyben%20%C3%ADrok.%20Rendszer%3A%20%E2%80%A6%20C%C3%ADmke%3A%20%E2%80%A6%20V%20%E2%80%A6%20Ah.%20K%C3%BCld%C3%B6m%20a%20c%C3%ADmke%20%C3%A9s%20a%20csatlakoz%C3%B3%20fot%C3%B3j%C3%A1t.%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku", "hajo": "https://wa.me/36708520208?text=Szia%21%20Haj%C3%B3akku%20felm%C3%A9r%C3%A9st%20k%C3%A9rn%C3%A9k%20a%20Balatonon.%20Haj%C3%B3%3A%20%E2%80%A6%20Motor%3A%20%E2%80%A6%20kW.%20Kik%C3%B6t%C5%91%3A%20%E2%80%A6%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku", "biztonsag": "https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku", "jegyzet": "https://wa.me/36708520208?text=Szia%21%20Akku%20%C3%BCgyben%20%C3%ADrok.%20%28akkumulatorepites.hu%29&utm_source=landing&utm_medium=cta&utm_campaign=akku"};
+  var PAGES = Object.keys(TITLES);
+  var current = null;
+
+  function $$(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  // Képhelyek: data-src → src. Ha a fájl hiányzik, a felirattal ellátott helyőrző marad.
+  function loadImages(root){
+    $$('img[data-src]', root).forEach(function(img){
+      if (img.getAttribute('data-tried')) return;
+      img.setAttribute('data-tried', '1');
+      var box = img.parentNode;
+      img.addEventListener('load', function(){ box.classList.add('loaded'); });
+      img.addEventListener('error', function(){ box.classList.remove('loaded'); img.removeAttribute('src'); });
+      img.src = img.getAttribute('data-src');
+    });
+  }
+
+  // Egyszerű útválasztó: #/oldal vagy #/oldal/szakasz. WordPressben ezek külön oldalak.
+  function parse(){
+    var h = decodeURIComponent((location.hash || '').replace(/^#\/?/, ''));
+    var parts = h.split('/');
+    var page = parts[0] || 'fooldal';
+    var sec = parts[1] || '';
+    if (PAGES.indexOf(page) === -1) {
+      var legacy = { urlap: ['fooldal', 'urlap'], hajo: ['hajo', ''], arak: ['roller', 'arak'], gyik: ['fooldal', 'gyik'], folyamat: ['fooldal', 'folyamat'] };
+      var m = legacy[page] || ['fooldal', ''];
+      page = m[0]; sec = m[1];
+    }
+    return { page: page, sec: sec };
+  }
+
+  function route(fromClick){
+    var r = parse();
+    var changed = r.page !== current;
+    if (changed) {
+      $$('main.page').forEach(function(p){ p.hidden = (p.id !== r.page); });
+      $$('[data-nav]').forEach(function(a){
+        if (a.getAttribute('data-nav') === r.page) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      document.title = TITLES[r.page];
+      var wa = WA[r.page] || WA.fooldal;
+      $$('.sticky .wa').forEach(function(a){ a.href = wa; });
+      current = r.page;
+      loadImages(document.getElementById(r.page));
+    }
+    var target = r.sec ? document.getElementById(r.page + '-' + r.sec) : null;
+    if (target) target.scrollIntoView({ block: 'start', behavior: changed ? 'instant' : 'smooth' });
+    else if (changed) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    else if (fromClick) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  window.addEventListener('hashchange', function(){ route(false); });
+  // Ugyanarra a címre kattintva a hashchange nem fut le, ezért kézzel görgetünk.
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest ? ev.target.closest('a[href^="#/"]') : null;
+    if (a && a.getAttribute('href') === location.hash) { ev.preventDefault(); route(true); }
+  });
+
+  // Tervezet-jelölések ki-be (csak ebben a böngészőben megjegyezve)
+  var tbdBtn = document.getElementById('tbd-toggle');
+  function setTbd(on){
+    document.body.classList.toggle('hide-tbd', !on);
+    if (tbdBtn) { tbdBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); tbdBtn.textContent = 'Jelölések: ' + (on ? 'be' : 'ki'); }
+    try { localStorage.setItem('akku-v2-jelolesek', on ? '1' : '0'); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('akku-v2-jelolesek'); } catch (e) {}
+  setTbd(saved !== '0');
+  if (tbdBtn) tbdBtn.addEventListener('click', function(){ setTbd(document.body.classList.contains('hide-tbd')); });
+
+  // Űrlapok: feltételes mezők, ellenőrzés, mailto-fallback, WhatsApp-alternatíva
+  $$('form.lead-form').forEach(function(form){
+    function tipusVal(){
+      var c = form.querySelector('input[name=tipus]:checked') || form.querySelector('input[name=tipus]');
+      return c ? c.value : '';
+    }
+    function syncCond(){
+      var v = tipusVal();
+      $$('fieldset.cond', form).forEach(function(fs){ fs.disabled = fs.getAttribute('data-when') !== v; });
+    }
+    $$('input[name=tipus][type=radio]', form).forEach(function(r){ r.addEventListener('change', syncCond); });
+    syncCond();
+    var sys = form.querySelector('select[name=rendszer]');
+    var warn = form.querySelector('.warn-inline');
+    if (sys && warn) sys.addEventListener('change', function(){ warn.style.display = /Bosch|Yamaha|Brose/.test(sys.value) ? 'block' : 'none'; });
+
+    form.addEventListener('submit', function(ev){
+      // A böngésző saját ellenőrzése már lefutott (required, e-mail formátum). Ez a csak szóközös mezőket fogja meg.
+      var bad = $$('input[required]:not([type=checkbox]), select[required], textarea[required]', form).filter(function(el){
+        var fs = el.closest('fieldset');
+        return !(fs && fs.disabled) && !String(el.value).trim();
+      })[0];
+      if (bad) { ev.preventDefault(); bad.focus(); return; }
+      if (typeof fbq === 'function') { try { fbq('track', 'Lead'); } catch (e) {} }
+      if (FORM_ACTION) { form.action = FORM_ACTION; return; }
+
+      ev.preventDefault();
+      var lines = [];
+      $$('[data-l]', form).forEach(function(el){
+        var fs = el.closest('fieldset');
+        if (fs && fs.disabled) return;
+        var v = String(el.value || '').trim();
+        if (v) lines.push(el.getAttribute('data-l') + ': ' + v);
+      });
+      var files = form.querySelector('input[type=file]');
+      if (files && files.files && files.files.length) lines.push('Fotó: ' + files.files.length + ' db, WhatsAppon küldöm');
+      var nevEl = form.elements.namedItem('nev');
+      var subject = 'Akku ajánlatkérés – ' + tipusVal() + ' – ' + (nevEl ? nevEl.value.trim() : '');
+      var body = 'Mihez kell: ' + tipusVal() + '\n' + lines.join('\n') + '\n\n(akkumulatorepites.hu)';
+      var wa = form.querySelector('.form-wa');
+      if (wa) wa.href = 'https://wa.me/36708520208?text=' + encodeURIComponent(subject + '\n\n' + body);
+      var btn = form.querySelector('button[type=submit]');
+      if (btn) btn.disabled = true;
+      var ok = form.querySelector('.form-ok');
+      if (ok) { ok.style.display = 'block'; try { ok.scrollIntoView({ block: 'center' }); } catch (e) {} }
+      location.href = 'mailto:erollerszerviz@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    });
+  });
+
+  // Ártábla: sorra koppintva a méret bekerül az oldal ajánlatkérőjébe
+  $$('.price-tbl').forEach(function(tbl){
+    var form = document.getElementById(tbl.getAttribute('data-form'));
+    $$('tbody tr', tbl).forEach(function(tr){
+      tr.tabIndex = 0;
+      function pick(){
+        if (!form) return;
+        var cfg = tr.getAttribute('data-cfg');
+        var sor = form.elements.namedItem('kivalasztott_sor');
+        if (sor) sor.value = cfg;
+        var chosen = form.querySelector('.chosen');
+        if (chosen) { chosen.textContent = 'Kiválasztott méret: ' + cfg; chosen.hidden = false; }
+        $$('tr.sel', tbl).forEach(function(x){ x.classList.remove('sel'); });
+        tr.classList.add('sel');
+        var target = '#/' + current + '/urlap';
+        if (location.hash === target) route(true); else location.hash = target;
+      }
+      tr.addEventListener('click', pick);
+      tr.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    });
+  });
+
+  // Hívás és WhatsApp kattintás: Meta Pixel "Contact" esemény, csak ha a Pixel hozzájárulás után betöltött
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest ? ev.target.closest('a[href^="tel:"], a[href^="https://wa.me/"]') : null;
+    if (!a || typeof fbq !== 'function') return;
+    try { fbq('track', 'Contact', { method: a.getAttribute('href').indexOf('tel:') === 0 ? 'phone' : 'whatsapp' }); } catch (e) {}
+  });
+
+  // ?tipus=roller|e-bike|hajo a címben: a főoldali űrlap előválasztása (hirdetési linkekhez)
+  try {
+    var t = new URLSearchParams(location.search).get('tipus');
+    var map = { roller: 'Roller', ebike: 'E-bike', 'e-bike': 'E-bike', hajo: 'Hajó' };
+    if (map[t]) {
+      var radio = document.querySelector('#f-fooldal input[name=tipus][value="' + map[t] + '"]');
+      if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+    }
+  } catch (e) {}
+
+  route(false);
+})();
+</script>
+</body>
+</html>

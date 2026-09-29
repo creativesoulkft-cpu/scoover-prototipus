@@ -1,5 +1,7 @@
 # akkumulatorepites.hu – landing page
 
+> **2026. szeptember:** a WordPress-átálláshoz és az újragondolt tartalomhoz lásd a [`v2/README.md`](v2/README.md)-t. Az alábbi GitHub Pages-út csak a v1 prototípus gyors élesítésére vonatkozik.
+
 Egyetlen `index.html`, nulla külső függőség. Bármilyen statikus hosztra feltehető; itt a GitHub Pages út van leírva, mert ingyenes és a domain rákötése kb. fél óra.
 
 Élesítés előtt a fájl tetején lévő 5 pontos kommentet nézd át (FORM_ACTION, Meta Pixel, og:image, fotó, domain).
