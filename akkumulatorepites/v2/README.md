@@ -15,14 +15,14 @@ Kattintható prototípus egyetlen fájlban (`index.html`), hat nézettel. A bön
 
 - A sárga pontozott aláhúzású részek (`.tbd`, `.tbd-b`) megerősítendő állítások, a `[szögletes zárójeles]` részek (`.fill`) hiányzó adatok. A döntési lista a prototípusban: `#/jegyzet/dontesek`.
 - Élesben törlendő: a `.draftbar` sáv, a `.tbd`, `.tbd-b`, `.fill` jelölések, a `#jegyzet` nézet és a `<meta name="robots" content="noindex">`.
-- A jótállás a v2-ben 2 év, 250 000 Ft felett 3 év (151/2003. Korm. r. 2. § (1), hatályos szöveg). A pack besorolását a 10/2024. IM r. 38. pontja (alkotórész) alapján egy fogyasztóvédelmi jogász erősítse meg.
+- A jótállás a v2-ben 2 év, 250 000 Ft felett 3 év (151/2003. Korm. r. 2. § (1), hatályos szöveg). Ez eldöntött vállalás, a kizárások szövegét érdemes jogásszal átnézetni.
 
 ## Oldalcímek és leírások
 
 | Oldal | `<title>` | Meta description |
 |---|---|---|
-| Főoldal | Roller és e-bike akku csere, felújítás, hajóakku \| Veszprém | Roller és e-bike akku csere, felújítás fix áron, 106 900 Ft-tól. Tenpower 21700 cella, mért kapacitás, jótállási jegy. LiFePO4 hajóakku a Balatonon. |
-| Roller | Roller akku csere Veszprém – fix ár, 106 900 Ft-tól \| Whoosh | Roller akku csere és felújítás Veszprémben: új, megmért pack a gyári rekeszbe, 36V 10Ah 106 900 Ft-tól. Fix árlista, 5–10 munkanap, jótállási jeggyel. |
+| Főoldal | Roller és e-bike akku csere, felújítás, hajóakku \| Veszprém | Roller és e-bike akku csere, felújítás fix áron, 76 900 Ft-tól. Tenpower 21700 cella, mért kapacitás, jótállási jegy. LiFePO4 hajóakku a Balatonon. |
+| Roller | Roller akku csere Veszprém – fix ár, 76 900 Ft-tól \| Whoosh | Roller akku csere és felújítás Veszprémben: új, megmért pack a gyári rekeszbe, 76 900 Ft-tól. Fix árlista, 5–10 munkanap, jótállási jeggyel. |
 | E-bike | E-bike akku felújítás Veszprém – 36, 48, 52 V \| Whoosh | E-bike akku felújítás és egyedi pack 36, 48 és 52 V-ra, a te tokodba vagy új házba. Előbb megnézzük, mibe lehet. Fix árlista, Veszprém. |
 | Hajó | LiFePO4 hajóakku a Balatonon – felmérés, beépítés \| Whoosh | LiFePO4 hajóakku ólom helyett a Balatonon: 24/48 V, 2–6 kWh, felmérés a kikötőben, beépítés, teszt a vízen. Tételes, írásos ajánlat. |
 | Biztonság | Roller akku biztonság, töltés és jótállás \| Whoosh Veszprém | Hogyan épül egy biztonságos roller akku, hogyan töltsd, és mit jelent a jótállás: 2 év, 250 000 Ft felett 3 év, jótállási jeggyel. |
