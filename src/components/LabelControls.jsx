@@ -7,6 +7,7 @@
  */
 import FontColorPicker from './FontColorPicker.jsx';
 import Slider from './Slider.jsx';
+import LabelRotate from './LabelRotate.jsx';
 
 function LabelCard({ label, index, pieces, categoryFont, autoColor, onChange, onRemove }) {
   const set = (patch) => onChange(label.id, patch);
@@ -34,8 +35,7 @@ function LabelCard({ label, index, pieces, categoryFont, autoColor, onChange, on
         format={(v) => `${Math.round(v * 100)}%`} />
       <Slider label="Eltolás X" value={label.dx} min={-300} max={300} step={1} onChange={(v) => set({ dx: v })} />
       <Slider label="Eltolás Y" value={label.dy} min={-150} max={150} step={1} onChange={(v) => set({ dy: v })} />
-      <Slider label="Forgatás" value={label.rotate} min={-90} max={90} step={1} onChange={(v) => set({ rotate: v })}
-        format={(v) => `${v}°`} />
+      <LabelRotate value={label.rotate} onChange={(v) => set({ rotate: v })} />
       <FontColorPicker label={label} categoryFont={categoryFont} autoColor={autoColor} onChange={set} />
     </div>
   );

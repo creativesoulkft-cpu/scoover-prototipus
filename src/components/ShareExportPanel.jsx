@@ -23,7 +23,7 @@ function slugify(text) {
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-');
 }
 
-export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, patternName, priceText }) {
+export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, patternName, priceText, buttonText = '📸 Mentsd le a tervedet!' }) {
   const [status, setStatus] = useState('idle'); // idle | working | error
   const [error, setError] = useState(null);
 
@@ -80,7 +80,7 @@ export default function ShareExportPanel({ canvasWrapRef, modelName, tierLabel, 
   return (
     <div className="share-panel">
       <button type="button" className="btn btn-secondary" disabled={status === 'working'} onClick={handleDownload}>
-        {status === 'working' ? 'Kép készítése…' : '📸 Mentsd le a tervedet!'}
+        {status === 'working' ? 'Kép készítése…' : buttonText}
       </button>
 
       {canShareFiles && (

@@ -13,16 +13,21 @@
  * A koordináta-rendszer 1 egység = 1 mm, így a minta léptéke fizikailag
  * értelmezhető.
  */
-import { useId } from 'react';
+import { useCallback, useId, useState } from 'react';
 import PatternDefs, { fillFor } from './PatternDefs.jsx';
 import LabelLayer from './LabelLayer.jsx';
 import { getFootboardFlat } from '../data/footboardFlat.js';
 import { formatHuf } from '../utils/format.js';
 
 export default function FootboardEditor({
-  model, piece, pattern, transform, label, onLabelDrag, price, onBack,
+  model, piece, pattern, transform, label, onLabelDrag, onLabelChange, wrapRef, price, onBack, actions,
 }) {
   const uid = useId();
+  /** { fits, fitScale } | null – a LabelLayer méri; csak változáskor frissül (nincs render-hurok) */
+  const [fit, setFit] = useState(null);
+  const onFit = useCallback((next) => {
+    setFit((prev) => (prev?.fits === next?.fits && prev?.fitScale === next?.fitScale ? prev : next));
+  }, []);
   const defId = `fbfill${uid}`;
   const flat = getFootboardFlat(model);
 
@@ -57,6 +62,7 @@ export default function FootboardEditor({
         <span className="muted"> · valós arány, {flat.widthMm} × {flat.heightMm} mm</span>
       </p>
 
+      <div className="footboard-canvas-wrap" ref={wrapRef}>
       <svg
         className="scooter-canvas footboard-canvas"
         viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
@@ -77,15 +83,31 @@ export default function FootboardEditor({
           />
           {label?.enabled && (
             <LabelLayer piece={flat.piece} label={label} font={label.font} color={label.color}
-              exploded={false} onDrag={onLabelDrag} />
+              exploded={false} onDrag={onLabelDrag} onFit={onFit} />
           )}
         </g>
       </svg>
+      </div>
+
+      {/* A felirat a taposó kontúrjánál levágódik (a nyomaton is) – ha kilóg, szólunk, és egy
+          gombbal visszaigazítható. A kolléga-teszten a "KUKIRIN G2" eleje így tűnt el észrevétlenül. */}
+      {label?.enabled && fit && !fit.fits && (
+        <div className="footboard-fit-warn" role="status">
+          <span>⚠ A felirat kilóg a taposóról – a széle levágódik, a nyomaton is.</span>
+          {onLabelChange && (
+            <button type="button" className="btn btn-mini"
+              onClick={() => onLabelChange({ scale: Math.max(0.3, Math.min(2, fit.fitScale)), dx: 0, dy: 0 })}>
+              Igazítsd a taposóra
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="footboard-editor-foot">
         <span className="muted small">Ez a felület a rendelésed része: <strong className="footboard-price">+{formatHuf(price)}</strong></span>
         <button type="button" className="btn" onClick={onBack}>← Vissza a teljes rollerhez</button>
       </div>
+      {actions}
     </div>
   );
 }

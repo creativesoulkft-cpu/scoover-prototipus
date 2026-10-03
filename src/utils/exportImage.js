@@ -42,6 +42,7 @@ function loadLogoImage() {
 }
 
 const EXPORT_SCALE = 2.2;
+const MIN_EXPORT_WIDTH = 2200;
 const FOOTER_HEIGHT = 128;
 const BRAND = {
   bg: '#171a1f',
@@ -274,8 +275,12 @@ async function renderWatermarkedPng(svgEl, info) {
   ]);
 
   const vb = svgEl.viewBox.baseVal;
-  const sceneW = Math.round((vb?.width || sceneImg.naturalWidth) * EXPORT_SCALE);
-  const sceneH = Math.round((vb?.height || sceneImg.naturalHeight) * EXPORT_SCALE);
+  const vbW = vb?.width || sceneImg.naturalWidth;
+  // keskeny jelenetnél (pl. a ~500 mm-es taposó) nagyobb nagyítás: a kép legalább
+  // MIN_EXPORT_WIDTH széles, így a vízjel-címke nem takarja ki a terv harmadát
+  const scale = Math.max(EXPORT_SCALE, MIN_EXPORT_WIDTH / vbW);
+  const sceneW = Math.round(vbW * scale);
+  const sceneH = Math.round((vb?.height || sceneImg.naturalHeight) * scale);
   const footerH = Math.round(FOOTER_HEIGHT * (EXPORT_SCALE / 2));
 
   const canvas = document.createElement('canvas');
