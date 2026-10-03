@@ -5,7 +5,7 @@
  *   #id=SCV-7F3K2Q   – szerveren mentett terv (rövid, stabil; a híd szerver adja vissza)
  *   #d=<tömörített>  – a TELJES dokumentum az URL-ben (lz-string, URL-biztos
  *                      ábécével). Szerver nélkül is működik – ezért a demó
- *                      (GitHub Pages) is tud linket adni –, de hosszú (~1–2 kB).
+ *                      (Cloudflare Pages) is tud linket adni –, de hosszú (~1–2 kB).
  *
  * Betöltéskor mindkettőt értjük. A dokumentum a linkből SOSEM tartalmaz
  * helyi (data-URL) képet – csak szerverre feltöltött kép URL-jét (lásd schema.js).

@@ -8,8 +8,13 @@
  * a böngésző natív oldal-zoomja: az utóbbi az egész felületet nagyítaná
  * (ársáv, panelek), és a rögzített elemek miatt használhatatlan lenne.
  * Egérrel: görgő = nagyítás, húzás = mozgatás, dupla kattintás = alaphelyzet.
+ *
+ * Portálon a <body>-ba kerül: a .stage tapadó (sticky, z-indexes) elem, ami
+ * saját rétegrendet nyit – benne hiába magas a z-index, a tapadó fejléc,
+ * ársáv és oldalsáv rácsúszott volna a teljes képernyős nézetre.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 6;
@@ -98,7 +103,7 @@ export default function FullscreenPreview({ title, children, onClose }) {
     return { scale, x: cx - (cx - cur.x) * k, y: cy - (cy - cur.y) * k };
   });
 
-  return (
+  return createPortal(
     <div className="fs-preview" role="dialog" aria-modal="true" aria-label={`${title} – teljes képernyős előnézet`}>
       <div
         className="fs-stage"
@@ -126,6 +131,7 @@ export default function FullscreenPreview({ title, children, onClose }) {
           <button type="button" className="btn btn-close" onClick={onClose}>Bezárás</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

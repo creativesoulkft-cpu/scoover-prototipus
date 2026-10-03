@@ -5,7 +5,7 @@ import { getModelMeta } from '../data/models/index.js';
 const cache = new Map();
 
 /**
- * Betölti (lazy import) a kiválasztott rollermodell geometriáját.
+ * Betölti a kiválasztott rollermodell geometriáját (a regiszter `load` felületén – lásd data/models/index.js).
  * Csak az aktív modell adata van memóriában/aktív használatban; modellváltáskor
  * az előző eredmény a cache-ben marad, hogy a visszaváltás azonnali legyen.
  *

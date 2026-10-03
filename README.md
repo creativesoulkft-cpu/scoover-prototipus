@@ -127,7 +127,7 @@ npm run build    # dist/ – statikusan hosztolható
 src/
   data/
     models/           # rollermodellek – EGY FÁJL = EGY MODELL
-      index.js        #   regiszter: metaadat + lazy import (csak a kiválasztott töltődik)
+      index.js        #   regiszter: metaadat + modellek (a fő csomagban – nincs elavult chunk új kiadás után)
       kukirin-g2.js   #   darabok SVG path-ként (d), priceGroup (→ zóna), explode-irány
       kukirin-g2-master.js
     zones.js          # ZÓNANEVEK ÉS -LEÍRÁSOK egy helyen (munkacímek) + priceGroup → zóna leképezés
@@ -176,7 +176,7 @@ src/
     ShareExportPanel.jsx # "Mentsd le a tervedet!" + Web Share gyorsgombok
     FullscreenPreview.jsx # teljes képernyős, csippentéssel nagyítható előnézet
     SplitHandle.jsx     # húzható elválasztó a kép/vezérlők felosztásához (osztott nézet)
-  hooks/useScooterModel.js  # lazy modellbetöltés + cache
+  hooks/useScooterModel.js  # modellbetöltés (aszinkron felület) + cache
   hooks/useIsTouch.js       # érintéses eszköz? (súgószövegek: "koppints" vs "vidd az egeret")
   hooks/useReportHeight.js  # elem magasságát CSS-változóba írja (egymás alá tapadó sávokhoz)
   hooks/useMediaQuery.js    # keskeny (osztott) elrendezés? – DOM-átrendezéshez, nem csak stílushoz

@@ -41,6 +41,8 @@ import DeliverySection from './components/DeliverySection.jsx';
 import HelpLine from './components/HelpLine.jsx';
 import FootboardEditor from './components/FootboardEditor.jsx';
 import FullscreenPreview from './components/FullscreenPreview.jsx';
+import LabelRotate from './components/LabelRotate.jsx';
+import { getFootboardFlat } from './data/footboardFlat.js';
 import SplitHandle from './components/SplitHandle.jsx';
 import CanvasCoach, { coachSeen, markCoachSeen } from './components/CanvasCoach.jsx';
 import AccountPanel from './account/AccountPanel.jsx';
@@ -165,6 +167,8 @@ export default function App() {
   const splitBeforeSlider = useRef(null);
   const restoreTimer = useRef(null);
   const canvasWrapRef = useRef(null);
+  /** a taposó-szerkesztő vászna – a taposó képként mentéséhez és a bélyegképhez */
+  const footboardWrapRef = useRef(null);
 
   const { model, loading, error } = useScooterModel(modelId);
   const isTouch = useIsTouch();
@@ -483,6 +487,7 @@ export default function App() {
   const footboardCategory = getCategory(footboardPattern?.category ?? 'solid');
   const footboardAutoColor = labelColorFor(footboardPattern);
   const footboardLabel = doc.footboard.label;
+  const footboardFlat = getFootboardFlat(model);
   const renderFootboardLabel = {
     ...footboardLabel,
     font: resolveLabelFont(footboardLabel, footboardCategory.labelFont),
@@ -539,7 +544,8 @@ export default function App() {
 
   /** A mentett terv bélyegképe (fiók, munkalap) – az aktuális vászonból. */
   const renderPreview = useCallback(async () => {
-    const svgEl = canvasWrapRef.current?.querySelector('svg.scooter-canvas');
+    // taposó-szerkesztés közben a roller vászna nincs a DOM-ban – ilyenkor a taposó a bélyegkép
+    const svgEl = (canvasWrapRef.current ?? footboardWrapRef.current)?.querySelector('svg.scooter-canvas');
     return svgEl ? renderPreviewPng(svgEl) : null;
   }, []);
 
@@ -647,6 +653,30 @@ export default function App() {
         </div>
       )}
     </>
+  );
+
+  /** Taposó-szerkesztés közben is menthető legyen a terv: kép a taposóról, link, fiók. */
+  const footboardPatternName = footboardLayer.patternId === UPLOAD_PATTERN_ID ? 'Saját kép' : (footboardPattern?.name ?? '–');
+  const footboardActionsEl = !model || !exportPrice ? null : (
+    <div className="below-actions footboard-actions">
+      <ShareExportPanel
+        canvasWrapRef={footboardWrapRef}
+        modelName={`${model.name} taposó`}
+        tierLabel={tierName}
+        patternName={footboardPatternName}
+        priceText={formatHuf(exportPrice.total)}
+        buttonText="📸 Mentsd le a taposó tervét!"
+      />
+      <SaveSharePanel
+        doc={doc}
+        onSaved={actions.setId}
+        renderPreview={renderPreview}
+        user={account.user}
+        onRequireLogin={() => setAccountOpen(true)}
+        modelName={model.name}
+        tierLabel={tierName}
+      />
+    </div>
   );
 
   const installationName = INSTALLATION_OPTIONS.find((o) => o.id === doc.installation)?.name ?? '';
@@ -786,8 +816,11 @@ export default function App() {
                   transform={footboardLayer.transform}
                   label={renderFootboardLabel}
                   onLabelDrag={(d) => actions.setFootboardLabel(d)}
+                  onLabelChange={(patch) => actions.setFootboardLabel(patch)}
+                  wrapRef={footboardWrapRef}
                   price={FOOTBOARD_EXTRA_HUF}
                   onBack={() => setFootboardEditMode(false)}
+                  actions={!isNarrow ? footboardActionsEl : null}
                 />
               ) : (
                 !isNarrow && belowCanvasEl
@@ -876,12 +909,12 @@ export default function App() {
                   </label>
                   <Slider label="Méret" value={footboardLabel.scale} min={0.3} max={2} step={0.05}
                     onChange={(v) => actions.setFootboardLabel({ scale: v })} format={(v) => `${Math.round(v * 100)}%`} />
-                  <Slider label="Eltolás X" value={footboardLabel.dx} min={-150} max={150} step={1}
-                    onChange={(v) => actions.setFootboardLabel({ dx: v })} />
-                  <Slider label="Eltolás Y" value={footboardLabel.dy} min={-100} max={100} step={1}
-                    onChange={(v) => actions.setFootboardLabel({ dy: v })} />
-                  <Slider label="Forgatás" value={footboardLabel.rotate} min={-90} max={90} step={1}
-                    onChange={(v) => actions.setFootboardLabel({ rotate: v })} format={(v) => `${v}°`} />
+                  {/* az eltolás mm-ben, a taposó valós méretéhez: a széléig el lehessen vinni */}
+                  <Slider label="Eltolás X" value={footboardLabel.dx} min={-Math.round(footboardFlat.widthMm / 2)} max={Math.round(footboardFlat.widthMm / 2)} step={1}
+                    onChange={(v) => actions.setFootboardLabel({ dx: v })} format={(v) => `${v} mm`} />
+                  <Slider label="Eltolás Y" value={footboardLabel.dy} min={-Math.round(footboardFlat.heightMm / 2)} max={Math.round(footboardFlat.heightMm / 2)} step={1}
+                    onChange={(v) => actions.setFootboardLabel({ dy: v })} format={(v) => `${v} mm`} />
+                  <LabelRotate value={footboardLabel.rotate} onChange={(v) => actions.setFootboardLabel({ rotate: v })} />
                   <FontColorPicker
                     label={footboardLabel}
                     categoryFont={footboardCategory.labelFont}
@@ -890,6 +923,8 @@ export default function App() {
                   />
                 </div>
               </section>
+
+              {isNarrow && footboardActionsEl}
 
               <button type="button" className="btn btn-outline" onClick={() => setFootboardEditMode(false)}>
                 ← Vissza a teljes rollerhez

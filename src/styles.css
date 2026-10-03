@@ -119,6 +119,7 @@ html, body { overscroll-behavior-y: none; }
 /* a felülnézeti dekk a stage teljes szabad területét kitölti (a 4:1 arány
    miatt a magassága a szélességből adódik – "meet" illesztés) */
 .footboard-editor { flex: 1; min-height: 0; }
+.footboard-canvas-wrap { flex: 1; min-height: 0; display: flex; }
 .footboard-canvas { flex: 1; min-height: 0; width: 100%; height: 100%; }
 
 /* fő darab (a feltöltött kép lényege ide kerül) */
@@ -302,6 +303,9 @@ button.link.danger { color: #ff7b7b; font-size: 12px; }
 .btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
 .btn:hover { border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-mini { padding: 4px 9px; font-size: 12px; border-radius: 7px; }
+.label-rotate { display: flex; flex-direction: column; gap: 6px; }
+.label-rotate-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #16110b; width: 100%; padding: 12px 14px; font-size: 15px; }
 .btn-primary:hover:not(:disabled) { filter: brightness(1.08); border-color: var(--accent); }
 /* Gombhierarchia: az EGYETLEN tömör narancs gomb a "Kosárba teszem".
@@ -481,7 +485,7 @@ details.sub > summary { padding: 6px 0; }
   background: rgba(25, 230, 193, .1); border: 1px solid rgba(25, 230, 193, .3); }
 
 /* --- teljes képernyős előnézet (FullscreenPreview.jsx) --- */
-.fs-preview { position: fixed; inset: 0; z-index: 60; background: var(--bg);
+.fs-preview { position: fixed; inset: 0; z-index: 65; background: var(--bg);
   display: flex; flex-direction: column; }
 .fs-stage { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: grab; }
 .fs-stage:active { cursor: grabbing; }
@@ -666,3 +670,9 @@ html { scroll-padding-top: calc(var(--topbar-h, 0px) + var(--price-bar-h, 0px) +
   html { scroll-padding-top: calc(var(--split-pct, 45) * 1dvh + 22px + var(--quick-nav-h, 0px) + 8px);
     scroll-padding-bottom: calc(var(--price-bar-h, 0px) + 8px); }
 }
+
+/* taposó: kilógó felirat jelzése */
+.footboard-fit-warn { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 8px; padding: 8px 12px; border-radius: 10px; font-size: 13px;
+  background: rgba(255, 176, 32, .12); border: 1px solid rgba(255, 176, 32, .45); color: #ffd48a; }
+.footboard-actions { margin-top: 12px; }

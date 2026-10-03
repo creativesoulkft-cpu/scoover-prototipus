@@ -1,38 +1,46 @@
 /**
  * Rollermodell-regiszter.
  *
- * Itt CSAK a könnyű metaadatok szerepelnek (név, márka, évjáratok), a tényleges
- * geometria (darabok SVG path-jai) lusta (lazy) importtal töltődik be,
- * kizárólag akkor, amikor a felhasználó kiválasztja a modellt. Így 20+ modell
- * esetén sem nő az induló letöltés – a Vite minden modellből külön chunkot készít.
+ * A modellek geometriája (darabok SVG path-jai) a FŐ csomagban van, nem külön
+ * letöltött darabban (chunk). Korábban lusta importtal töltődtek, de a
+ * statikus tárhelyen minden új kiadás lecseréli a régi
+ * fájlneveket: aki egy régebben megnyitott lapon váltott modellt, annak a
+ * régi darab 404-et adott, és a modellváltás csendben elakadt ("a G2 Master
+ * fül nem működik"). Modellenként ~2 KB (gzip), így ez 20+ modellnél is
+ * elhanyagolható. Ha egyszer több száz KB lesz, a lusta betöltés csak
+ * újratöltés-kezeléssel (vite:preloadError → mentett állapot + reload) térhet vissza.
  *
  * ÚJ MODELL HOZZÁADÁSA:
  *   1. Hozz létre egy új fájlt ebbe a mappába (pl. `ninebot-max-g2.js`),
  *      ugyanazzal a szerkezettel, mint `kukirin-g2.js` (id, name, viewBox,
  *      decor[], pieces[] – minden darab: id, name, group, explode, d, és a
  *      zónába soroláshoz `priceGroup`, lásd src/data/zones.js).
- *   2. Vegyél fel egy bejegyzést az alábbi tömbbe (id, name, brand, years, load).
+ *   2. Importáld lent, és vegyél fel egy bejegyzést a tömbbe (id, name, brand, years, load).
  *   3. Adj neki árat: src/pricing.js → MODEL_PRICES (ugyanezzel az id-val).
  *   4. Nyomdai geometria (CSAK a szerveren, a kliens sosem kapja meg): a vágóív
  *      PDF-ből `python3 tools/cutfile/cutfile.py extract <pdf> <id>` + `build <id>`
  *      (lásd docs/print-pipeline.md); a kiírt mm/egység értékek a `printScale`-be.
- *   Ennyi, kódot nem kell írni.
  *
  * ÚJ ÉVJÁRAT: az adott modell `years` listájába egy új szám. Az évjárat
  * jelenleg csak a rendelésbe kerül (a vágófájl kiválasztásához a gyártásban),
  * árat és geometriát nem befolyásol. Ha egy évjárat más geometriát igényel,
  * az külön modell-bejegyzés legyen (pl. 'kukirin-g2-2026').
  *
- * A `load` függvény egy Promise-t ad vissza, ami a modell-objektumot tartalmazó
- * ES-modulra oldódik fel (`mod.default`).
+ * A `load` függvény (a szerver és a useScooterModel közös felülete) egy
+ * Promise-t ad vissza, ami `{ default: modell }`-re oldódik fel.
  */
+import kukirinG2 from './kukirin-g2.js';
+import kukirinG2Master from './kukirin-g2-master.js';
+
+const ready = (model) => () => Promise.resolve({ default: model });
+
 export const MODEL_REGISTRY = [
   {
     id: 'kukirin-g2',
     name: 'Kukirin G2',
     brand: 'Kukirin',
     years: [2022, 2023, 2024, 2025],
-    load: () => import('./kukirin-g2.js'),
+    load: ready(kukirinG2),
     /** egy nézet-egység milliméterben – a saját kép dpi-becsléséhez (utils/printQuality.js);
      *  a valódi vágóív illesztéséből (tools/cutfile/cutfile.py build kiírja) */
     printScale: { schematic: 1.144, photo: 0.955 },
@@ -42,7 +50,7 @@ export const MODEL_REGISTRY = [
     name: 'Kukirin G2 Master',
     brand: 'Kukirin',
     years: [2023, 2024, 2025],
-    load: () => import('./kukirin-g2-master.js'),
+    load: ready(kukirinG2Master),
     printScale: { schematic: 1.055, photo: 1.029 },
   },
 ];

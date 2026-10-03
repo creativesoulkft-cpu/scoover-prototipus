@@ -14,15 +14,20 @@
  *  - a szín automatikusan fehér/fekete a háttérminta világossága alapján
  *    (vagy a felhasználó által rögzített);
  *  - a darab `labelAngle` mezője + a felhasználói `rotate` szerint forgat;
- *  - a szöveg egérrel húzható (onDrag → dx/dy a vázlat egységeiben).
+ *  - a szöveg egérrel húzható (onDrag → dx/dy a vázlat egységeiben);
+ *  - opcionális `onFit`: méri, hogy a (forgatott) felirat belefér-e a darab
+ *    befoglaló dobozába, és mekkora `scale`-lel férne bele középre igazítva –
+ *    a taposó-szerkesztő ebből jelzi, ha a felirat széle levágódna.
  *
  * Egy LabelLayer = egy felirat; több felirat = több LabelLayer (labels tömb).
  */
 import { useLayoutEffect, useRef, useState, useId } from 'react';
 
-export default function LabelLayer({ piece, label, font, color, exploded, onDrag }) {
+export default function LabelLayer({ piece, label, font, color, exploded, onDrag, onFit }) {
   const measureRef = useRef(null);
+  const textRef = useRef(null);
   const [box, setBox] = useState(null);
+  const [fontsTick, setFontsTick] = useState(0);
   const clipId = `clip${useId()}`;
   const drag = useRef(null);
 
@@ -30,6 +35,35 @@ export default function LabelLayer({ piece, label, font, color, exploded, onDrag
   useLayoutEffect(() => {
     if (measureRef.current) setBox(measureRef.current.getBBox());
   }, [piece?.d]);
+
+  // a webfont betöltése után a szöveg szélessége változik – újramérjük
+  useLayoutEffect(() => {
+    if (!onFit || !document.fonts?.ready) return undefined;
+    let alive = true;
+    document.fonts.ready.then(() => { if (alive) setFontsTick((t) => t + 1); });
+    return () => { alive = false; };
+  }, [onFit]);
+
+  // Belefér-e a (forgatott) felirat a darab dobozába? A <text> getBBox-a a saját
+  // transform NÉLKÜLI doboz; a forgatást (és a dőlt betű ferdítését) kézzel számoljuk rá.
+  useLayoutEffect(() => {
+    if (!onFit) return;
+    const el = textRef.current;
+    if (!el || !box || !label?.enabled || !String(label?.text ?? '').trim()) { onFit(null); return; }
+    const t = el.getBBox();
+    const a = (((piece.labelAngle ?? 0) + (label.rotate ?? 0)) * Math.PI) / 180;
+    const skewPad = Math.abs(Math.tan(((font?.skew ?? 0) * Math.PI) / 180)) * t.height / 2;
+    const hw = t.width / 2 + skewPad, hh = t.height / 2;
+    const ex = Math.abs(Math.cos(a)) * hw + Math.abs(Math.sin(a)) * hh;
+    const ey = Math.abs(Math.sin(a)) * hw + Math.abs(Math.cos(a)) * hh;
+    const tcx = t.x + t.width / 2, tcy = t.y + t.height / 2;
+    const tol = Math.min(box.width, box.height) * 0.01;
+    const fits = tcx - ex >= box.x - tol && tcx + ex <= box.x + box.width + tol
+      && tcy - ey >= box.y - tol && tcy + ey <= box.y + box.height + tol;
+    // középre igazítva, a lekerekített sarkok miatt kis ráhagyással
+    const k = Math.min((box.width / 2) / ex, (box.height / 2) / ey) * 0.92;
+    onFit({ fits, fitScale: Math.round((label.scale ?? 1) * k * 100) / 100 });
+  });
 
   const text = label?.text ?? '';
   if (!piece || !text) return null;
@@ -94,6 +128,8 @@ export default function LabelLayer({ piece, label, font, color, exploded, onDrag
       {box && (
         <g clipPath={`url(#${clipId})`}>
           <text
+            ref={textRef}
+            data-fonts={fontsTick}
             x={cx}
             y={cy}
             // a döntés (skew) a szöveg középpontja körül, különben elcsúszna
