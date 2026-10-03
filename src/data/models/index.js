@@ -3,7 +3,7 @@
  *
  * A modellek geometriája (darabok SVG path-jai) a FŐ csomagban van, nem külön
  * letöltött darabban (chunk). Korábban lusta importtal töltődtek, de a
- * statikus tárhelyen (GitHub Pages) minden új kiadás törli a régi
+ * statikus tárhelyen minden új kiadás lecseréli a régi
  * fájlneveket: aki egy régebben megnyitott lapon váltott modellt, annak a
  * régi darab 404-et adott, és a modellváltás csendben elakadt ("a G2 Master
  * fül nem működik"). Modellenként ~2 KB (gzip), így ez 20+ modellnél is
