@@ -13,6 +13,15 @@ npm run dev      # http://localhost:5173
 npm run build    # dist/ – statikusan hosztolható
 ```
 
+## Hosting és ágak
+
+- A repó privát; a demó **Cloudflare Pages**-en fut (build `npm run build`, kimenet `dist`), nem GitHub Pages-en.
+- `main` = az igazság. Munkamenetek a saját `claude/...` águkról olvasztanak be (lásd `CLAUDE.md`).
+- `archiv/taposofelulet-2026-09-03`: korai, önálló taposófelület-kísérlet (grip-textúra galéria); a main-beli
+  taposófelület-tervező váltotta ki, nem olvasztottuk be.
+- `archiv/shoprenter-kepek-2026-09`: a régi Shoprenter bolt 2,1 GB termékfotója. Nem a konfigurátor része;
+  csak addig él itt, amíg nincs róla másolat Drive-on/NAS-on. Minden más Whoosh-munka a `whoosh` repóban van.
+
 ## Mit tud
 
 - 2 rollermodell (Kukirin G2, G2 Master) évjárattal, legördülőből váltható; a
